@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.DeptMapper">
+	<resultMap id="deptWithUsersAmount" type="com.zonekey.study.entity.Dept">
+		<id property="id" column="id" />
+		<association property="userAmount" column="id" javaType="int" select="getUserAmount"></association>
+	</resultMap>
+	<!-- 查询所有部门和用户数量 -->
+	<select id="findDeptsWithUserNumbers" resultMap="deptWithUsersAmount">
+		select d.id,d.parentid,d.code,d.name,d.attribute,d.description,d.Sort,d.state,d.classyear,d.createdate,d.createuser,d.modifydate,d.modifyuser,d.deleteflag
+            from zonekey_dept d where d.deleteflag='0'
+	</select>
+	<!-- 根据code查询部门id -->
+	<select id="findDeptByCode" resultType="String">
+		select d.id from zonekey_dept d where d.deleteflag='0' and d.code =#{code}
+	</select>
+	<!-- 查询各部门用户数量 -->
+	<select id="getUserAmount" parameterType="String" resultType="int">
+		select count(*) from sys_user u left join zonekey_dept d on u.deptid = d.id where d.id=#{id} and u.deleteflag='0' and u.status != '1'
+	</select>
+	<!-- 机构信息 -->
+	<select id="getDeptList" parameterType="string" resultType="map">
+		(
+		select b.name,b.id from sys_user a,zonekey_dept b where  a.loginname=#{loginname} and a.deptid=b.id and b.deleteflag = '0'
+		)  union
+		(
+		select c.name,c.id from 
+		zonekey_curriculum a,
+		sys_user b,
+		zonekey_dept c where  a.userid = b.id and a.deptid=c.id and c.deleteflag='0' and b.loginname=#{loginname} group by a.deptid 
+		) 
+	</select>
+	<!-- 部门树 start -->
+	<resultMap type="com.zonekey.study.vo.Tree" id="treeMap">
+		<result property="id" column="id" />
+		<association property="nodes" column="id" select="getData" />
+	</resultMap>
+	<select id="getData" resultMap="treeMap">
+		select id,name title from zonekey_dept d where d.deleteflag='0' and parentid =#{id} order by d.name
+	</select>
+	<select id="getDeptTree" resultMap="treeMap">
+		select id,name title from zonekey_dept d where d.deleteflag='0' and parentid ='0' order by d.name
+	</select>
+	<!-- 部门树 end -->
+	<!-- 新建活动，查询所有机构 -->
+	<select id="getDepts" resultType="Map">
+	    select d.id value,d.name name from zonekey_dept d where d.deleteflag='0' order by d.name
+	</select>
+</mapper>

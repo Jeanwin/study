@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.CommentMapper">
+	<!-- sql绑定用户名 -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+	
+		<!-- sql绑定资源ip -->
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+	
+	
+	<select id="getAllComments" parameterType="String" resultType="map">
+		select s.createuser,s.name,s.pictureURL,sc.score from sys_user s,study_comment sc where s.id = sc.createuser  and resourceid=#{resourceid} and type=#{type}
+	</select>
+	
+	
+	<!-- 添加资源 -->
+	<insert id="addComment" parameterType="com.zonekey.study.entity.Comment">
+	    <include refid="bindLoginname" />
+		insert into study_comment(id,resourceid,type,parentid,score,content,createuser,createdate) 
+		values(#{id},#{resourceid},#{type},#{parentid},#{score},#{content},#{_loginname},sysDate())
+	</insert>
+	
+	<!-- 修改资源属性 -->
+	<update id="modify" parameterType="map">
+		update study_resource
+		<set>
+			<if test="parentid != null">
+				parentid = #{parentid},
+			</if>
+			<if test="modifyuser != null">
+				modifyuser =#{modifyuser},
+			</if>
+			<if test="name != null">
+				name = #{name},
+			</if>
+			<if test="type != null">
+				type = #{type},
+			</if>
+			<if test="source != null">
+				source =#{source},
+			</if>
+			<if test="subject != null">
+				subject = #{subject},
+			</if>
+			<if test="grade != null">
+				grade = #{grade},
+			</if>
+			<if test="description != null">
+				description = #{description},
+			</if>
+			modifydate = sysDate()
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除资源 -->
+	<delete id="delete" parameterType="string">
+		delete from study_resource
+		where find_in_set(id,getPathChildList(#{id}))
+	</delete>
+	
+	<resultMap type="com.zonekey.study.entity.Comment" id="CommentMaps">
+		<result property="id" column="id" />
+		<association property="nodes" column="id" select="getDatas" />
+	</resultMap>
+	<select id="getDatas" resultMap="CommentMaps">
+		select id,resourceid,type,parentid,content,score,(select name from sys_user where loginname=c.createuser )createuser,DATE_FORMAT(createdate,'%Y-%m-%d %H:%i')createdate
+		from study_comment c where parentid=#{id} ORDER BY createdate desc
+	</select>
+	<select id="getCommentByPage" parameterType="com.zonekey.study.entity.PageBean" resultMap="CommentMaps">
+	
+		<include refid="resourceIp" />
+		select c.id ,resourceid,type,parentid,content,score,u.name createuser,concat(#{_ip},"/",u.pictureURL) pictureURL,DATE_FORMAT(c.createdate,'%Y-%m-%d %H:%i')createdate
+		from study_comment c ,sys_user u where c.createuser=u.loginname  and
+		parentid='0' 
+		<if test="keywords!=null and keywords!=''">
+			<if test="keywords.resourceid !=null || keywords.resourceid!=''">
+			and resourceid=#{keywords.resourceid}
+			</if>
+			<if test="keywords.typedata !=null || keywords.typedata !=''">
+			and type=#{keywords.typedata}
+			</if>
+		</if>
+		ORDER BY c.createdate desc
+		<if test="page !=null and page.offset!=null">
+		limit #{page.offset} ,#{page.pageSize}
+		</if>
+</select>
+
+
+<select id="queryCommentNumsByPage" resultType="long">
+	select count(*) nums from study_comment where parentid='0' and resourceid=#{keywords.resourceid} and type=#{keywords.typedata}	
+</select>
+
+<select id="queryCommentNums" resultType="map">
+	select count(*) nums from study_comment where parentid='0' and resourceid=#{resourceid} and type=#{type}	
+</select>
+<select id="queryComment" resultType="map">
+	select SUM(score) totalscore from study_comment where parentid='0' and resourceid=#{resourceid} and type=#{type}	
+</select>
+<update id="hitCount" parameterType="String">
+	<if test="name=='curriculumid'">
+	update zonekey_curriculum r set r.watchwatchnum=watchwatchnum+1 where id=#{value}
+	</if>
+	<if test="name=='floder'">
+	update zonekey_resource  r set r.watchwatchnum=watchwatchnum+1  where  floder=#{value}
+	</if>
+	
+	</update>
+</mapper>

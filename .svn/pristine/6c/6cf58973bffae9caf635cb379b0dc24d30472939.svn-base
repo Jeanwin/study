@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.SysUserMapper">
+	<!-- sql绑定用户名 -->
+	<!-- <sql id="bindLoginname"> <bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()"/> </sql> -->
+	<resultMap id="userResult" type="com.zonekey.study.entity.SysUser">
+		<id column="id" property="id" />
+		<!-- <result column="uuid" property="uuid" jdbcType="CHAR" /> -->
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="loginname" property="loginname" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="salt" property="salt" jdbcType="VARCHAR" />
+		<result column="phone" property="phone" jdbcType="CHAR" />
+		<result column="status" property="status" jdbcType="CHAR" />
+		<result column="deptid" property="deptid" jdbcType="CHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="sex" property="sex" jdbcType="CHAR" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="pictureURL" property="pictureURL" jdbcType="VARCHAR" />
+		<result column="schoolyear" property="schoolyear" jdbcType="CHAR" />
+		<result column="createdate" property="createdate" jdbcType="TIMESTAMP" />
+		<result column="createuser" property="createuser" jdbcType="CHAR" />
+		<result column="modifydate" property="modifydate" jdbcType="TIMESTAMP" />
+		<result column="modifyuser" property="modifyuser" jdbcType="CHAR" />
+		<result column="deleteflag" property="deleteflag" jdbcType="CHAR" />
+		<result column="user_type" property="usertype" jdbcType="CHAR" />
+		<result column="checked" property="checked" jdbcType="CHAR" />
+		<result column="validateCode" property="validateCode" jdbcType="VARCHAR" />
+		<result column="outDate" property="outDate" jdbcType="TIMESTAMP" />
+		<result column="enable" property="enable" jdbcType="CHAR" />
+		<result column="logindate" property="logindate" jdbcType="TIMESTAMP" />
+		<result column="loginip" property="loginip" jdbcType="VARCHAR" />
+	</resultMap>
+	<!-- sql绑定用户名 -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+	<!-- sql绑定资源ip -->
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+	<!-- 根据用户登录名更新用户 -->
+	<update id="update" parameterType="com.zonekey.study.entity.SysUser">
+		update sys_user
+		<set>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="password != null">
+				password = #{password,jdbcType=VARCHAR},
+			</if>
+			<if test="salt != null">
+				salt = #{salt,jdbcType=VARCHAR},
+			</if>
+			<if test="phone != null">
+				phone = #{phone,jdbcType=CHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=CHAR},
+			</if>
+			<if test="deptid != null">
+				deptid = #{deptid,jdbcType=CHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="sex != null">
+				sex = #{sex,jdbcType=CHAR},
+			</if>
+			<if test="email != null">
+				email = #{email,jdbcType=VARCHAR},
+			</if>
+			<if test="pictureURL != null">
+				pictureURL = #{pictureURL,jdbcType=VARCHAR},
+			</if>
+			<if test="schoolyear != null">
+				schoolyear = #{schoolyear},
+			</if>
+			<if test="modifyuser != null">
+				modifyuser = #{modifyuser,jdbcType=CHAR},
+			</if>
+			<if test="deleteflag != null">
+				deleteflag = #{deleteflag,jdbcType=CHAR},
+			</if>
+			<if test="usertype != null">
+				user_type = #{usertype,jdbcType=CHAR},
+			</if>
+			<if test="checked != null">
+				checked = #{checked},
+			</if>
+			<if test="validateCode != null">
+				validateCode = #{validateCode,},
+			</if>
+			<if test="outDate != null">
+				outDate = #{outDate},
+			</if>
+			<if test="enable != null">
+				enable = #{enable},
+			</if>
+			<if test="logindate != null">
+				logindate = #{logindate},
+			</if>
+			<if test="loginip != null">
+				loginip = #{loginip,jdbcType=VARCHAR},
+			</if>
+			modifydate = sysDate(),
+		</set>
+		where loginname = #{loginname,jdbcType=CHAR}
+	</update>
+	<!-- 更新登陆时间 -->
+	<update id="updateLoginDateAndIp" parameterType="String">
+		<!-- <include refid="bindLoginname"/> -->
+		update sys_user set logindate = sysDate(),loginip = #{loginip} where
+		loginname = #{loginname} and deleteflag='0'
+	</update>
+	<!-- 密码修改 -->
+	<update id="modifyPassword" parameterType="com.zonekey.study.entity.SysUser">
+		<include refid="bindLoginname" />
+		update sys_user set password = #{password}, modifydate=sysDate(),
+		modifyuser = #{modifyuser} where loginname = #{_loginname}
+	</update>
+	<!-- 根据id查询用户 -->
+	<select id="findOne" parameterType="java.lang.String" resultType="com.zonekey.study.entity.SysUser">
+		select * from sys_user where id = #{id}
+	</select>
+	<!-- 查询收件人列表 -->
+	<select id="findUsers" parameterType="com.zonekey.study.entity.SysUser" resultMap="userResult">
+		<include refid="bindLoginname" />
+		select
+		loginname as id,name as text,phone,email from sys_user
+		where
+		loginname != #{_loginname} and
+		deleteflag = '0' and status = '0'
+		<if test="name != null and name != ''">
+			and name like concat('%',#{name},'%')
+		</if>
+		order by name
+	</select>
+	<!-- 根据名字查找用户信息 -->
+	<select id="findByLoginname" parameterType="String" resultType="com.zonekey.study.entity.SysUser">
+		<include refid="resourceIp" />
+		select
+		id,name,loginname,password,phone,
+		(select d.name from zonekey_dept d where d.id = deptid) deptName,
+		(select d.attribute from zonekey_dept d where d.id = deptid) deptAttribute,
+		(select d.parentid from zonekey_dept d where d.id = deptid) parentDeptId,
+		deptid,remark,sex,email,concat(#{_ip},pictureurl) pictureURL ,outDate,validateCode,user_type
+		as usertype
+		from sys_user
+		where loginname = #{loginname}
+		and
+		deleteflag='0' and status = '0'
+	</select>
+	<!-- 根据用户名和密码查询用户 -->
+	<select id="getUserByNameAndPass" parameterType="String" resultType="com.zonekey.study.entity.SysUser">
+		select
+		id,name,loginname,password,salt,phone,status,deptid,remark,sex,email,pictureurl,schoolyear,createdate,createuser,modifydate,modifyuser,deleteflag,user_type,checked,validatecode,outdate,enable,logindate,loginip
+		from sys_user where loginname = #{loginname} and password =
+		#{password} and deleteflag='0' and status = '0'
+	</select>
+	<!-- 根据机构查找用户 -->
+	<select id="getByDeptIds" parameterType="java.util.Map" resultType="com.zonekey.study.entity.SysUser">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+		select name text,loginname id,deptid,phone,sex,email,concat(#{_ip},pictureURL) pictureURL from
+		sys_user where
+		deleteflag = '0' and status = '0' and loginname != #{_loginname}
+		<if test="map != null">
+			and deptid in
+			<foreach collection="map" open="(" close=")" separator="," index="index" item="dept">
+				#{dept.id}
+			</foreach>
+		</if>
+	</select>
+	<!-- 更改密码找回的验证码 -->
+	<update id="addEmailCode">
+		update sys_user set validateCode =
+		#{validateCode},outDate = sysDate() where loginname=#{loginname} and
+		deleteflag ="0" and status = '0'
+	</update>
+	<select id="findByDept" parameterType="map" resultType="map">
+		select
+		loginname from sys_user where
+		find_in_set(deptid,getDeptChildLst(#{id})) and deleteflag="0" and status = '0';
+	</select>
+	<select id="getAllUser" resultType="map">
+		<include refid="bindLoginname" />
+		select loginname,concat(loginname,"(",name,")") name from sys_user where
+		deleteflag="0" and status = '0' and loginname != #{_loginname}
+		<if test="loginname != null ">
+			and loginname like concat("%",#{loginname},"%")
+		</if>
+	</select>
+	<!-- 验证手机号码 -->
+	<select id="validatePhone" parameterType="String" resultType="int">
+		<include refid="bindLoginname" />
+		select count(*) from sys_user u where u.loginname != #{_loginname} and u.phone = #{phone}
+	</select>
+	<!-- 验证邮箱是否重复 -->
+	<select id="validateEmail" parameterType="String" resultType="int">
+		<include refid="bindLoginname" />
+		select count(*) from sys_user u where u.loginname != #{_loginname} and u.email = #{email}
+	</select>
+	<!-- 根据用户登录名返回用户邮箱号和 用户名 -->
+	<select id="findEmais" parameterType="List" resultType="Map">
+		SELECT email,name,loginname FROM sys_user WHERE email REGEXP '^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$'
+		<if test="users != null">
+			and loginname in
+			<foreach collection="users" open="(" close=")" separator="," index="index" item="user">
+				#{user}
+			</foreach>
+		</if>
+	</select>
+	<!-- 根据部门id查询用户 -->
+	<select id="getByDeptId" parameterType="com.zonekey.study.entity.PageBean" resultType="com.zonekey.study.entity.SysUser">
+		select id,name,loginname,sex,(select d.name from zonekey_dept d where d.id = deptid) deptName
+		<!-- 教师0，暂时改为1测试 -->
+		from sys_user where deleteflag = '0' and status = '0' and user_type = '1'
+		<if test="keywords.deptid != null and keywords.deptid !=''">
+			and deptid = #{keywords.deptid}
+		</if>
+		<if test="keywords.name != null and keywords.name != ''">
+			and name like concat("%",#{keywords.name},"%")
+		</if>
+		order by name asc
+		<if test="page != null and page.offset != null and page.limit != null">
+			limit #{page.offset} ,#{page.limit}
+		</if>
+	</select>
+	<!-- 统计数量 -->
+	<select id="findUserCountByDeptId" resultType="long" parameterType="com.zonekey.study.entity.PageBean">
+		select count(*) from (select id
+		from sys_user where deleteflag = '0' and status = '0' and user_type = '1'
+		<if test="keywords.deptid != null and keywords.deptid !=''">
+			and deptid = #{keywords.deptid}
+		</if>
+		<if test="keywords.name != null and keywords.name != ''">
+			and name like concat("%",#{keywords.name},"%")
+		</if>
+		) a
+	</select>
+	<!-- 判断用户是否有系统管理员权限 -->
+	<select id="hasAdminPermission" resultType="int">
+		<include refid="bindLoginname" />
+		select count(*) from user_role ur left join sys_user u on ur.userid = u.loginname where u.loginname = #{_loginname} and ur.roleid= '2'
+	</select>
+	<!-- 查询用户角色 -->
+	<select id="getUserRole" resultType="String">
+		<include refid="bindLoginname" />
+		select r.role_name from user_role ur left join sys_user u on u.loginname = ur.userid left join sys_role r on ur.roleid = r.id where u.loginname=#{_loginname}
+	</select>
+	<insert id="insert" parameterType="com.zonekey.study.entity.SysUser">
+		INSERT INTO sys_user(status,id,name,loginname,password,deptid,user_type,sex)
+		value
+		("0",replace(uuid(),'-',''),#{name},#{loginname},"",#{deptid},#{usertype},#{sex});
+	</insert>
+
+	<!-- 递归查询部门 -->
+	<select id="getDeptName" parameterType="String" resultType="Map">
+		select d.id,d.parentid,d.name,d.attribute from zonekey_dept d where d.id = #{parentDeptId}
+	</select>
+</mapper>

@@ -1,0 +1,266 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/include/taglib.jsp"%>
+<!DOCTYPE html>
+<html>
+<head>
+<%@ include file="/WEB-INF/views/include/head.jsp"%>
+</head>
+<body id="top">
+	<!--[if lte IE 8]>
+<div>不支持此浏览器</div>
+<![endif]-->
+
+	<div class="container-fluid padding-left-right-none">
+	
+		<%@ include file="/WEB-INF/views/include/header.jsp"%>
+		<!-- <iframe name="main_view" width="100%" height="800px" scrolling="no"></iframe> -->
+		<div class="col-xs-12 padding-left-right-none padding-bottom-20" style="background:#f7f7f7;">
+			<div class="row margin-right-none" id="homepage">
+				<div id="banner-image">
+					<div class="col-xs-12 padding-left-right-none">
+						<img id="banner-image-1" src="${ctx}/static/img/lemonade-pages_pic1.jpg" style="width:100%" class="iphone-img" /> <img id="banner-image-2" src="${ctx}/static/img/banner3.png" style="width:100%"
+							class="iphone-img" /> <img id="banner-image-3" src="${ctx}/static/img/danner2.png" style="width:100%" class="iphone-img" />
+					</div>
+					<div class="col-xs-6 col-xs-offset-5" style="margin-bottom:10px;margin-top:-10px;">
+						<div id="banner-div1" style="height:5px;width:80px;background-color:#000;float:left;"></div>
+						<div id="banner-div2" style="height:5px;width:80px;background-color: #000;margin-left:5px;float:left;"></div>
+						<div id="banner-div3" style="height:5px;width:80px;background-color: #000;margin-left:5px;float:left;"></div>
+					</div>
+				</div>
+			</div>
+			<div id="hot" class="iphone-hide" style="background:#f2f2f2">
+				<div class="container">
+					<div class="row margin-none" id="homepagecontentHot">
+						<div class="col-xs-9" style="padding-top:1%;">
+							<div class="homeline-two col-xs-4"></div>
+							<div class="col-xs-4 margin-top-10">
+								<img src="${ctx}/static/img/lemonade-pages_title1.png" style="width: 106%" />
+							</div>
+							<div class="homeline-two col-xs-4"></div>
+						</div>
+						<div class="col-xs-9 col-sm-9" style="padding-top:2%">
+							<div class="row">
+								<div class="col-xs-1 col-sm-1 hotCourseLeft">
+									<span class="glyphicon glyphicon-chevron-left" onclick="prehotCourse()"></span>
+								</div>
+								<div class="col-xs-10 topList">
+									 <div class="topListMain">
+									<c:forEach items="${hotList.data }" var="hot" varStatus="abc">
+										 <div class="padding-left-right-none">
+									        <div class="hotCourse-top-decorate top${(abc.index)%3+1 }">
+									            <div class="hotCourse-top-title top${(abc.index)%3+1 }">
+									                <span>Top/${abc.index+1 }</span>
+									            </div>
+									        </div>
+									        <div class="hotCourse-top-frame topframe2"> <a href="courseDetail?floder=${hot.floder }" target="_blank"><img src="${hot.uploadPic}" onerror="javascript:this.src='${ctx}/static/img/lemon-pages-12.jpg'"/></a>
+									        </div>
+									        <div class="img-shadow"></div>
+									        <div class="hotCourse-top1-detail">
+									            <div class="home-hotclass-font font-overlay-1">课程:${hot.resourcename }</div>
+									            <div class="home-hotclass-font1 font-overlay-1">讲师:${hot.name }</div>
+									            <div class="home-hotclass-font1 margin-top-5">
+									                <span class="glyphicon glyphicon-eye-open"></span>
+									                <span>${hot.watchwatchnum }</span>
+									            </div>
+									        </div>
+									    </div>
+									</c:forEach>
+									 </div>
+								</div>
+								<div class="col-xs-1 col-sm-1 padding-left-none hotCourseRight">
+									<span class="glyphicon glyphicon-chevron-right" onclick="nexthotCourse()"></span>
+								</div>
+							</div>
+						</div>
+						<div class="col-xs-3 padding-left-right-none noticInfo" style="margin-top:-3%">
+							<div style="background-color: #ffffff;">
+								<div style="padding-top: 20px;margin-left: 20px">
+									<span class="noticefont" style="font-size: 23px;color: #808080">通知公告</span> <a class="moreinfo"> 更多 <span class="glyphicon glyphicon-chevron-right"></span>
+									</a>
+								</div>
+								<div style="margin-top: 10px;padding-bottom: 10px;margin-bottom: 40px">
+									<ul style="margin-bottom: 20px;width:95%">
+										<li><span><i class="icon-lens"></i><a>北京等7省市将试点外资独试点外资独</a></span></li>
+										<li><span><i class="icon-lens"></i><a>北京等7省市将试点外资独试点外资独</a></span></li>
+										<li><span><i class="icon-lens"></i><a>北京等7省市将试点外资独试点外资独</a></span></li>
+										<li><span><i class="icon-lens"></i><a>北京等7省市将试点外资独试点外资独</a></span></li>
+										<li><span><i class="icon-lens"></i><a>北京等7省市将试点外资独试点外资独</a></span></li>
+										<li><span><i class="icon-lens"></i><a>北京等7省市将试点外资独试点外资独</a></span></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="live" class="iphone-hide" style="background:#ffffff">
+				<div class="container" style="padding-bottom:40px;">
+					<div class="row margin-none" id="homepagecontentLive">
+						<div class="col-xs-12 padding-left-right-none" style="padding-bottom:2%">
+							<div class="col-xs-8" style="padding-top:1%;">
+								<div class="col-xs-7 col-xs-offset-5 col-sm-7 col-sm-offset-5 col-md-5 col-md-offset-7 margin-top-10 margin-bottom-10">
+									<img src="${ctx}/static/img/lemonade-pages_title2.png" style="width: 100%" />
+								</div>
+							</div>
+							<div class="col-xs-4" style="margin-top:7%;text-align:right;">
+								<span style="color: #428bca;"> <a href="live">更多</a><span class="glyphicon glyphicon-chevron-right"></span>
+								</span>
+							</div>
+						</div>
+						<div class="col-xs-12 padding-left-right-none">
+							<c:forEach items="${liveList.data }" var="live">
+								<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 padding-right-none listCourseOver" style="max-width:400px;">
+								<div class="vedio-image padding-left-right-none col-xs-12">
+									<a <c:if test="${live.status==0 }"> href="courseDetail?curriculumid=${live.id }" </c:if> target="_blank"> <img src="${live.imageurl }" onerror="javascript:this.src='${ctx}/static/img/lemon-pages-12.jpg'"/>
+									</a>
+								</div>
+								<c:choose>
+									<c:when test="${live.status==0 }">
+										<div class="course-condition living"></div>
+									</c:when>
+									<c:otherwise>
+										<div class="course-condition bg-color-orange widLong">${live.date } ${live.starttime }</div>
+									</c:otherwise>
+								</c:choose>
+								<div class=" col-xs-12 padding-left-right-none">
+									<div class="hover-image">
+										<span class="col-xs-3 teacher-image"></span>
+									</div>
+									<div class="v-meta-overlay">
+										<span class="teacher-name">${live.username}</span>
+									</div>
+								</div>
+								<div class="col-xs-12 padding-left-right-none margin-bottom-10 vedio-shadow">
+									<div class="col-xs-12 coursename">${live.subject }</div>
+									<div class="col-xs-12 course-otherinfo">
+										<div class="col-xs-6">
+											<i class="icon-sms"></i> <span class="vedio-comment">${live.num }</span>
+										</div>
+										<div class="col-xs-6 text-right padding-right-none pull-right">
+											<span class="glyphicon glyphicon-eye-open"></span> <span class="vedio-viewcount">${live.watchwatchnum }</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							</c:forEach>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="exec" class="iphone-hide homeexcellentimg">
+				<div class="container" style="padding-bottom:40px;">
+					<div class="row margin-none" id="homepagecontentExcellent">
+						<div class="col-xs-12 padding-left-right-none" style="padding-bottom:2%">
+							<div class="col-xs-8" style="padding-top:1%;">
+								<div class="col-xs-7 col-xs-offset-5 col-sm-7 col-sm-offset-5 col-md-5 col-md-offset-7 margin-top-10 margin-bottom-10">
+									<img src="${ctx}/static/img/lemonade-pages_title3.png" style="width: 100%" />
+								</div>
+							</div>
+							<div class="col-xs-4" style="margin-top:7%;text-align:right;">
+								<span style="color: #428bca;"> 
+									<a href="exec">更多</a>
+									<span class="glyphicon glyphicon-chevron-right"></span>
+								</span>
+							</div>
+							
+						</div>
+						<c:forEach items="${execList.data }" var="exec">
+							<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 padding-right-none listCourseOver" style="max-width:400px;">
+							<div class="vedio-image padding-left-right-none col-xs-12">
+								<a href="courseDetail?floder=${exec.floder }" target="_blank"> <img src="${exec.uploadPic }" onerror="javascript:this.src='${ctx}/static/img/lemon-pages-12.jpg'"/>
+								</a>
+							</div>
+							<div class=" col-xs-12 padding-left-right-none">
+								<div class="hover-image">
+									<span class="col-xs-3 teacher-image"></span>
+								</div>
+								<div class="v-meta-overlay">
+									<span class="teacher-name">${exec.name }</span>
+								</div>
+							</div>
+							<div class="col-xs-12 padding-left-right-none margin-bottom-10 vedio-shadow">
+								<div class="col-xs-12 coursename">${exec.resourcename }</div>
+								<div class="col-xs-12 course-otherinfo">
+									<div class="col-xs-6">
+										<i class="icon-sms"></i> <span class="vedio-comment">${exec.num }</span>
+									</div>
+									<div class="col-xs-6 text-right padding-right-none pull-right">
+										<span class="glyphicon glyphicon-eye-open"></span> <span class="vedio-viewcount">${exec.watchwatchnum }</span>
+									</div>
+								</div>
+							</div>
+						</div>
+						</c:forEach>
+
+					</div>
+				</div>
+			</div>
+			<div class="iphone-hide" style="background:#ffffff">
+				<div class="container" style="padding-bottom:40px;">
+					<div class="row margin-none homephoneApp" id="homephoneApp">
+						<div class="col-xs-12">
+							<div class="col-xs-12 col-sm-6" style="background-color: #26b27f">
+								<div class="" style="bottom:0;position:absolute;width:45%">
+									<img src="${ctx}/static/img/lemonade-pages_phone.png" style="width: 90%" />
+								</div>
+								<div class="col-xs-5 col-sm-6 col-md-6 padding-left-right-none pull-right" style="padding-top:4%;padding-bottom:3%;">
+									<div style="color: #ffffff;font-size: 25px;margin-bottom: 20px">手机APP上线</div>
+									<div style="color: #ffffff;margin-bottom: 10px">扫面下载</div>
+									<div class="col-xs-11 padding-left-none">
+										<img src="${ctx}/static/img/lemonade-pages_pic22.jpg" style="width: 90%" />
+									</div>
+								</div>
+							</div>
+							<div class="col-xs-12 col-sm-6" style="padding-top:4%;">
+								<div class="col-xs-12" style="font-size: 25px;color: #808080;">友情链接</div>
+								<div class="col-xs-12" style="margin-top:6%;">
+									<div class="col-xs-6 col-sm-4 padding-top-5 padding-bottom-5">
+										<img src="${ctx}/static/img/lemonade-pages_link1.png" style="width: 128px;height: 56px" />
+									</div>
+									<div class="col-xs-6 col-sm-4 padding-top-5 padding-bottom-5">
+										<img src="${ctx}/static/img/lemonade-pages_link2.png" style="width: 128px;height: 56px" />
+									</div>
+									<div class="col-xs-6 col-sm-4 padding-top-5 padding-bottom-5">
+										<img src="${ctx}/static/img/lemonade-pages_link3.png" style="width: 128px;height: 56px" />
+									</div>
+									<div class="col-xs-6 col-sm-4 padding-top-5 padding-bottom-5">
+										<img src="${ctx}/static/img/lemonade-pages_link4.png" style="width: 128px;height: 56px" />
+									</div>
+									<div class="col-xs-6 col-sm-4 padding-top-5 padding-bottom-5">
+										<img src="${ctx}/static/img/lemonade-pages_link4.png" style="width: 128px;height: 56px" />
+									</div>
+									<div class="col-xs-6 col-sm-4 padding-top-5 padding-bottom-5">
+										<img src="${ctx}/static/img/lemonade-pages_link4.png" style="width: 128px;height: 56px" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="pin-info iphone-hide">
+				<div class="homerightHead">
+					<div style="padding-top: 8px">
+						<a href="#top">返回顶部</a>
+					</div>
+				</div>
+				<div class="homerightNav">
+					<i class="icon-link icon-hot orange-color"></i> <a href="#hot">热播课程</a>
+				</div>
+				<div class="homerightNav">
+					<i class="icon-link icon-cast-connected blue-color"></i> <a href="#live">直播课程</a>
+				</div>
+				<div class="homerightNav">
+					<i class="icon-link icon-school pink-color"></i> <a href="#exec">精品课程</a>
+				</div>
+				<div class="homerightNav">
+					<i class="icon-link icon-link green-color"></i> <a href="#homephoneApp">友情链接</a>
+				</div>
+			</div>
+		</div>
+		<%@ include file="/WEB-INF/views/include/footer.jsp"%>
+	</div>
+<script type="text/javascript" src="${ctx }/static/js/init.js"></script>
+</body>
+</html>

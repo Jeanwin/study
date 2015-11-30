@@ -1,0 +1,46 @@
+package com.zonekey.study.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.zonekey.study.dao.base.BaseMapper;
+import com.zonekey.study.dao.base.MyBatisRepository;
+import com.zonekey.study.entity.Active;
+import com.zonekey.study.entity.Pagebar;
+import com.zonekey.study.vo.ActiveView;
+
+@MyBatisRepository
+public interface ActiveMapper extends BaseMapper<Active, Integer> {
+	// 新建活动
+	public int insertActive(ActiveView activeView);
+
+	// 活动管理
+	public int updateActive(ActiveView activeView);
+
+	// 根据id查询活动
+	public ActiveView findActiveById(@Param("id") int id);
+
+	// 统计本次活动报名的部门id,名称
+	public List<Map<String, Object>> findSignerDept(@Param("activeid") int activeid);
+	// 统计各部门报名人数
+	public int findSignerAmount(@Param("acId") int activeid,@Param("deptid") String deptid);
+	//查询饼图数据
+	public int findReviewAmount(@Param("aid") int aid,@Param("isover") String isover);
+	//查询每位专家的评审情况                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+	
+	
+	public List<Map<String, Object>> getAllActives(Pagebar page);
+	public List<Map<String, Object>> findLiveUser(String deptid);
+	public List<Map<String, Object>> findClassicUser(String deptid);
+	public List<Map<String, Object>> findDept();
+	public long count(Pagebar page);
+
+
+	public long countAllActives(@Param("value")String vlaue);
+
+	public ActiveView getActiveEdit(@Param("editid") int activeid);
+
+	public ActiveView getActiveByWorkId(@Param("workid") int workid);
+}

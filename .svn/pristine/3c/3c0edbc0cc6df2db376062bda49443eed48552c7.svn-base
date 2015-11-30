@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.MaterialMapper">
+	<!-- 根据不同条件查素材 -->
+	<select id="selectMaterialByWhere" parameterType="com.zonekey.study.entity.Material" resultType="com.zonekey.study.entity.Material">
+		select id,name,type,flag,resourceid,worksid ,(case  when ISNULL(sort) then '0' else sort end) sort,
+		(select fileurl from study_resource where resource_uuid=m.resourceid  limit 1) fileurl
+		 from study_material m where 1=1 
+		<if test="worksid != null and worksid !=''"> and worksid =#{worksid} </if>
+		<if test="resourceid != null and resourceid !=''"> and resourceid =#{resourceid} </if>
+	</select>
+	<!-- 通过id查找 -->
+	<select id="selectMaterialById" parameterType="string" resultType="com.zonekey.study.entity.Material">
+		select * from study_material where id=#{id}
+	</select>
+	<!-- 修改素材 -->
+	<update id="updateMaterial" parameterType="com.zonekey.study.entity.Material" >
+	update study_material set 
+	<if test="flag != null and flag !=''"> flag = #{flag} </if>
+	<if test="sort != null and sort !=''"> sort = #{sort} </if>
+	where id=#{id}
+	</update>
+	
+	<!-- 允许下载素材 -->
+	<update id="allowDownloadMaterial" parameterType="com.zonekey.study.entity.Material" >
+	update study_material set 
+	<if test="flag == 0"> flag = '1' </if>
+	<if test="flag == 1"> flag = '0' </if>
+	where id=#{id}
+	</update>
+	<!-- 新增素材 -->
+	<insert id="addMaterial" parameterType="com.zonekey.study.entity.Material">
+		insert into study_material (name,type,sort,flag,resourceid,worksid) value
+		<foreach collection="list" item="item" separator=",">
+		(#{item.name},#{item.type},#{sort},#{flag},#{item.resource_uuid},#{worksid})
+		</foreach>
+	</insert>
+	<!-- 刪除素材 -->
+	<delete id="deleteMaterial" parameterType="string">
+		delete from study_material where id=#{id}
+	</delete>
+	<!-- 新增素材 -->
+	<insert id="addMaterialOne" parameterType="map">
+		insert into study_material (name,type,sort,flag,resourceid,worksid) value
+		(#{name},#{type},#{sort},#{flag},#{resource_uuid},#{worksid})
+	</insert>
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.WisclassroomMapper">
+<!-- 根据文件夹名字查一下是否存在这个文件夹 -->
+	<select id="selectById"  parameterType="string" resultType="map">
+		select parentid,name,nametype,fileurl,size,isfolder,areaid,userid,curriculumid,createdate,createuser from study_wisclassroom_resource where   id=#{id}
+	</select>
+<!-- 根据文件夹名字查一下是否存在这个文件夹 -->
+	<select id="selectFloderByName"  parameterType="string" resultType="map">
+		select id from study_wisclassroom_resource where   isfolder='0' and parentid='1' and name=#{name}
+	</select>
+	
+	<!-- 根据uuid字查一下是否存在这个文件夹 -->
+	<select id="selectFloderByUuid"  parameterType="string" resultType="map">
+		select id from study_wisclassroom_resource where   isfolder='0' and parentid='1' and resource_uuid=#{uuid}
+	</select>
+	<!-- 新增 文件夹-->
+	<insert id="insertintowisclass" parameterType="map">
+	INSERT into study_wisclassroom_resource (parentid,resource_uuid,name,isfolder,createdate,createuser) VALUES(#{parentid},#{resource_uuid},#{name},#{isfolder},SYSDATE(),#{createuser})
+	</insert>
+	<!-- 新增文件 -->
+	<insert id="insertFileIntowisclass_bak" parameterType="map">
+		insert into study_wisclassroom_resource(parentid,name,nametype,fileurl,size,isfolder,areaid,userid,curriculumid,createdate,createuser) value
+		<foreach collection="list"  item="item" separator=",">
+			(#{parentid},#{item.name},#{item.fileurl},#{item.size},#{isfolder},#{areaid},#{userid},#{curriculumid},sysdate(),#{createuser})
+		</foreach>
+	</insert>
+	<!-- 新增文件 -->
+	<insert id="insertFileIntowisclass" parameterType="map">
+		insert into study_wisclassroom_resource(parentid,name,nametype,fileurl,size,isfolder,areaid,userid,curriculumid,createdate,createuser) value
+			(#{parentid},#{name},#{nametype},#{fileurl},#{size},#{isfolder},#{areaid},#{userid},#{curriculumid},sysdate(),#{createuser})
+	</insert>
+	<!-- 新增文件 -->
+	<insert id="insertFileIntowisclassreturnP" parameterType="com.zonekey.study.entity.Wisclassroom" useGeneratedKeys="true" keyProperty="id">
+		insert into study_wisclassroom_resource(parentid,name,nametype,fileurl,size,isfolder,areaid,userid,curriculumid,createdate,createuser) value
+			(#{parentid},#{name},#{nametype},#{fileurl},#{size},#{isfolder},#{areaid},#{userid},#{curriculumid},sysdate(),#{createuser})
+	</insert>
+	<!-- 查找文件夹 -->
+	<select id="selectFloderById" parameterType="string" resultType="com.zonekey.study.entity.Wisclassroom">
+		select id,parentid,name, areaid,userid ,curriculumid,fileurl
+		from study_wisclassroom_resource where id  in(select parentid from study_wisclassroom_resource where curriculumid=#{curriculumid})
+	</select>
+	<!-- 查找文件 -->
+	<select id="selectFilesById" parameterType="map" resultType="com.zonekey.study.entity.Wisclassroom">
+		select id, parentid,name, nametype,areaid,userid ,curriculumid,fileurl ,visable as resourcevisable ,size,
+		ifnull((select count(rc.id) from study_resource rc where rc.storeid = r.id and rc.createuser = #{createuser}),'')as resourcecollection
+		from study_wisclassroom_resource r where parentid=#{parentid} and curriculumid=#{curriculumid}
+	</select>
+	<!-- 修改可见性 -->
+	<update id="setafterclassvisibility" parameterType="string">
+		update study_wisclassroom_resource set visable=#{resourcevisable} where id=#{id}
+	</update>
+	<!-- 转码后更新 -->
+	<update id = "wistransUpdate" parameterType="com.zonekey.study.entity.Wisclassroom">
+	    update study_wisclassroom_resource
+		<set>
+			<if test="transPath != null and transPath != ''">
+				transPath = #{transPath},
+			</if>
+			<if test="transFlag != null and transFlag != ''">
+				transFlag = #{transFlag},
+			</if>
+			modifydate = sysDate()
+		</set>
+		where id = #{id}
+	</update>
+</mapper>

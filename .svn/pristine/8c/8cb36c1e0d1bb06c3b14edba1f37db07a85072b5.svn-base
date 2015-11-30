@@ -1,0 +1,119 @@
+<div class="container-fluid" id="videoDot">
+	<div class="modal-body">
+		<div>
+			<div style="height: 24px;width: 8px;background-color: #fcb750"></div>
+			<div style="margin-left: 20px;margin-top: -30px;font-size: 24px">视频打点</div>
+		</div>
+
+		<div class="col-xs-12 margin-top-5 margin-bottom-5" style="line-height: 34px">
+			<span class="detail gray-color"> <i class="glyphicon glyphicon-facetime-video"></i>&nbsp; <span>当前播放:</span> <span style="color: #428bca"> {{dottingVideo[0].title}} </span>
+			</span>
+			<button class="btn btn-primary pull-right" ng-click="EditVideo('dottingdetail')">更换视频</button>
+		</div>
+		<div class="col-xs-12" style="margin-bottom:20px;">
+			<div id="vco_player_content">
+				<div id="player"></div>
+			</div>
+			<div id="vco_controlor">
+				<div id="progressbar" style="margin-bottom: 10px">
+					<div id="progress"></div>
+					<!--  -->
+					<div ng-repeat="dot in dotInfos" id="dot" tooltip="{{dot.description}}" tooltip-placement="top" tooltip-trigger="mouseenter" class="ng-scope" style="margin-left: calc({{dot.margin}} - 10px);"></div>
+					<div id="point" tooltip="{{tooltipDotTitle}}" tooltip-placement="top" tooltip-trigger="mouseenter">
+						<!-- 提示 -->
+						<!-- <div class="tooltip top fade in" style="display: block;position:absolute;">
+							<div class="tooltip-arrow"></div>
+							<div class="tooltip-inner ng-binding">{{tooltipDotTitle}}</div>
+						</div> -->
+					</div>
+				</div>
+				<a id="playbtn">播放</a> <a id="pausebtn">暂停</a>
+			</div>
+		</div>
+		<div class="col-xs-12">
+			<form class="form-horizontal" name="from_video_dotting">
+				<div class="dotting-set">
+					<i class="icon-movie-creat"></i>&nbsp; <span>视频打点</span>
+				</div>
+				<div class=" margin-top-10 margin-bottom-10 form-group">
+					<label class="control-label col-sm-2">打点时间：</label>
+					<div class="col-sm-2">
+						<input type="seconds" class="form-control" style="min-width:115px" ng-model="addDotTime" disabled="disabled">
+					</div>
+				</div>
+				<div class=" form-group">
+					<label class="control-label col-sm-2">节点标题：</label>
+					<div class="col-sm-10">
+						<input type="text" ng-blur="titleBlur()" name="title" ng-focus="titleFocus()" placeholder="填写节点标题" class="form-control" ng-model="addDotTitle" required>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-2"></div>
+					<div class="col-sm-2">
+						<button class="btn btn-primary" style="width:100%;min-width: 115px" ng-disabled="from_video_dotting.title.$error.required" ng-click="addDotInfo()">打点保存</button>
+					</div>
+				</div>
+				<!--  <div class="form-group">
+					<div class="col-sm-2"></div>
+					<div class="col-sm-2">
+						<button class="btn btn-primary" style="width:100%" ng-click="submitDotInfo()">保存节点</button>
+					</div>
+				</div> -->
+			</form>
+		</div>
+		<div class="col-xs-12 dotting-content" style="margin-top:50px;margin-bottom:50px;">
+			<div class="col-xs-12 padding-right-none dot-header">
+				<div class="col-xs-2 padding-left-right-none blue-color dot-time-header">视频起点</div>
+				<div class="col-xs-1 dot-img-header">
+					<div class="dot-circle"></div>
+					<div class="dot-line" style="margin-top:20px"></div>
+				</div>
+			</div>
+
+			<div class="col-xs-12 dot-body padding-right-none" ng-show="!dotshow" ng-repeat="dotinfo in dotInfos">
+				<div class="col-xs-2 text-right dot-time">
+					<i class="icon-access-time"></i> <span class="dotTime">{{getLocalTime(dotinfo.dotTime)}}</span>
+				</div>
+				<div class="col-xs-1 dot-img">
+					<div ng-class="{'activedot animated bounceIn':editinfo,'dot-circle':!editinfo}"></div>
+					<div class="dot-line" style="height:35px;"></div>
+				</div>
+				<div class="col-xs-9 dot-detail padding-right-none">
+					<span class="padding-right-10" style="font-size:14px" ng-show="!editinfo" ng-mouseover="editinfo = true" ng-click="editinfo = !editinfo">{{dotinfo.description}}</span> <span ng-show="editinfo"
+						ng-mouseleave="editinfo = (false || editFlag)" style="margin-top:-9px;display:block;"> <input type="text" ng-class="{'text_blue_color':editinfo}" ng-model="dotinfo.description"
+						class="form-control inline-block" style="width:80%;" ng-focus="editFlag=true" ng-blur="editFlag=false"> <i class='icon-check fontSize-30 blue-color'
+						style="height:34px;line-height: 34px;vertical-align: middle;" title="编辑" ng-click="editinfo = !editinfo;okEdit($index,dotinfo)"></i> <i class='icon-close fontSize-30'
+						style="height:34px;line-height: 34px;vertical-align: middle;" title="取消" ng-click="editinfo = !editinfo"></i> <i class='icon-delete fontSize-30'
+						style="height:34px;line-height: 34px;vertical-align: middle;color: #d43f3a;;" title="删除" ng-click="deleteDot($index,dotinfo.id)"></i>
+					</span>
+				</div>
+			</div>
+
+			<!--			<div class="col-xs-12 padding-right-none dot-footer">
+				<div class="col-xs-2 text-right dot-time">
+					<i class="icon-access-time"></i> <span class="dotTime">00:12:24</span>
+				</div>
+				<div class="col-xs-1 dot-img">
+					<div class="dot-circle"></div>
+					<div class="dot-line"></div>
+				</div>
+
+			</div>-->
+		</div>
+	</div>
+	<!-- <pagination
+            class="pagination-sm pull-right"
+            total-items="pagination.totalItems"
+            page="pagination.pageIndex"
+            items-per-page="pagination.pageSize"
+            max-size="pagination.maxSize"
+            previous-text="{{pagination.previousText}}"
+            next-text="{{pagination.nextText}}"
+            first-text="{{pagination.firstText}}"
+            last-text="{{pagination.lastText}}"
+            class="pagination-small"
+            boundary-links="true"
+            on-select-page="onSelectPage(page)">
+    </pagination> -->
+	<div growl></div>
+</div>

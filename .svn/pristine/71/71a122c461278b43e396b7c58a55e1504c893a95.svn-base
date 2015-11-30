@@ -1,0 +1,55 @@
+package com.zonekey.study.dao;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+
+import com.zonekey.study.common.SpringTxTestCase;
+import com.zonekey.study.entity.PageBean;
+import com.zonekey.study.entity.SysUser;
+
+@ContextConfiguration(locations = { "/applicationContext.xml" })
+public class SysUserMapperTest extends SpringTxTestCase {
+
+	@Autowired
+	private SysUserMapper userMapper;
+
+	@Test
+	public void testAll() {
+        //SysUser user  = userMapper.findOne(6);
+        //SysUser user1 = userMapper.findByLoginname("admin");
+        userMapper.updateLoginDateAndIp("192.168.12.190","admin");
+        //System.out.println(user.getLoginip());
+       /* userMapper.modifyPassword(user);
+        userMapper.findUsers();
+        userMapper.getByDeptId("1");
+        userMapper.getUserByNameAndPass("admin", "123");
+        userMapper.update(user);*/
+        
+        List<SysUser> users = new ArrayList<SysUser>();
+        SysUser user1 = new SysUser();
+        SysUser user2 = new SysUser();
+        user1.setLoginname("admin");
+        user2.setLoginname("123456");
+        users.add(user1);
+        users.add(user2);
+        userMapper.findEmais(users);
+        Map<String,Object> keywords = new HashMap<String,Object>();
+        Map<String,Object> page = new HashMap<String,Object>();
+        keywords.put("deptid", "1");
+        keywords.put("name", "a");
+        page.put("limit", 0);
+        page.put("offset", 10);
+        PageBean pb = new PageBean();
+        pb.setKeywords(keywords);
+        pb.setPage(page);
+        userMapper.getByDeptId(pb);
+        userMapper.findUserCountByDeptId(pb);
+        System.out.println( "users:"+userMapper.findUserCountByDeptId(pb));
+	}
+}

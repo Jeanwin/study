@@ -1,0 +1,5 @@
+(function($) {
+	$.config = {
+		appName : "/study"
+	}
+})(Zepto)

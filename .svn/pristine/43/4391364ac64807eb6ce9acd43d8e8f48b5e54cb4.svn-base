@@ -1,0 +1,49 @@
+package com.zonekey.study.service;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
+
+import com.zonekey.study.common.DateUtils;
+import com.zonekey.study.common.IdUtils;
+import com.zonekey.study.common.JsonUtil;
+import com.zonekey.study.common.SpringTxTestCase;
+import com.zonekey.study.entity.Comment;
+
+@ContextConfiguration(locations={"/applicationContext.xml"})
+public class CommentServiceTest extends SpringTxTestCase{
+	@Resource
+	CommentService reService;
+	@Test
+	public void getAllComments(){
+		String resourceid = "1";
+		String type = "1";
+		List<Map<String,Object>> dss = reService.getAllComments(resourceid,type);
+		System.out.println(JsonUtil.toJson(dss));
+		System.out.println("ddd");
+	}
+	
+	@Test
+	public void addCommentTest(){
+		Comment comment =  new Comment();
+		comment.setId(88);
+		comment.setResourceid("2");
+		comment.setType("2");
+		comment.setContent("ceshicontent");
+		comment.setCreatedate(DateUtils.getToday());
+		comment.setCreateuser("TestZhou");
+		comment.setScore("2342");
+		comment.setParentid("3");
+		
+		int i = reService.addComment(comment);
+		
+		System.out.println(i);
+		
+	}
+
+}

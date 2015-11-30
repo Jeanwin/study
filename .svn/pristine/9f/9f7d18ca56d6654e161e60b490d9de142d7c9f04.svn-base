@@ -1,0 +1,52 @@
+package com.zonekey.study.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.zonekey.study.dao.DeptMapper;
+import com.zonekey.study.entity.Dept;
+import com.zonekey.study.service.auth.ShiroDbRealm;
+import com.zonekey.study.vo.Tree;
+
+@Service
+@Transactional(readOnly = true)
+public class DeptService {
+	@Resource
+	private DeptMapper deptMapper;
+
+	/**
+	 * 查找所有部门以及人数
+	 * 
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public List<Dept> findDepts() {
+		return deptMapper.findDeptsWithUserNumbers();
+	}
+	@Transactional(readOnly = true)
+	public List<Dept> getDeptList() {
+		
+		return deptMapper.getDeptList(ShiroDbRealm.getCurrentLoginName());
+	}
+	/**
+	 * 新建活动，添加评审专家，查询所有部门
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+    public List<Map<String,Object>> getDepts(){
+    	return deptMapper.getDepts();
+    }
+	/**
+	 * 机构树
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public Tree getDeptTree(){
+		return deptMapper.getDeptTree();
+	}
+}

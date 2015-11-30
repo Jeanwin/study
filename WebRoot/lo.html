@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>login.html</title>
+
+<meta name="keywords" content="keyword1,keyword2,keyword3">
+<meta name="description" content="this is my page">
+<meta name="content-type" content="text/html; charset=UTF-8">
+
+<!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+
+</head>
+
+<body>
+	<div style="width:400px;height:300px;margin:0 auto;padding-top:30px;">
+		<form action="/study/gateway/login" method="post">
+			<p>
+				<span style="width:60px">用户名：</span><input type="text" name="username" />
+			</p>
+			<p>
+				<span style="width:60px">密码：</span><input type="password" name="password" />
+			</p>
+			<p>
+				<input type="submit" name="login" />
+			</p>
+		</form>
+		<div id="overlay_video" style="display: block;">
+		<div class="video_warper animated bounceInDown">
+			<div class="video_close" ng-click="showVideo('url',true)"></div>
+			<div id="video_container"><video controls="" autoplay="" class="video_jeanwin" width="720" height="540" src="/data/trans/2015/20151023/8e68d986-c2ea-4920-b051-e11e86199a8f.mp4"></video></div>
+		</div>
+	</div>
+	</div>
+</body>
+</html>

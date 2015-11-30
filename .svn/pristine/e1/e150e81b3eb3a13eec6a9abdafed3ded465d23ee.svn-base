@@ -1,0 +1,147 @@
+package com.zonekey.study.entity;
+
+
+import java.io.Serializable;
+import java.util.List;
+
+public class Comment implements Serializable {
+	private int id;
+	private String resourceid;
+	private String type;
+	private String parentid;
+	private String content;
+	private String score;
+	private String createuser;
+	private String createdate;
+	private String name;
+	private String pictureURL;
+	private List<Comment> nodes;
+	
+	
+	@Override
+	public String toString() {
+		return "Comment [id=" + id + ", resourceid=" + resourceid + ", type="
+				+ type + ", parentid=" + parentid + ", content=" + content
+				+ ", score=" + score + ", createuser=" + createuser
+				+ ", createdate=" + createdate + ", name=" + name
+				+ ", pictureURL=" + pictureURL + "]";
+	}
+
+
+
+
+	public List<Comment> getNodes() {
+		return nodes;
+	}
+
+
+
+
+	public void setNodes(List<Comment> nodes) {
+		this.nodes = nodes;
+	}
+
+
+
+
+	public int getId() {
+		return id;
+	}
+
+
+
+
+	public String getResourceid() {
+		return resourceid;
+	}
+
+
+	public void setResourceid(String resourceid) {
+		this.resourceid = resourceid;
+	}
+
+
+	public String getType() {
+		return type;
+	}
+
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+
+	public String getParentid() {
+		return parentid;
+	}
+
+
+	public void setParentid(String parentid) {
+		this.parentid = parentid;
+	}
+
+
+	public String getContent() {
+		return content;
+	}
+
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+
+	public String getScore() {
+		return score;
+	}
+
+
+	public void setScore(String score) {
+		this.score = score;
+	}
+
+
+	public String getCreateuser() {
+		return createuser;
+	}
+
+
+	public void setCreateuser(String createuser) {
+		this.createuser = createuser;
+	}
+
+
+	public String getCreatedate() {
+		return createdate;
+	}
+
+
+	public void setCreatedate(String createdate) {
+		this.createdate = createdate;
+	}
+
+
+	public String getName() {
+		return name;
+	}
+
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	public String getPictureURL() {
+		return pictureURL;
+	}
+
+
+	public void setPictureURL(String pictureURL) {
+		this.pictureURL = pictureURL;
+	}
+
+
+	public void setId(int id) {
+		this.id = id;
+	}
+}

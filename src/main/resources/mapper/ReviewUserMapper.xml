@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.ReviewUserMapper">
+	<!-- 根据活动id查询专家列表 -->
+	<select id="findUserList" resultType="com.zonekey.study.vo.ReviewUserView" parameterType="int">
+		select id,activeId,userid,(select name from sys_user u where u.loginname = userid) username from study_review_user where activeId = #{activeId}
+	</select>
+	<!-- 自动分配评审专家 -->
+	<insert id="insertUsers" parameterType="List">
+		insert into study_review_user(activeId,userid,createdate) values
+		<foreach collection="userList" item="u" index="index" separator=",">
+			(#{u.activeId},#{u.userid},sysDate())
+		</foreach>
+	</insert>
+	<!-- 插入验证 -->
+	<select id="checkExist" resultType="int">
+	    select count(*) from study_review_user where userid = #{userid} and activeId = #{acid} 
+	</select>
+	<!-- 批量删除数据 -->
+	<delete id="deleteUsers" parameterType="List">
+		delete from study_review_user where id in
+		<foreach collection="usersDel" open="(" close=")" separator="," item="u">
+			#{u.id}
+		</foreach>
+	</delete>
+	<!-- 根据活动id和用户登录名删除专家 -->
+	<delete id="delByActiveAndUser">
+	    delete from study_review_user where activeId = #{aeid} and userid in
+	    <foreach collection="users" open="(" close=")" separator="," item = "us">
+	        #{us} 
+	    </foreach>
+	</delete>
+	<!-- 删除验证 -->
+	<select id="deleteCheck" resultType="int">
+	    select count(*) from study_review_detail rd left join study_works w on rd.worksid = w.id left join study_review_user ru on ru.userid = rd.userid 
+	    where rd.isover = '1' 
+	    and w.activeid = #{aid} and rd.userid = #{uid}
+	</select>
+	<!-- 根据活动id删除专家 -->
+	<delete id="deleteByActiveid" parameterType="int">
+	    delete from study_review_user where activeid = #{actid}
+	</delete>
+	<!-- 删除验证 -->
+	<select id="checkDel" resultType="int">
+	    select count(*) from study_review_detail rd left join study_works w on rd.worksid = w.id left join study_active a on w.activeid = a.id where 
+	    rd.userid = #{userId} and w.activeid = #{activeId} and rd.isover = '1'
+	</select>
+</mapper>

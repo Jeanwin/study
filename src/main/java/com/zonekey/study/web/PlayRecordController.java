@@ -1,0 +1,75 @@
+package com.zonekey.study.web;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.zonekey.study.common.JsonMsg;
+import com.zonekey.study.entity.PageBean;
+import com.zonekey.study.service.PlayRecordService;
+import com.zonekey.study.vo.PlayRecordView;
+
+@Controller
+@RequestMapping(value = "/mobile")
+public class PlayRecordController {
+
+	@Autowired
+	private PlayRecordService prService;
+
+	/**
+	 * 添加或更新播放记录
+	 * 
+	 * @param pr
+	 * @return
+	 */
+	@RequestMapping(value = "/playRecord", method = RequestMethod.POST)
+	public @ResponseBody
+	JsonMsg saveOrUpdatePlayRecord(@RequestBody PlayRecordView pr) {
+		return prService.playRecord(pr);
+	}
+
+	/**
+	 * 播放记录列表
+	 * 
+	 * @param pb
+	 * @return
+	 */
+	@RequestMapping(value = "/playRecordList", method = RequestMethod.POST)
+	public @ResponseBody
+	Map<String, Object> playRecordsList(@RequestBody PageBean pb) {
+		return prService.pageList(pb);
+	}
+
+	/**
+	 * 最近点播
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/latestPlay", method = RequestMethod.POST)
+	public @ResponseBody
+	List<PlayRecordView> latestPlay() {
+		return prService.listTwo();
+	}
+	
+	
+	/**
+	 *  获取直播课表正在观看列表
+	 * 
+	 * @param visitor
+	 * @param currenttime
+	 * @return
+	 */
+	@RequestMapping(value="/guankanList")
+	public @ResponseBody
+	List<Map<String,Object>> guankanList(String visitor,String currenttime){
+		return prService.guankanList(visitor,currenttime);
+	}
+
+}

@@ -1,0 +1,265 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/include/taglib.jsp"%>
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <%@ include file="/WEB-INF/views/include/mobileHead.jsp"%>
+    <title>点播页面</title>
+</head>
+<body>
+<header id="header">
+    <div class="back"><a href="index.html"><i class="icon-chevron-left"></i></a></div>
+    <div class="iconBar"><i class="icon-format-list-bulleted" id="list" onclick="aaa()"></i><i class="icon-close" id="close" onclick="bbb()" style="display: none;"></i></div>
+    <nav id="nav" style="display: none;">
+        <a  href="liveCourses.html">直播</a>
+        <a  href="videoDemand.html">点播</a>
+        <a  href="collection.html">收藏</a>
+        <a  href="personalCenter.html">个人中心</a>
+        <a  href="information.html">公告</a>
+    </nav>
+    <script>
+        function aaa(){
+            var nav=document.getElementById("nav");
+            var list=document.getElementById("list");
+            var close=document.getElementById("close");
+            nav.style.display="block";
+            list.style.display="none";
+            close.style.display="block";
+        }
+        function bbb(){
+            var nav=document.getElementById("nav");
+            var list=document.getElementById("list");
+            var close=document.getElementById("close");
+            nav.style.display="none";
+            list.style.display="block";
+            close.style.display="none";
+        }
+    </script>
+    点播
+    <div class="search">
+        <input type="text" placeholder="请输入搜索内容" onfocus="demo()" />
+        <button onclick="ccc()">筛选<i class="icon-arrow-drop-down"></i></button>
+    </div>
+</header>
+<div class="selectedList" id="selectedList" style="display: none;">
+    <ul>
+        <span>共13546546节课</span>
+        <li class="cur">所有院系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+        <li>系学院数学系</li>
+        <li>电机系</li>
+
+    </ul>
+    <ul class="childList">
+        <li>诸葛亮</li>
+        <li>诸葛亮</li>
+        <li>诸葛亮<span><i class="icon-check"></i></span></li>
+        <li>诸葛亮</li>
+        <li>诸葛</li>
+        <li>诸葛孔明<span><i class="icon-check"></i></span></li>
+        <li>诸葛亮</li>
+        <li>诸葛亮</li>
+        <li>诸葛亮</li>
+        <li>诸葛亮<span><i class="icon-check"></i></span></li>
+        <li>诸葛</li>
+        <li>诸葛孔明</li>
+    </ul>
+    <div class="listOption">
+        <button>重置</button>
+        <button onclick="ddd()">确定(349节)</button>
+    </div>
+</div>
+<script>
+    function ccc(){
+        var selectedList=document.getElementById("selectedList");
+        selectedList.style.display="block";
+    }
+    function ddd(){
+        var selectedList=document.getElementById("selectedList");
+        selectedList.style.display="none";
+    }
+    function demo(){
+        var listFrom=document.getElementById("listFrom");
+        var header=document.getElementById("header");
+        var resultPage=document.getElementById("resultPage");
+        listFrom.style.display="none";
+        header.style.display="none";
+        resultPage.style.display="block";
+    }
+</script>
+<div class="playingState paddingTop90" id="listFrom">
+    <!--最近观看-->
+    <div class="recentWatch">
+        <div class="title color-green"><i class="icon-event-note"></i>最近观看</div>
+        <div class="playList">
+            <a href="demandDetail.html">
+                <h3>六上“生物的多样性”单元疑难解答</h3>
+                <div class="resentLive loft">
+                    <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                    <div class="liveCurrentStatic color-green"><i class="icon-living"></i>剩余23:22</div>
+                </div>
+            </a>
+            <a href="demandDetail.html">
+                <h3>六上“生物的多样性”单元疑难解答</h3>
+                <div class="resentLive loft">
+                    <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                    <div class="liveCurrentStatic color-green"><i class="icon-living"></i>不足一分钟</div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <!--更多点播-->
+    <div class="recentWatch">
+        <div class="title"><i class="icon-event-note"></i>更多点播</div>
+        <div class="playList">
+            <a href="demandDetail.html">
+                <h3>六上“生物的多样性”单元疑难解答</h3>
+                <div class="resentLive">
+                    <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                    <div class="liveTime">1:24:21</div>
+                    <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+            </a>
+            <a href="demandDetail.html">
+                <h3>六上“生物的多样性”单元疑难解答</h3>
+                <div class="resentLive">
+                    <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                    <div class="liveTime">1:24:21</div>
+                    <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+            </a>
+            <a href="demandDetail.html">
+                <h3>六上“生物的多样性”单元疑难解答</h3>
+                <div class="resentLive">
+                    <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                    <div class="liveTime">1:24:21</div>
+                    <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+            </a>
+            <a href="demandDetail.html">
+                <h3>六上“生物的多样性”单元疑难解答</h3>
+                <div class="resentLive">
+                    <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                    <div class="liveTime">1:24:21</div>
+                    <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+            </a>
+            <a href="demandDetail.html">
+                <h3>六上“生物的多样性”单元疑难解答</h3>
+                <div class="resentLive">
+                    <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                    <div class="liveTime">1:24:21</div>
+                    <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+<!--搜索结果显示-->
+<div class="resultPage" id="resultPage" style="display: none;">
+    <div class="searchResult">
+        <input type="text" placeholder="请输入课程名、教师" />
+        <button onclick="eee()">取消</button>
+    </div>
+    <div class="playingState" style="display: none;">
+        <!--最近观看-->
+        <div class="recentWatch">
+            <div class="title color-green"><i class="icon-event-note"></i>最近观看</div>
+            <div class="playList">
+                <a href="liveDetail.html">
+                    <h3>六上“生物的多样性”单元疑难解答</h3>
+                    <div class="resentLive">
+                        <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                        <div class="liveCurrentStatic color-green"><i class="icon-living"></i>剩余23:22</div>
+                    </div>
+                </a>
+                <a href="liveDetail.html">
+                    <h3>六上“生物的多样性”单元疑难解答</h3>
+                    <div class="resentLive">
+                        <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                        <div class="liveCurrentStatic color-green"><i class="icon-living"></i>不足一分钟 </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!--更多点播-->
+        <div class="recentWatch">
+            <div class="title"><i class="icon-event-note"></i>更多点播</div>
+            <div class="playList">
+                <a href="liveDetail.html">
+                    <h3>六上“生物的多样性”单元疑难解答</h3>
+                    <div class="resentLive">
+                        <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                        <div class="liveTime">1:24:21</div>
+                        <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                    </div>
+                </a>
+                <a href="liveDetail.html">
+                    <h3>六上“生物的多样性”单元疑难解答</h3>
+                    <div class="resentLive">
+                        <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                        <div class="liveTime">1:24:21</div>
+                        <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                    </div>
+                </a>
+                <a href="liveDetail.html">
+                    <h3>六上“生物的多样性”单元疑难解答</h3>
+                    <div class="resentLive">
+                        <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                        <div class="liveTime">1:24:21</div>
+                        <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                    </div>
+                </a>
+                <a href="liveDetail.html">
+                    <h3>六上“生物的多样性”单元疑难解答</h3>
+                    <div class="resentLive">
+                        <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                        <div class="liveTime">1:24:21</div>
+                        <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                    </div>
+                </a>
+                <a href="liveDetail.html">
+                    <h3>六上“生物的多样性”单元疑难解答</h3>
+                    <div class="resentLive">
+                        <div class="liveAuthor"><i class="icon-person"></i>唐雨泽</div>
+                        <div class="liveTime">1:24:21</div>
+                        <div class="liveCurrentStatic color-gray"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="noContent">
+        <span><i class="icon-phone_search_no"></i> </span>
+        <p>暂无内容</p>
+    </div>
+</div>
+<script>
+    function eee(){
+        var listFrom=document.getElementById("listFrom");
+        var header=document.getElementById("header");
+        var resultPage=document.getElementById("resultPage");
+        listFrom.style.display="block";
+        header.style.display="block";
+        resultPage.style.display="none"
+    }
+</script>
+</body>
+</html>

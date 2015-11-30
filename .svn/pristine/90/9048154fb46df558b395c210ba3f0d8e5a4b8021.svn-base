@@ -1,0 +1,261 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/include/taglib.jsp"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<!DOCTYPE html>
+<html>
+<head>
+<%@ include file="/WEB-INF/views/include/head.jsp"%>
+<script type="text/javascript"  src="${ctx}/static/js/bootstrap.min.js"></script>
+
+<script type="text/javascript" src="${ctx}/static/js/curriculum/flexpaper/js/flexpaper_flash.js">
+</script>
+<script type="text/javascript" src="${ctx}/static/js/curriculum/flexpaper/js/flexpaper_flash_debug.js">
+</script>
+<script type="text/javascript" src="${ctx}/static/js/teaching/getUrlParam.js"></script>
+<script type="text/javascript" src="${ctx}/static/js/curriculum/courseDetail.js"></script>
+<script type="text/javascript" src="${ctx}/static/js/curriculum/displayVideos.js"></script> 
+<script type="text/javascript"  src="${ctx}/static/js/partical.js"></script>
+<script type="text/javascript"  src="${ctx}/static/js/swfobject.js"></script>
+<%-- <script type="text/javascript"  src="${ctx}/static/js/main.js"></script> --%>
+</head>
+<body>
+<!--[if lte IE 8]>
+<div>不支持此浏览器</div>
+<![endif]-->
+<div class="container-fluid padding-left-right-none">
+ <%@ include file="/WEB-INF/views/include/header.jsp"%>
+
+<div class="col-xs-12 padding-left-right-none padding-bottom-20" style="background:#f7f7f7;">
+<div class="iphone-hide container padding-left-right-none" style="margin-top:16px;padding-top:20px;background:#fff;width:1170px;">
+<div class="col-xs-12">
+    <span style="font-size: 25px" id="subjectname"></span>
+    <button class="btn btn-primary btn-color pull-right" id="btn-write-note"><i class="glyphicon glyphicon-pencil"></i>&nbsp;笔记</button>
+</div>
+<div class="col-xs-12 margin-top-10 margin-bottom-10">
+    <span class="stars pull-right"></span>
+</div>
+<div class="col-xs-12 padding-left-right-none" style="height:540px;margin-bottom:20px;">
+<div class="videoBroadcastBox" style="width:100%;height:100%;">
+</div>
+</div>
+
+
+<div class="col-xs-12 margin-top-20 coursedtail">
+    <div class="col-xs-10 padding-left-none">
+        <div class="col-xs-12 padding-bottom-10">
+            <ul class="nav-bar courseViewNav clearfix"><li class="current">评审</li><li>听课表</li><li>课程素材</li><li id="commentMenu">评论</li></ul>
+            <div class="reviewWrap courseViewContent">
+                <select id="templatename" onchange="changetemplate()"></select>
+                <div class="score-wrap">
+                    <div class="score-tab">
+                        <div class="title"><i class="icon-lens"></i> <span id="score"><strong></strong></span>评分表</div>
+                        <div class="table-responsive">
+                            <table>
+                               <thead>
+                                    <tr>
+                                        <th class="col-xs-2">评审指标</th>
+                                        <th class="col-xs-6">评价要点</th>
+                                        <th class="col-xs-2">分值</th>
+                                        <th class="col-xs-2">打分</th>
+                                    </tr>
+                               </thead>
+                                <tbody id="reviewdetail">
+                                <%-- <span id="templateid" hidden="hidden"></span>
+                                <span id="workid" hidden="hidden">${workid}</span>
+                                <span id="curriculumid" hidden="hidden">${curriculumid}</span>
+                                <span id="floder" hidden="hidden">${floder}</span>
+                                <span id="typedata" hidden="hidden">${typedata}</span>
+                                <span id="tab" hidden="hidden">${tab}</span>
+                                <span id="recordtemplateid" hidden="hidden"></span>     --%>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="remark" >
+                    	<div id="assess" hidden="true">
+                        <div class="title"><i class="icon-lens"></i>评语</div>
+                        <textarea id="remark"></textarea>
+                        </div>
+                        <button class="btn btn-primary pull-right btn-bg-blue margin-top-20"  id="savetReviewDetails">保存评价</button>
+                    </div>
+                </div>
+            </div>
+            <div class="listenWrap courseViewContent">
+               
+            </div>
+            <div class="course-resource courseViewContent">
+                <div class="course-resource-edit">
+                    <div class="course-resource-preview">
+                        <div class="title"><i class="icon-lens"></i><input type="button" id="editmaterials" value="编辑素材" class="btn btn-primary pull-right btn-bg-blue course-resource-edit-click" />素材预览</div>
+                         <div class="book-relative">
+                           <!-- <div class="bookTitle"><span class="pull-right"><a href="#"><i class="icon-my-download"></i>下载</a></span><i class="icon-Word"></i> 中国近代史 - 太平天国运动</div>
+                            <div class="bookContent"></div>-->
+                        </div> 
+                    </div>
+                     <div class="other-resource">
+                    </div>
+                </div>
+                <div class="course-resource-add" style="display: none;">
+                    <div class="title">
+                        <a href="javascript:;" class="course-resource-back-click"><i class="icon-reply back"></i>返回</a>
+                        <button class="btn btn-primary pull-right btn-bg-blue" id="add-resource"><i class="icon-add"></i>添加素材</button>
+                    </div>
+                    <div class="course-resource-add-tab">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>素材名称</th>
+                                    <!-- <th>类型</th> -->
+                                    <th>排序</th>
+                                    <th>允许下载</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="MaterialListhtml">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="commentWrap courseViewContent">
+                <div class="col-xs-12 padding-bottom-10" style="margin-top: 40px">
+                    <div class="col-xs-3" style="color: #5e5e5e;font-size: 24px">
+                        <i class="icon-textsms"></i>
+                        <span style="padding-left: 16px;">评论</span>
+                    </div>
+                    <div class="col-xs-4" style="color: #5e5e5e;padding-top: 16px">
+                        <span>评分</span>
+                                <span style="padding-left: 16px" id="scoreMenu">
+                                    <i class="icon-star yellow-color" value="1"></i>
+                                    <i class="icon-star gray-color" value="2"></i>
+                                    <i class="icon-star gray-color" value="3"></i>
+                                    <i class="icon-star gray-color" value="4"></i>
+                                    <i class="icon-star gray-color" value="5"></i>
+                                </span>
+                    </div>
+                    <div class="pull-right" style="padding-top: 16px"><span id="result">0</span>/100</div>
+                </div>
+                <div class="col-xs-12">
+                    <input class="form-control" placeholder="说说你的感想吧..." value="" id="oneLevelComment"  maxlength="100" >
+                </div>
+                <div class="col-xs-12 padding-top-10">
+                    <button class="btn btn-primary pull-right" onclick="submitComment1();">发表</button>
+                </div>
+                <div class="col-xs-12 padding-top-10 padding-bottom-10">
+                    <div style="background-color: #f2f2f2;margin-top: 64px;height: 40px">
+                        <div class="col-xs-3" style="padding-top: 8px;font-size: 16px">全部评论(<span id="commentNums"></span>)</div>
+                        <div class="col-xs-9" style="margin-top: -15px"></div>
+                    </div>
+                </div>
+                
+                  <!--评论内容start -->
+                  <div id="commentBody"></div>
+                  <!-- 评论内容end -->
+                 <!-- 分页条 -->
+  				<div class="col-xs-12 text-right" id="review_user_pagination"></div>
+                  	
+                  	
+            </div>
+        </div>
+        <div>
+        </div>
+    </div>
+    <div class="col-xs-2 padding-left-right-none">
+        <div class="col-xs-12 padding-top-15 padding-bottom-15" style="background-color: #f2f2f2;">
+            <div class="col-xs-12 padding-left-right-none" style="padding-bottom: 15px;font-size: 16px">
+                <b>主讲人：</b>
+            </div>
+            <div class="col-xs-3 padding-left-right-none">
+                <img src="" style="width:100%" id="teacherUrl"/>
+            </div>
+            <div class="pull-right col-xs-9 padding-right-none">
+                <div style="font-size: 14px"><span id="teachername"></span></div>
+               <!--  <div style="font-size:12px"><b>国家特级教师</b></div> -->
+            </div>
+            <div class="col-xs-12 padding-left-right-none padding-top-10">
+                　　<span id="teacherIntroduce"></span>
+            </div>
+        </div>
+        <div class="col-xs-12 padding-top-15 padding-bottom-15 margin-top-20" style="background-color: #f2f2f2;">
+            <div class="col-xs-12 padding-left-right-none" style="padding-bottom: 15px;font-size: 16px">
+                <b>教学内容概述：</b>
+            </div>
+            <div class="col-xs-12 padding-left-right-none">
+                　　<span id="courseIntroduce"></span>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="my-note-box" style="margin-right: 20px;">
+    <div class="my-note-box-header">
+        <span class="white-color">我的笔记</span>
+        <i class="icon-close my-note-box-close"></i>
+    </div>
+    <div class="my-note-content border-radius-none">
+        <div class="my-note-content-list" id="my-note-content-list">
+            
+        </div>
+        <div class="my-note-content-area">
+            <div class="input-group">
+                <input type="text" class="form-control note-input-add border-radius-none" id="content" placeholder="">
+                <span class="close-add-note pull-right">
+                      <i class="icon-close clear-add-note"></i>
+                </span>
+            </div>
+            <button class="btn btn-default btn-bg-white" id="savenote"><span class="blue-color">保存</span></button>
+        </div>
+    </div>
+</div>
+<!-- 底部jsp -->
+	<%@ include file="/WEB-INF/views/include/footer.jsp"%>
+</div>
+<div class="file-box col-xs-6 col-md-4">
+    <div class="file-box-top" id="VideoFile">
+        <span class="pull-right color-red">最多只能选择一个</span>
+        <a id="film_btn" onclick="showSelectFile(1)" class="cur">选择录像文件</a> | <a id="upload_btn" onclick="showSelectFile(2)">上传</a>
+    </div>
+    <div class="file-box-mid selectVideoFileContent-import" id="select_film">
+        <ul>
+        </ul>
+        <div class="row margin-top-20">
+            <div class="col-xs-6">
+                <input type="button" value="添加" class="btn btn-bg-blue" style="width:100%;" onclick="importMaterial()"/>
+            </div>
+            <div class="col-xs-6">
+                <input type="button" value="取消" class="btn btn-bg-white"  id="cancelFileBox" style="width:100%;" />
+            </div>
+        </div>
+    </div>
+    <div class="file-box-mid selectVideoFileContent" style="display: none;" id="select_upload">
+                <table border="2">
+                <tr>
+                <input id="file" name="file" type="file">
+                </tr>
+                </table>
+            <div class="row margin-top-20">
+                <div class="col-xs-6">
+                    <input type="button" value="添加" class="btn btn-bg-blue" style="width:100%;" onclick="uploadOnClick()"/>
+                </div>
+                <div class="col-xs-6">
+                    <input type="button" value="取消" class="btn btn-bg-white"  id="cancelFileBox2" style="width:100%;" />
+                </div>
+            </div>
+    </div>
+</div>
+
+
+	<!--遮罩层-->
+	<div class="overlay"></div>
+	<!-- <div class="overlay" onclick="closeAssign();cancelDeleteWorks();closeAddResourceView()"></div> -->
+	<!-- t -->
+	<div id="message_info" class="growl" style="display:none">
+		<div id="message_content" class="growl-item alert"></div>
+	</div>
+	
+	
+
+</body>
+</html>

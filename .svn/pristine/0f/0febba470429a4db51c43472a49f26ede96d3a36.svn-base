@@ -1,0 +1,79 @@
+﻿
+<div class="row padding-left-right-none padding-top-10 padding-bottom-10" style="width: 100%;background: #fff;z-index: 1003;position: relative;left: 0;">
+        <div style="width:94%;margin-left:2.5%;" class="row">
+        	<div class="row">
+        		<div class="col-xs-1">
+        			<i class="icon-chevron-left large-chevron"></i>
+        		</div>
+        		<div class="col-xs-10 padding-right-none text-center photoShowContainer">
+        			<img ng-if="activePhotoShow.nametype == 'Pictrue'" ng-src="{{activePhotoShow.fileurl}}" onload="imgonloade(this)"> 
+        			
+					<video ng-if="activePhotoShow.nametype == 'Videos'"   ng-src="{{activePhotoShow.fileurl}}" controls style="width:100%;height:100%;">
+
+					</video>
+					
+        		</div>
+        		<div class="col-xs-1 padding-left-none">
+        			<i class="icon-chevron-right large-chevron"></i>    			
+        		</div>
+        	</div>
+        </div>
+        <div class="col-xs-12 padding-left-right-none" style="background-color: #f2f2f2;padding: 5px 0;
+margin: 5px 0;">
+        	<div class="row" >
+        		<div class="col-xs-1 padding-left-right-none" style="text-align:right;">
+        			<i class="icon-chevron-left small-chevron"></i>
+        		</div>
+                <div  class="col-xs-10 padding-left-right-none" style="overflow:hidden;">
+            		<div class="col-xs-12 overContainer">
+            			<div  class="pohotContainer" ng-repeat="p in photo" id="photowalldiv{{$index+1}}"  ng-click="ToactivePhoto($index)" ng-class="{'activeborder':activePhoto==$index}" style="position:relative;">
+            			
+            				<img ng-if="p.nametype == 'Pictrue'" src="{{p.fileurl}}" onload="imgonloade2(this)">
+            				<video  ng-if="p.nametype == 'Videos'"  ng-src="{{p.fileurl}}" style="width:100%;height:100%;">
+
+							</video>
+							<span ng-if="p.nametype == 'Videos'" class="glyphicon glyphicon-facetime-video videoIcon"></span>
+            			
+            			</div>
+                	</div>
+                </div>
+        		<div class="col-xs-1">
+        			<i class="icon-chevron-right small-chevron"></i>    			
+        		</div>
+        	</div>
+        </div>
+<script>
+				
+function imgonloade(e){
+	var maxWidth=e.parentNode.clientWidth,maxHeight=e.parentNode.clientHeight, w = e.width,h = e.height; 
+	if(w < maxWidth && h < maxHeight) return;
+	e.height = '-1';e.width='-1';
+	w/h > maxWidth/maxHeight ? e.width = maxWidth: e.height = maxHeight;
+	
+}
+function imgonloade2(e){
+	var maxWidth=e.parentNode.clientWidth,maxHeight=e.parentNode.clientHeight, w = e.width,h = e.height; 
+	if(w < maxWidth && h < maxHeight) return; 
+	w/h > maxWidth/maxHeight ? e.width = maxWidth : e.height = maxHeight;
+}
+
+</script>
+    	<div class="row">
+    		<span class="col-xs-3 col-xs-offset-2 fontSize-20 blue-color">
+    			<span>来源：</span>
+    			<span ng-if="type == '1'">智慧教室</span>
+    			<span ng-if="type == '2'">录播机</span>
+    		</span>
+    		<div class="col-xs-4 pull-right fontSize-30">
+    			<span ng-show="user.usertype != 2" ng-click="oneafterclassvisibility()" >
+                     <i ng-show="resourcevisable === '0' || resourcevisable==='' || resourcevisable===null" class="blue-color icon-visibility-off" title="可见"></i>
+                     <i ng-show="resourcevisable === '1'" class="blue-color icon-visibility" title="不可见"></i>
+                 </span>
+                 <span  ng-click="onecollectAfterResource()" class="padding-left-10">
+                     <i ng-show="!resourcecollection || resourcecollection === '0'" class="blue-color icon-star-o" title="收藏"></i>
+                     <i ng-show="resourcecollection === '1'" class="blue-color icon-star" title="取消收藏"> </i>
+                 </span>
+                 <i class="blue-color  icon-cloud-download padding-left-10"></i> 
+    		</div>
+    	</div>
+</div>

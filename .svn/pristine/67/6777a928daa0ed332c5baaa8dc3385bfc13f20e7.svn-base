@@ -1,0 +1,162 @@
+<div class="container-fluid message-myinfo">
+	<div class="modal-body">
+		<div style="height: 24px;width: 8px;background-color: #fcb750"></div>
+		<div style="margin:-30px 0 32px 20px;font-size: 24px">我的消息</div>
+		<div class="header" style="height: 46px;">
+			<ul class="top-nav" style="height:46px;">
+				<li style="height:46px;border-collapse: collapse;" class="pull-left big" ng-class="{'colorShow':accepted === '1'}"><a style="display: block;vertical-align: middle;" href ng-click="showmodal('1');pagination.pageIndex='1';searchInbox()" ng-class="{'fontwhite':accepted === '1'}">已接收</a></li>
+				<li style="height:46px;border-collapse: collapse;" class="big" ng-class="{'colorShow':Sent === '2'}"><a style="display: block;vertical-align: middle;" href ng-click="showmodal('2');pagination.pageIndex='1';searchOutbox()" ng-class="{'fontwhite':Sent === '2'}">已发送</a></li>
+				<li style="height:46px;border-collapse: collapse;margin-left:-3px;" class="big" ng-class="{'colorShow':sendmessage === '3'}" style="margin-left:-5px;"><a style="display: block;vertical-align: middle;" href ng-click="showmodal('3');recieverIds=[];title='';content=''"
+					ng-class="{'fontwhite':sendmessage === '3'}">发消息</a></li>
+				<li class="pull-right" style="border:none;height:46px;padding: 6px 25px;border-collapse: collapse;">
+					<button ng-show="accepted === '1'" class="btn btn-primary btn-color" ng-click="deleteInboxes(inboxList)">清空</button>
+					<button ng-show="Sent === '2'" class="btn btn-primary btn-color" ng-click="deleteOutboxes(outboxList);">清空</button>
+				</li>
+			</ul>
+		</div>
+
+		<div ng-show="accepted === '1'">
+			<div ng-repeat="msg in inboxList">
+				<div class="col-xs-12 Messageoption accept">
+					<div class="col-xs-2" style="width:100px;float:left" ng-if="msg.sender.pictureURL === ''">
+						<img class="img-circle" style="height:80px;width:80px;border-radius:50px;border:0;padding:0" ng-src="{{imgData.url}}">
+					</div>
+					<div class="col-xs-2" style="width:100px;float:left" ng-if="msg.sender.pictureURL !== ''">
+						<img class="img-circle" style="height:80px;width:80px;border-radius:50px;border:0;padding:0" ng-src="{{msg.sender.pictureURL}}">
+					</div>
+					<div class="col-xs-10 padding-right-none" style="padding-left: 0px;width:calc(100% - 100px)" ng-click="viewMsg(msg)">
+						<div class="col-xs-12" style="padding-bottom:5px;" ng-class="{'titleColor':titlenameColor==='1'}">
+							<span> <a href class="title" style="max-width: 50%;float:left;display:block;">主题：{{msg.message.title}}</a><span ng-show="msg.readstatus==='0'" class="newicon red-color"><img
+									style="padding-left:5px" src="./assets/img/icon/newer.gif" /></span><span style="padding-left: 35px;color: #5ee0f4"><span style="color:black;padding-right:5px">来自:</span>{{msg.sender.name}}</span>
+								<span class="glyphicon glyphicon-eye-open" style="padding-left:15px;color:grey" tooltip-placement="top" tooltip-popup-delay="300" tooltip="标记为已阅读" ng-show="msg.readstatus==='0'"
+								ng-click="viewMsg(msg)"></span> <span class="glyphicon glyphicon-eye-open" style="padding-left:15px;color:red" tooltip-placement="top" tooltip-popup-delay="300" tooltip="已阅读"
+								ng-show="msg.readstatus==='1'""></span>
+							</span> <span class="pull-right" style="color: #818181">{{msg.sendtimestring}}</span>
+						</div>
+						<div class="col-xs-12">
+							<span class="font-overlay-3"><pre style="font-size: 14px;font-family: 微软雅黑;border: none;background: azure;padding:6px 12px;margin-bottom: 10px;min-height:80px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{msg.message.content}}</pre>
+							</span> <span class="pull-right"> <span class="comment" ng-click="showReply(msg.sender,msg.message,'3');viewMsg(msg)">回复</span>
+								<button ng-click="deleteInbox(msg)" class="btn-link" tooltip-placement="top" tooltip-popup-delay="1000" tooltip="删除">
+									<span class="glyphicon glyphicon-trash" style="color:red"></span>
+								</button>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-12 padding-left-none" ng-show="pagination.totalItems > pagination.pageSize">
+				<div class="col-xs-12 padding-left-right-none">
+					<pagination class="pagination-sm pull-right" total-items="pagination.totalItems" page="pagination.pageIndex" items-per-page="pagination.pageSize" max-size="pagination.maxSize"
+						previous-text="{{pagination.previousText}}" next-text="{{pagination.nextText}}" first-text="{{pagination.firstText}}" last-text="{{pagination.lastText}}" class="pagination-small"
+						boundary-links="true" on-select-page="onSelectPage(page)"> </pagination>
+				</div>
+			</div>
+		</div>
+
+		<div ng-show="Sent === '2'">
+			<!-- 遍历发件箱消息 -->
+			<div ng-repeat="message in outboxList">
+				<div class="col-xs-12 Messageoption send">
+					<div class="padding-right-none">
+						<div class="col-xs-12" style="padding-bottom:5px;" ng-class="{'titleColor':titlenameColor==='1'}">
+							<span> <span><a href class="title" style="width: 50%;float:left;display:block;">主题：“{{message.title}}”</a></span>
+								<div class="accept-info tooltipTest-item">
+									<span class="accept-name">收件人：<span>{{message.deptNames}}</span>(共{{message.recieverNum}}个)
+									</span>
+									<div class="accept-list tooltipTest-content" style="max-height: 800px;overflow:hidden;width:auto;max-width:800px;">
+										<p class="margin-bottom-5" style="color: #5ee0f4">收件人列表</p>
+										<p class="accept-content">
+											<span > <!-- <{{msgSta.reciever.dept.name}}> -->{{message.reciewerNames}}
+											</span>
+										</p>
+									</div>
+								</div>
+							</span> <span class="pull-right" style="color: #818181">{{message.createdatestring}}</span>
+						</div>
+						<div class="col-xs-12">
+							<span class="font-overlay-3"><pre style="font-size: 14px;font-family: 微软雅黑;border: none;background: azure;padding:6px 12px;margin-bottom: 10px;min-height:80px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{message.content}}</pre></span>
+							<span class="pull-right">
+								<button ng-click="deleteOutbox(message)" class="btn-link" tooltip-placement="top" tooltip-popup-delay="1000" tooltip="删除">
+									<span class="glyphicon glyphicon-trash" style="color:red"></span>
+								</button>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 遍历发件箱消息 -->
+			<div class="col-xs-12 padding-left-none" ng-show="pagination.totalItems > pagination.pageSize">
+				<div class="col-xs-12 padding-left-right-none">
+					<pagination class="pagination-sm pull-right" total-items="pagination.totalItems" page="pagination.pageIndex" items-per-page="pagination.pageSize" max-size="pagination.maxSize"
+						previous-text="{{pagination.previousText}}" next-text="{{pagination.nextText}}" first-text="{{pagination.firstText}}" last-text="{{pagination.lastText}}" class="pagination-small"
+						boundary-links="true" on-select-page="onSelectPage(page)"> </pagination>
+				</div>
+			</div>
+		</div>
+
+		<div ng-show="sendmessage === '3'">
+			<form name="form_sendMessage" class="form-horizontal" method="post">
+				<div style="margin: 40px 0px 0px 0px">
+					<!--  -->
+					<div class="form-group" style="margin-bottom: 10px">
+						<label class="control-label col-md-2 padding-bottom-10">消息类型</label>
+						<div class="col-md-9">
+							<div class="btn-group">
+								<label class="btn btn-default control-label" ng-init="isEmail='N'" ng-class="{'btn-primary':isEmail==='Y'}" ng-model="isEmail" btn-radio="'Y'">邮件消息</label> <label
+									class="btn btn-default control-label" ng-class="{'btn-primary':isEmail==='N'}" ng-model="isEmail" btn-radio="'N'">站内消息</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-group" style="margin-bottom: 10px">
+						<label class="control-label col-md-2 padding-bottom-10">收件人</label>
+						<div class="col-md-9">
+							<div style="padding:0px 0px;width:94%;float:left;position: relative;">
+								<!-- <input type="hidden" style="width:100%;max-height:200px;overflow:auto;" ui-select2="select2Options" ng-model="recieverIds"> -->
+								<!-- shousuo -->
+								<select style="width:100%;max-height:200px;overflow:auto;" ui-select2 multiple name="recieverIds" ng-model="recieverIds" class="populate" required>
+								     <option ng-repeat="u in recieverList" value="{{u.id}}">{{u.text}}</option>
+								</select>
+								<!-- <ui-select multiple ng-model="recieverIds" theme="bootstrap"> 
+								     <ui-select-match placeholder="Select colors...">{{$item.text}}</ui-select-match> 
+								     <ui-select-choices repeat="person in recieverList | filter: {id: $select.search, text: $select.search}">
+								<div ng-bind-html="person.text"></div>
+								<small> age: <span ng-bind-html="''+person.id"></span>
+								</small> 
+								</ui-select-choices> </ui-select> -->
+								<!-- <input type="text" id="user_search_hidden" style="width: calc(100% - 35px); margin: 2px 6px;float: left;position: absolute;z-index: 99999;" class="form-control"> -->
+								<!-- <input type="hidden" style="width:100%;max-height:200px;overflow:auto;" ui-select2="multi" ng-model="recieverIds" /> -->
+							</div>
+							<div style="padding:0px 0px;width:5%;float:right;">
+								<a style="float:right;" ng-click="addDeptReciever()"> <img src="assets/img/add.png" style="min-width: 28px;min-height: 28px;"></a>
+							</div>
+						</div>
+					</div>
+					<div class="form-group" style="margin-bottom: 10px">
+						<label class="control-label col-md-2 padding-bottom-10">主题</label>
+
+						<div class="col-md-9">
+							<input class="form-control" style="width: 100%;height: 30px" name="title" ng-model="title" ng-maxlength="50" placeholder="最多输入50字" required>
+						</div>
+						<span ng-show="form_sendMessage.title.$error.maxlength">
+							<div style="color: red;">标题过长</div>
+						</span>
+					</div>
+					<div class="form-group" style="margin-bottom: 10px">
+						<label class="control-label col-md-2 padding-bottom-10">内容</label>
+						<div class="col-md-9">
+							<textarea id="message_content" class="form-control" style="width: 100%;height: 200px;overflow: auto" ng-model="content" name="content" placeholder="最多输入1000字" ng-maxlength="1000" required></textarea>
+						</div>
+					</div>
+					<div class="form-group" style="padding-bottom:5px">
+						<div class="col-md-2"></div>
+						<div class="col-md-9">
+							<button id="btn_send_message" ng-disabled="form_sendMessage.recieverIds.$error.required || form_sendMessage.title.$error.required || form_sendMessage.content.$error.required || form_sendMessage.title.$error.maxlength || form_sendMessage.content.$error.maxlength" style="width:164px;box-shadow:#cecece 2px 2px 3px;" class="btn btn-primary" ng-click="sendMesage(recieverIds,title,content,isEmail)">发送</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<!-- 展示消息的div -->
+	<div growl></div>
+</div>

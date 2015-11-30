@@ -1,0 +1,17 @@
+data.redis.host=192.168.12.220
+data.redis.port=6379
+data.redis.usepool=true
+data.redis.maxActive=300
+data.redis.initialSize=5
+#ms
+data.redis.maxWait=5000
+data.redis.maxIdle=20
+data.redis.minIdle=5
+data.redis.timeBetweenEvictionRunsMillis=5000
+data.redis.minEvictableIdleTimeMillis=10000
+data.redis.removeAbandoned=true
+#removeAbandonedTimeout(s)
+data.redis.removeAbandonedTimeout=180
+
+redis.data.cache.time=3
+redis.data.cache.timeunit=MINUTES

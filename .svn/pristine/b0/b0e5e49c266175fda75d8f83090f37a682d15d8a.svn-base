@@ -1,0 +1,21 @@
+<div style="background-color: #f2f2f2;border-radius: 6px;">
+	<div class="modal-header" style="padding:15px">
+		<a href type="button" class="close" ng-click="cancel()" data-dismiss="modal"> <span aria-hidden="true">&times;</span><span class="sr-only">关闭</span>
+		</a> <span class="modal-title">
+			<h3 style="font-size:24px">删除发件箱</h3>
+		</span>
+	</div>
+	<div class="modal-body">
+		<h4 style="font-size:18px">
+			确认删除消息吗？&nbsp;&nbsp;&nbsp;&nbsp;
+			<div style="max-height:380px;overflow-y:auto">
+				<!-- <div ng-repeat="msgs in inboxdel" style="font-size: 18px"><b>{{msgs.message.title}}</b></div> -->
+			</div>
+
+		</h4>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-danger" ng-click="ok()" focus-me="true">确认</button>
+		<button class="btn btn-default" ng-click="cancel()">取消</button>
+	</div>
+</div>

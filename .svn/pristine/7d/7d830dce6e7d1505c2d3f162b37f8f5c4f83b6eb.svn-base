@@ -1,0 +1,58 @@
+(function($) {
+	$.animateIt = function(target, clazz, duration) {
+		var dft = "animated fadeIn";
+		if (target != undefined && target != null) {
+			// 移除基础样式
+			var oClass = target.attr("class") ? target.attr("class") : "";
+			var bClass = clazz ? clazz : dft;
+			var aClass = bClass.split(" ");
+			if (target.hasClass(aClass[0])) {
+				if (oClass.indexOf(aClass[0]) !== -1) {
+					target.attr("class", oClass.substring(0, oClass.lastIndexOf(aClass[0])));
+				}
+			}
+			if (duration != undefined && duration != null) {
+				for (var i = 0; i < 20; i++) {
+					// 开始动画
+					setTimeout(function() {
+						target.addClass(bClass);
+					}, duration * i + 1);
+					// 取消样式
+					setTimeout(function() {
+						oClass = target.attr("class") ? target.attr("class") : "";
+						if (oClass.indexOf(aClass[0]) !== -1) {
+							target.attr("class", oClass.substring(0, oClass.lastIndexOf(aClass[0])));
+						}
+					}, duration * (i + 1));
+				}
+			} else {
+				setTimeout(function() {
+					target.addClass(bClass);
+				}, 0);
+			}
+		} else {
+			console.log("not find target object to be animated");
+		}
+	}
+	/** ********************************************************************************** */
+	$.message = function(message, type, duration) {
+		$("#message_info").remove();
+		var messageDiv = '<div id="message_info" class="growl">';
+		if (message != undefined && message != null && message != '') {
+			if (type == undefined || type == null || type === '') {
+				messageDiv += '<div class="growl-item alert growl-success"><p class="growl-p">' + message + '</p></div>';
+			} else {
+				messageDiv += '<div class="growl-item alert growl-' + type + '"><p class="growl-p">' + message + '</p></div>';
+			}
+			messageDiv += '</div>';
+			$(messageDiv).appendTo($("body"));
+			$.animateIt($("#message_info"), "animated slideInUp");
+			//$("#message_info").get(0).style.display = "block";
+			var time = duration ? duration : 2000;
+			setTimeout(function() {
+				//$("#message_info").get(0).style.display = "none";
+				$.animateIt($("#message_info"), "animated slideOutDown");
+			}, time);
+		}
+	}
+})(Zepto)

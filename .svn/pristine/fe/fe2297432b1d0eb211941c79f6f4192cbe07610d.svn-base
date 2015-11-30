@@ -1,0 +1,43 @@
+package com.zonekey.study.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+
+import com.zonekey.study.common.SpringTxTestCase;
+import com.zonekey.study.vo.ReviewDetailView;
+
+@ContextConfiguration(locations = { "/applicationContext.xml" })
+public class ReviewDetailMapperTest extends SpringTxTestCase {
+
+	@Autowired
+	private ReviewDetailMapper rdMapper;
+
+	@Test
+	public void testAll() {
+		List<ReviewDetailView> details = new ArrayList<ReviewDetailView>();
+		List<Integer> list = new ArrayList<Integer>();
+		list.add(1);
+		ReviewDetailView detail1 = new ReviewDetailView();
+		ReviewDetailView detail2 = new ReviewDetailView();
+		detail1.setTemplateid(1);
+		detail1.setUserid("admin");
+		detail1.setWorksid(1);
+		detail2.setTemplateid(1);
+		detail2.setUserid("123456");
+		detail2.setWorksid(1);
+		details.add(detail1);
+		details.add(detail2);
+        rdMapper.insertDetails(details); 
+        rdMapper.deleteByActiveId(0);
+        rdMapper.deleteByWorksId(list);
+        rdMapper.findByWorksId(0);
+        rdMapper.findDetailByWorkId(0);
+        rdMapper.findSpecialistByActiveId(15);
+        rdMapper.countReview(15, "admin", "0");
+        
+	}
+}

@@ -1,0 +1,34 @@
+#mysql database setting
+jdbc.driver=com.mysql.jdbc.Driver
+<<<<<<< .mine
+jdbc.url=jdbc\:mysql\://192.168.12.214/dis_test_8080?useUnicode\=true&characterEncoding\=utf-8
+#jdbc.url=jdbc:mysql://172.16.30.251/zjk?useUnicode=true&characterEncoding=utf-8
+#jdbc.url=jdbc:mysql://localhost/distributedt?useUnicode=true&characterEncoding=utf-8
+=======
+jdbc.url=jdbc:mysql://192.168.12.214/dis_production_8080?useUnicode=true&characterEncoding=utf-8
+>>>>>>> .r3147
+jdbc.username=root
+jdbc.password=123456
+#common
+<<<<<<< .mine
+project.name = /study
+resource.ip = http\://study.zonekey.com.cn/data/
+common.ip=http\://localhost\:8100
+=======
+resource.ip = /data/
+common.ip=http\://study.zonekey.com.cn
+>>>>>>> .r3147
+#dbcp settings
+dbcp.maxIdle=5
+dbcp.maxActive=40
+
+#memcached settings
+memcached.url=192.168.12.106:12000
+memcache.server=192.168.12.106:12000
+memcache.initConn=20
+memcache.minConn=10
+memcache.maxConn=50
+memcache.maintSleep=30
+memcache.nagle=false
+memcache.socketTO=3000
+memcache.time=6000

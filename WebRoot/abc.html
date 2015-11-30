@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>abc.html</title>
+
+<meta name="keywords" content="keyword1,keyword2,keyword3">
+<meta name="description" content="this is my page">
+<meta name="content-type" content="text/html; charset=UTF-8">
+
+<!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+<script type="text/javascript" src="./static/js/jquery/jquery-1.11.3.js"></script>
+<script type="text/javascript">
+	function printButton() {
+		document.getElementById("WebBrowser1").execWB(6, 1);
+	}
+	
+	//打印预览  
+	function printPreview() {
+		//wb.execwb(7,1) 
+		document.getElementById("WebBrowser1").execwb(7, 1);
+	}
+
+	function printPage() {
+		window.print();
+	}
+	$(function() {
+		/* console.log(navigator.geolocation.getCurrentPosition(function() {
+			console.log("123")
+		})); */
+		console.log(document.URL);
+		console.log(window);
+		/* document.write("<p>MinorVersion: ")
+		document.write(navigator.appMinorVersion + "</p>") */
+		//alert(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+	})
+</script>
+<basefont color="red" size="5" />
+</head>
+
+<body bgcolor="">
+	This is my HTML page.
+	<br>
+	<meter value="3" min="0" max="10">十分之三</meter>
+	<address>北京市海淀区</address>
+	<article>
+		<h1>Internet Explorer 9</h1>
+		<p>Windows Internet Explorer 9（简称 IE9）于 2011 年 3 月 14 日发布.....</p>
+	</article>
+	<p>Me and my family visited The Epcot center this summer.</p>
+	<aside>
+		<h4>Epcot Center</h4>
+		The Epcot Center is a theme park in Disney World, Florida.
+	</aside>
+	<audio src="someaudio.wav"> 您的浏览器不支持 audio 标签。
+	</audio>
+	<b>这是出题文本</b>
+	<ul>
+		<li>Username <bdi dir="auto">Bill</bdi>:80 points
+		</li>
+		<li>Username <bdi>Steve</bdi>: 78 points
+		</li>
+	</ul>
+	<big>这是大文本</big>
+	<blockquote>这是引用文本</blockquote>
+	<button value="buttom" autofocus="autofocus" type="button">删除</button>
+	<canvas id="myCanvas"></canvas>
+
+	<input type="button" value="打印本页" onclick="printPage()" />
+	<input type="button" value="打印预览" onclick="printPreview()">
+	<OBJECT classid="CLSID:8856F961-340A-11D0-A96B-00C04FD705A2" height=0 id=wb name=wb width=0></OBJECT>
+	<OBJECT id="WebBrowser1" height=0 width=0 classid=CLSID:8856F961-340A-11D0-A96B-00C04FD705A2 name=wb></OBJECT>
+	<!-- flash -->
+	<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0" width="900" height="300" id="FlashZhuan">
+		<param name="movie" value="zhuanpan.swf">
+		<param name="FlashVars" value="prizeResult=3">
+		<param name="quality" value="high">
+		<param name="menu" value="false">
+		<param name="wmode" value="transparent">
+		<param name="allowScriptAccess" value="always" />
+		<embed src="zhuanpan.swf" FlashVars="prizeResult=3" allowScriptAccess="always" wmode="transparent" menu="false" quality="high" width="510" height="510" type="application/x-shockwave-flash"
+			pluginspage="http://get.adobe.com/cn/flashplayer/" name="FlashZhuan" />
+	</object>
+	<!-- <object type="application/x-shockwave-flash" data="http://static.youku.com/v1.0.0583/v/swf/loader.swf" width="600" height="450" id="movie_player">
+		<param name="allowFullScreen" value="true">
+		<param name="allowscriptaccess" value="always">
+		<param name="allowFullScreenInteractive" value="true">
+		<param name="flashvars"
+			value="VideoIDS=XMTM4ODI2NjgwNA==&amp;ShowId=277930&amp;category=97&amp;Cp=authorized&amp;ev=1&amp;Light=on&amp;THX=off&amp;unCookie=0&amp;frame=0&amp;pvid=14478267738886wUMrh&amp;uepflag=0&amp;Tid=0&amp;isAutoPlay=true&amp;Version=/v1.0.1106&amp;show_ce=0&amp;winType=interior&amp;openScanCode=1&amp;scanCodeText=&quot;限时&quot; 扫码免广告&amp;embedid=AjM0NzA2NjcwMQJ3d3cueW91a3UuY29tAi8=&amp;vext=bc%3D%26pid%3D14478267738886wUMrh%26unCookie%3D0%26frame%3D0%26type%3D0%26svt%3D1%26stg%3D40%26emb%3DAjM0NzA2NjcwMQJ3d3cueW91a3UuY29tAi8%3D%26dn%3D%E7%BD%91%E9%A1%B5%26hwc%3D1%26mtype%3Doth&amp;pageStartTime=1447826773887">
+		<param name="movie" value="http://static.youku.com/v1.0.0583/v/swf/loader.swf">
+		<div class="player_html5">
+			<div class="picture" style="height:100%">
+				<div style="line-height:460px;">
+					<span style="font-size:18px">您还没有安装flash播放器,请点击<a href="http://www.adobe.com/go/getflash" target="_blank">这里</a>安装
+					</span>
+				</div>
+			</div>
+		</div>
+	</object> -->
+	<input type="text" name="edtSearch" x-webkit-speech id="edtSearch" value="Search...." onfocus="if (this.value == 'Search....') {this.value = '';}"
+		onblur="if (this.value == '') {this.value = 'Search....';}" />
+	<script type="text/javascript">
+		var canvas = document.getElementById('myCanvas');
+		var ctx = canvas.getContext('2d');
+		ctx.fillStyle = '#00FF00';
+		ctx.fillRect(0, 0, 100, 100);
+	</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<div class="container-fluid">
+    <div class="col-xs-12 tab-space">
+                            <div class="col-xs-12 margin-top-10">
+                                <div class="col-xs-12 margin-top-20 tabTitle">
+                                    我的活动
+                                </div>
+                                <div class="col-xs-6 col-xs-offset-6 margin-top-10 text-right">
+                                    累计参加活动：{{total}}&nbsp;&nbsp;待评审：<span class="color-red numWaiView">{{countPS}}</span>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 spaceTab">
+                                <div class="col-xs-12 padding-left-right-none">
+                                    <table class="table">
+                                     <thead style="border:1px #cecece solid;">
+                                            <tr>
+                                                <th>活动名称</th>
+                                                <th>类型</th>
+                                                <th>参赛作品</th>
+                                                <th>报名时间</th>
+                                                <th>状态</th>
+                                                <th>操作</th>
+                                            </tr>
+                                            </thead>
+                                        <tbody>
+                                            <tr ng-repeat="active in myactivesList">
+                                                <td>{{active.activename}}</td>
+                                                <td>{{transfer(codeMap,active.type)}}</td>
+                                                <td>{{active.workname}}</td>
+                                                <td>{{active.cssj}}</td>
+                                                <td class="color-orange">
+                                                <span ng-if="active.pszt==1" class="color-orange">报名中</span>
+                                                <span ng-if="active.pszt==2" class="color-blue">报名评审中</span>
+                                                <span ng-if="active.pszt==3" class="color-green">评审中</span>
+                                                <span ng-if="active.pszt==4" class="color-grey">已结束</span>
+                                                </td>
+                                                <td>
+                                                <a href="/study/gateway/activeDetail?activeid={{active.activeid}}">查看详情</a>
+             <!--  <a ng-if="active.type1==1"  href="/study/gateway/courseDetail?curriculumid={{active.resourceid}}">查看详情</a>
+              <a ng-if="active.type1==2"  href="/study/gateway/courseDetail?workid={{active.workid}}&source={{active.source}}">查看详情</a>       -->                             
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                     <div class="col-xs-12 text-right margin-top-20">
+				<div class="page">
+				<pagination ng-show="pagination.totalItems > pagination.pageSize" class="pagination-sm pull-right" total-items="pagination.totalItems" page="pagination.pageIndex" items-per-page="pagination.pageSize" max-size="pagination.maxSize"
+				previous-text="{{pagination.previousText}}" next-text="{{pagination.nextText}}" first-text="{{pagination.firstText}}" last-text="{{pagination.lastText}}" class="pagination-small"
+				boundary-links="true" on-select-page="onSelectPage(page)"> </pagination>
+					<!-- <a href=""><i class="icon-chevron-left"></i></a><a href="">1</a>
+					<a href="">2</a><a href="">3</a><a href="" class="cur">4</a><a
+						href="">5</a><a href="">6</a><a href="">7</a><a href="">8</a><a
+						href="">9</a><a href="">10</a><a href=""><i
+						class="icon-chevron-right"></i> </a> -->
+				</div>
+			</div> 
+                                    
+                                </div>
+                            </div>
+                        </div>
+</div>

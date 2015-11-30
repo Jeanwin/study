@@ -1,0 +1,170 @@
+<style>
+input {
+	height: 30px;
+}
+</style>
+<div class="container-fluid message-myinfo" style="padding-bottom:20px;">
+	<div class="modal-body">
+		<div style="height: 24px;width: 8px;background-color: #fcb750"></div>
+		<div style="margin:-30px 0 32px 20px;font-size: 24px">个人设置</div>
+		<div class="header">
+			<ul class="top-nav">
+				<li class="pull-left big" ng-class="{'colorShow':Myinformation === '1'}"><a href ng-click="showmodal('1')" ng-class="{'fontwhite':Myinformation === '1'}">个人信息</a></li>
+				<li class="big" ng-class="{'colorShow':Mypassword === '2'}"><a href ng-click="showmodal('2')" ng-class="{'fontwhite':Mypassword === '2'}">密码修改</a></li>
+			</ul>
+		</div>
+		<div ng-show="Myinformation === '1'">
+			<form name="modify_personalInfo_form" method="POST" class="form-horizontal" novalidate role="form">
+				<!-- <div class="row" style="border: none"> -->
+				<div class="col-xs-4" style="margin-top: 65px">
+					<!--  -->
+					<div class="drop-box" style="width:152px;height:186px"">
+						<div ng-if="user.pictureURL === '' && !imgCheck.flag" class="ng-scope">
+							<img style="position: relative; width: 144px;height: 178px;" ng-src="{{imgData.url}}">
+						</div>
+						<div ng-if="imgCheck.flag">
+							<img style="position: relative; width: 144px;height: 178px;" ng-src="{{imgData.url}}">
+						</div>
+						<div ng-if="!imgCheck.flag">
+							<img style="position: relative; width: 144px;height: 178px;" ng-src="{{user.pictureURL}}">
+						</div>
+					</div>
+					<div class="js-fileapi-wrapper upload-btn">
+						<input id="choose" name="files" type="file" ng-file-select="onFileSelect($files)" style="width:152px;margin:0px auto" />
+					</div>
+				</div>
+				<div class="col-xs-7" style="text-align: right;color: #595757;margin-top: 80px;">
+					<!-- <div class="panel panel-default margin-bottom-10">
+							<div class="panel-body padding-top-10 padding-bottom-10"> -->
+					<!-- <div>
+									<span style="padding-right:16px">性别</span> <span style="padding-right:54px"><input style="height: 13px;" type="radio" name="sex" checked>男</span> <span style="padding-right:120px"><input
+										style="height: 13px;" type="radio" name="sex">女</span>
+								</div> -->
+					<div class="form-group margin-bottom-10">
+						<label class="col-xs-3 control-label" for="user1" style="line-height: 34px;height:34px;padding-top:0px;">性别</label>
+						<div class="col-xs-9" style="line-height: 34px;height:34px;vertical-align: middle;">
+							<span style="float: left;margin:0px;margin-right:20px" ng-repeat="sex in sexList"><input style="height:34px;line-height: 34px;vertical-align: middle;margin-top:0px;margin-right: 4px;" type="radio" name="sex" value="{{sex.value}}" ng-model="user.sex">{{sex.name}}</span>
+							<!-- <span style="float: left;margin-left: 30px"><input
+								style="height: 13px;" type="radio" name="sex" value="28" ng-model="user.sex">女</span> -->
+							<!-- <label ng-repeat="usrsex in sexList" class="btn btn-default" ng-model="user.sex" btn-radio="'{{usrsex.value}}'">{{usrsex.name}}</label> -->
+						</div>
+					</div>
+					<div class="form-group margin-bottom-10">
+						<label class="col-xs-3 control-label" for="phone">手机</label>
+						<div class="col-xs-9">
+							<input name="phone" id="phone" ng-blur="phoneDisplay=true" ng-change="selectPhone()" ng-pattern=/^1[3|4|5|7|8]\d{9}$/ class="form-control" type="text" placeholder="{{user.phone}}"
+								ng-model="user.phone" number-only /> <span ng-show="phoneValid" class="help-inline" style="color:green"><img src="assets/img/icon/icon-ok.png"
+								style="width: 14px;height: 14px">{{phoneMsg}}</span> <span ng-show="showPhoneError">
+								<div style="color: red;">
+									<img src="assets/img/icon/icon-error.png" style="width: 14px;height: 14px">手机号:{{user.phone}}&nbsp;&nbsp;已被使用
+								</div>
+							</span>
+							<div ng-show="phoneDisplay">
+								<span ng-show="modify_personalInfo_form.phone.$error.pattern">
+									<div style="color: red;">
+										<img src="assets/img/icon/icon-error.png" style="width: 14px;height: 14px">手机号必须是以13,14,15,17,18开头的11位数字
+									</div>
+								</span>
+							</div>
+						</div>
+
+					</div>
+					<div class="form-group margin-bottom-10">
+						<label class="col-xs-3 control-label">电子邮箱</label>
+						<div class="col-xs-9">
+							<input name="email" class="form-control" ng-pattern=/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/ type="email" placeholder="{{user.email}}" ng-change="selectEmail()"
+								ng-model="user.email" /> <span ng-show="emailValid" class="help-inline" style="color:green"><img src="assets/img/icon/icon-ok.png" style="width: 14px;height: 14px">{{emailMsg}}</span> <span
+								ng-show="showEmailError">
+								<div style="color: red;">
+									<img src="assets/img/icon/icon-error.png" style="width: 14px;height: 14px">邮箱号:{{user.email}}&nbsp;&nbsp;已被使用
+								</div>
+							</span> <span ng-show="modify_personalInfo_form.email.$error.pattern">
+								<div style="color: red;">
+									<img src="assets/img/icon/icon-error.png" style="width: 14px;height: 14px">不是合法的邮箱
+								</div>
+							</span>
+						</div>
+
+					</div>
+					<div class="form-group margin-bottom-none">
+						<label class="col-xs-3 control-label" for="user4">个人介绍</label>
+						<div class="col-xs-9">
+							<textarea class="form-control" id="user4" name="remark" placeholder="最多输入300个字" ng-maxlength="300" style="height: 60px;" ng-model="user.remark"></textarea>
+							<p ng-show="modify_personalInfo_form.remark.$error.maxlength" class="help-inline" style="color:red">最多输入300个字！</p>
+						</div>
+					</div>
+					<div class="form-group margin-bottom-none">
+						<div class="col-xs-3"></div>
+						<div class="col-xs-9" style="margin-top: 15px;float: left">
+							<button class="btn btn-primary" style="width:80px" ng-click="modifyPersonalInfo(user);retrieveUser();"
+								ng-disabled="modify_personalInfo_form.$invalid || modify_personalInfo_form.phone.$error.pattern || modify_personalInfo_form.email.$error.pattern || showPhoneError || showEmailError">确定</button>
+						</div>
+					</div>
+
+				</div>
+			</form>
+
+		</div>
+		<!--  -->
+		<div ng-show="Mypassword === '2'">
+			<form name="form_modifyPassword" class="form-horizontal" novalidate role="form">
+				<div class="container-fluid message-myinfo" style="padding-bottom:20px;">
+					<div style="margin: 80px 0 0 60px">
+						<div class="form-group margin-bottom-10">
+							<label class="col-xs-2 control-label" for="password">当前密码</label>
+							<div class="col-xs-5">
+								<input name="password" class="form-control" id="password" ng-blur="validatePassword()" type="password" placeholder="当前密码" ng-model="originalPassword" required> <span
+									ng-show="passwordValid" class="help-inline" style="color:green"><img src="assets/img/icon/icon-ok.png" style="width: 14px;height: 14px">{{passwordMsg}}</span> <span
+									ng-show="showPasswordError">
+									<div style="color: red;">
+										<img src="assets/img/icon/icon-error.png" style="width: 14px;height: 14px">原始密码错误
+									</div>
+								</span> <span ng-show="form_modifyPassword.password.$error.pattern">
+									<div style="color: red;">
+										<img src="assets/img/icon/icon-error.png" style="width: 14px;height: 14px">密码格式不正确
+									</div>
+								</span>
+							</div>
+						</div>
+						<div class="form-group margin-bottom-10">
+							<label class="col-xs-2 control-label" for="nassword">新密码</label>
+							<div class="col-xs-5">
+								<input name="npassword" class="form-control" id="npassword" type="text" placeholder="新密码" ng-model="newPassword" ng-pattern=/^[0-9a-zA-z_]{6,18}$/ required>
+								<!-- <!-- <span ng-show="showEmailError">
+																<div style="color: red;">*电子邮件不能重复</div>
+														</span> -->
+								<span ng-show="form_modifyPassword.npassword.$error.pattern">
+									<div style="color: red;">
+										<img src="assets/img/icon/icon-error.png" style="width: 14px;height: 14px">密码格式不正确
+									</div>
+								</span>
+							</div>
+						</div>
+						<div class="form-group margin-bottom-10">
+							<label class="col-xs-2 control-label" for="rpassword">确认密码</label>
+							<div class="col-xs-5">
+								<input name="rpassword" class="form-control" id="rpassword" type="text" placeholder="确认密码" ng-model="secondPassword" ng-pattern=/^[0-9a-zA-z_]{6,18}$/ required> <span
+									ng-show="newPassword != secondPassword">
+									<div style="color: red;">
+										<img src="assets/img/icon/icon-error.png" style="width: 14px;height: 14px">新密码与确认密码不一致
+									</div>
+								</span>
+							</div>
+						</div>
+						<div class="form-group margin-bottom-10">
+							<label class="col-xs-2 control-label"></label>
+							<div class="col-xs-5">
+								<button class="btn btn-primary form-control" style="margin-top:10px"
+									ng-disabled="form_modifyPassword.npassword.$error.pattern || form_modifyPassword.npassword.$error.required || form_modifyPassword.rpassword.$error.required 
+								|| form_modifyPassword.password.$error.required || form_modifyPassword.$invalid || newPassword != secondPassword || showPasswordError"
+									ng-click="modifyPassword(originalPassword,newPassword,secondPassword)">保存</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<!-- 展示消息的div -->
+	<div growl></div>
+</div>

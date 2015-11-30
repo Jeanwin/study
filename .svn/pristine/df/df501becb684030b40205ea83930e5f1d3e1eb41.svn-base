@@ -1,0 +1,155 @@
+define(['app','config'], function (app,config) {
+    app.registerController('PhotoWallCtrl', ['$scope','$modal','$sce','growl','ScheduleService','$stateParams','$location', function ($scope,$modal,$sce,growl,ScheduleService,$stateParams,$location) {
+    	
+    	
+    	//开启点播状态
+    	$scope.openVideoState = function(status,floder){
+    		
+    		ScheduleService.demand(floder,status).then(
+                    function(data){
+                    	
+                    	$scope.videoList = data;
+                    	if($scope.videoList.data.length > 0){
+	                    	$.each($scope.videoList,function(i,video){
+	                    		if(video.nametype == 'Videos'){
+	                    			video.fileurl = $sce.trustAsResourceUrl(video.fileurl);
+	                    		}
+	                         });
+	                    	$scope.user = $scope.global.user;
+	                    	$scope.type = $scope.videoList.source;
+	                    	$scope.photo = $scope.videoList.data;
+	                    	$scope.activePhotoShow = $scope.videoList.data[0];
+	                    	$scope.activePhoto = 0;
+	                    	$scope.resourcevisable=$scope.videoList.data[0].resourcevisable;
+	                    	$scope.resourcecollection=$scope.videoList.data[0].resourcecollection;
+                    	}
+                    },
+                    function(code){
+                        return [];
+                    }
+               )
+    	}
+    	
+       
+        	
+        	$scope.ToactivePhoto = function(index){
+        		$scope.activePhoto = index;
+        		$scope.activePhotoShow = $scope.videoList.data[index];
+        		$scope.resourcevisable=$scope.videoList.data[index].resourcevisable;
+            	$scope.resourcecollection=$scope.videoList.data[index].resourcecollection;
+        		/*$scope.activePhotoShow = angular.copy(wallList[index]);*/
+        	};
+        	
+        	//设置录播机单一文件可见性（单一）
+        	$scope.oneafterclassvisibility=function (){
+            	if($scope.resourcevisable==='1'){
+            		$scope.resourcevisable='0';
+            	} else{
+            		$scope.resourcevisable='1';
+            	}
+            	if($scope.type == '2'){
+            	var keywords = {
+            			"resourcevisable":$scope.resourcevisable,
+                        "readyresourcid":$scope.activePhotoShow.id,
+                        "curriculumid":$scope.activePhotoShow.curriculumid,
+                        "floder":$scope.activePhotoShow.floder
+                    };
+            	
+            		ScheduleService.oneafterclassvisibility(keywords).then(
+                            function(data){
+                            	growl.addSuccessMessage("设置成功");
+                            	
+                            },function(){
+                            	 //处理失败后操作
+                            	growl.addErrorMessage("设置失败");
+                            }
+                        );
+            	}else{
+            		var keywords = {
+                			"resourcevisable":$scope.resourcevisable,
+                            "id":$scope.activePhotoShow.id
+                        };
+                	
+                		ScheduleService.onesetafterclassvisibility(keywords).then(
+                                function(data){
+                                	growl.addSuccessMessage("设置成功");
+                                	
+                                },function(){
+                                	 //处理失败后操作
+                                	growl.addErrorMessage("设置失败");
+                                }
+                            );
+            	}
+            	
+        	};
+        	//收藏录播机上单一文件（单一）
+        	$scope.onecollectAfterResource=function (){
+            	if($scope.resourcecollection==='1' ){
+            		$scope.resourcecollection='0';
+            	} else{
+            		$scope.resourcecollection='1';
+            	}
+            	if($scope.type == '2'){
+            	var keywords = {
+            			"storetype":"2",
+                        "storeid":$scope.activePhotoShow.id,
+                        "curriculumid":$scope.activePhotoShow.curriculumid,
+                        "floder":$scope.activePhotoShow.floder,
+                        "resourcecollection":$scope.resourcecollection,
+                        "name":$scope.activePhotoShow.name,
+                        "subject":$scope.activePhotoShow.subject,
+                        "grade":$scope.activePhotoShow.grade,
+                        "id":$scope.activePhotoShow.id,
+                        "transPath":$scope.activePhotoShow.transPath,
+                        "transFlag":$scope.activePhotoShow.transFlag
+                    };
+            	ScheduleService.collectOneVideo(keywords).then(
+                        function(data){
+                        	 growl.addSuccessMessage("设置成功");
+                        	
+                        },function(){
+                        	 //处理失败后操作
+                        	growl.addErrorMessage("设置失败");
+                        }
+                    );
+            	}else{
+            		
+                 	var keywords = {
+                 			"storetype":"3",
+                             "storeid":$scope.activePhotoShow.id,
+                             "curriculumid":$scope.activePhotoShow.curriculumid,
+                             "resourcecollection":$scope.resourcecollection,
+                             "name":$scope.activePhotoShow.name,
+                             "fileurl":$scope.activePhotoShow.fileurl,
+                             "size":$scope.activePhotoShow.size,
+                             "id":$scope.activePhotoShow.id,
+                             "transPath":$scope.activePhotoShow.transPath,
+                             "transFlag":$scope.activePhotoShow.transFlag
+                         };
+                 	ScheduleService.setOnecollectAfterResource(keywords).then(
+                             function(data){
+                             	 growl.addSuccessMessage("设置成功");
+                             	
+                             },function(){
+                             	 //处理失败后操作
+                             	growl.addErrorMessage("设置失败");
+                             }
+                         );
+            	}
+        	};
+       
+      
+       
+        var init = function(){
+        	/*$scope.video =  JSON.parse($stateParams.video);*/
+        	var id=$location.search().id;
+        	var curriculumid = $location.search().curriculumid;
+        	$scope.openVideoState(id,curriculumid);
+        	
+        	
+            
+        };
+
+        init();
+      }]);
+});

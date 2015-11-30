@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.PlayRecordMapper">
+
+	<!-- <typeAlias alias="playRecord" type="com.zonekey.study.entity.PlayRecord" /> <typeAlias alias="playRecordView" type="com.zonekey.study.vo.PlayRecordView" /> <typeAlias alias="pageBean" type="com.zonekey.study.entity.PageBean" 
+		/> -->
+
+	<!-- sql绑定资源ip -->
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+
+	<!-- add -->
+	<insert id="add" parameterType="com.zonekey.study.entity.PlayRecord">
+		<include refid="bindLoginname"></include>
+		insert into study_play_record(type,loginname,resourceid,playtime,flag,createdate)
+		values(#{type},#{_loginname},#{resourceid},#{playtime},#{flag},sysDate())
+	</insert>
+
+	<!-- 更新点播记录 -->
+
+
+	<!-- delete -->
+	<delete id="delPlayRecord" parameterType="java.util.List">
+		delete from study_play_record where id in
+		<foreach collection="playids" open="(" separator="," close=")" item="id">
+			#{id}
+		</foreach>
+	</delete>
+
+	<!-- list -->
+	<select id="list" parameterType="com.zonekey.study.entity.PageBean" resultType="com.zonekey.study.vo.PlayRecordView">
+		<include refid="bindLoginname"></include>
+		select spr.id,spr.resourceid,spr.playtime,spr.flag,spr.createdate,
+		<!-- courseName -->
+		(select c.subject from zonekey_curriculum c left join zonekey_resource r on c.id = r.curriculumid where r.id = spr.resourceid) as courseName,
+		<!-- username -->
+		(select u.name from sys_user u where u.loginname = spr.loginname) as username,
+		<!-- deptName -->
+		concat(
+		(select IFNULL(CONCAT((select dd.name from zonekey_dept dd where dd.id = (select ddd.parentid from zonekey_dept ddd left join sys_user suu on ddd.id = suu.deptid where suu.loginname =
+		spr.loginname)),''),"")),
+		(select d.name from zonekey_dept d left join sys_user su on d.id = su.deptid where su.loginname = spr.loginname)) deptName,
+		<!-- picture -->
+		(select u2.pictureURL from sys_user u2 where u2.loginname = spr.loginname) as picture,
+		<!-- duration -->
+		(select r2.timelength from zonekey_resource r2 where r2.id = spr.resourceid) as duration,
+		<!-- case when spr.playtime is null then '未开始看'
+		when <![CDATA[ 0 <= spr.playtime < (select r2.timelength from zonekey_resource r2 where r2.id = spr.resourceid) then (select r2.timelength from zonekey_resource r2 where r2.id = spr.resourceid) - spr.playtime
+		when spr.playtime < (select r2.timelength from zonekey_resource r2 where r2.id = spr.resourceid) then '已看完' ]]>
+		else '未开始看' end as playProcess, -->
+		<!-- recordTime -->
+		case when date_format(spr.createdate,"%Y-%m-%d") = date_format(sysDate(),"%Y-%m-%d") then '今天'
+		when <![CDATA[ to_days(sysDate()) - spr.createdate <= 7 then '一周内' ]]>
+		else date_format(spr.createdate,"%Y-%m-%d %T") end as recordTime
+		from study_play_record spr where spr.loginname = #{_loginname}
+		order by spr.createdate desc
+		<if test="page != null and page.offset != null and page.limit != null">
+			limit #{page.offset} ,#{page.limit}
+		</if>
+	</select>
+
+	<!-- count -->
+	<select id="count" parameterType="map" resultType="long">
+		<include refid="bindLoginname"></include>
+		select count(*) from study_play_record spr where spr.loginname = #{_loginname}
+	</select>
+
+	<!-- listTwo -->
+	<select id="listTwo" parameterType="String" resultType="com.zonekey.study.vo.PlayRecordView">
+		<include refid="bindLoginname"></include>
+		select spr.id,spr.resourceid,spr.playtime,spr.flag,spr.createdate,
+		<!-- courseName -->
+		(select c.subject from zonekey_curriculum c left join zonekey_resource r on c.id = r.curriculumid where r.id = spr.resourceid) as courseName,
+		<!-- username -->
+		(select u.name from sys_user u where u.loginname = spr.loginname) as username,
+		<!-- deptName -->
+		concat(
+		(select IFNULL(CONCAT((select dd.name from zonekey_dept dd where dd.id = (select ddd.parentid from zonekey_dept ddd left join sys_user suu on ddd.id = suu.deptid where suu.loginname =
+		spr.loginname)),''),"")),
+		(select d.name from zonekey_dept d left join sys_user su on d.id = su.deptid where su.loginname = spr.loginname)) deptName,
+		<!-- picture -->
+		(select u2.pictureURL from sys_user u2 where u2.loginname = spr.loginname) as picture,
+        <!-- duration -->
+        (select r2.timelength from zonekey_resource r2 where r2.id = spr.resourceid) as duration,
+ 		<!-- playTime -->
+		<!-- case when spr.playtime is null then '未开始看'
+		when  <![CDATA[ 0 <= spr.playtime < (select r2.timelength from zonekey_resource r2 where r2.id = spr.resourceid) then (select r2.timelength from zonekey_resource r2 where r2.id = spr.resourceid) - spr.playtime
+		when spr.playtime < (select r2.timelength from zonekey_resource r2 where r2.id = spr.resourceid) then '已看完' ]]>
+		else '未开始看' end as playProcess, -->
+		<!-- recordTime -->
+		case when date_format(spr.createdate,"%Y-%m-%d") = date_format(sysDate(),"%Y-%m-%d") then '今天'
+		when  <![CDATA[ to_days(sysDate()) - spr.createdate <= 7 then '一周内' ]]>
+		else date_format(spr.createdate,"%Y-%m-%d %T") end as recordTime
+		from study_play_record spr where spr.loginname = #{_loginname}
+		order by spr.createdate desc limit 2
+	</select>
+
+	<!-- check -->
+	<select id="check" parameterType="int" resultType="long">
+		<include refid="bindLoginname"></include>
+		select count(*) from study_play_record spr where spr.loginname = #{_loginname} and spr.resourceid = #{rid}
+	</select>
+
+	<!-- updateTime -->
+	<update id="updateTime">
+		<include refid="bindLoginname"></include>
+		update study_play_record set playtime = #{playtime},createdate = sysDate() where loginname = #{_loginname} and resourceid = #{reid}
+	</update>
+</mapper>

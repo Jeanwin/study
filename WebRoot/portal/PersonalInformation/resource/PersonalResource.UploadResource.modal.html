@@ -1,0 +1,77 @@
+<style>
+.modal-content{
+width: 600px !important;
+margin-left:0 !important;
+}
+	.table td,table th{
+		padding:5px !important;
+	}
+	.fileinput-button input{
+		position: absolute;
+		top: 18px;
+		left: 20px;
+		margin: 0;
+		opacity: 0;
+		-ms-filter: 'alpha(opacity=0)';
+		/* font-size: 200px; */
+		direction: ltr;
+		cursor: pointer;
+		height: 37px;
+		width: 113px;
+	}
+</style>
+<div class="container-fluid" style="background-color: #f2f2f2;border-radius: 5px">
+    <div class="modal-header">
+    	<h3 style="font-size: 24px;">上传资源</h3>
+    </div>
+    <div class="modal-body">
+    	<span class="btn btn-success fileinput-button">
+                    <i class="glyphicon glyphicon-plus"></i>
+                    <span>上传文件</span>
+                    
+               
+    	<input id="choose" name="files" type="file" multiple="multiple" ng-file-select="onFileSelect($files)"> </span>
+    	<div style="margin-top:5px;max-height:450px;overflow-y: auto;overflow-x:hidden" ng-show="file">
+    	<table class="table">
+		  <thead>
+		  <tr>
+		    <th>文件名</th>
+		    <th>大小</th>
+		    <th>进度</th>
+		    <th>操作</th>
+		  </tr>
+		  </thead>
+		  <tbody>
+		  <tr ng-repeat="f in file">
+		  	<td style="max-width:200px" class="overFlow-text" ><strong title="{{f.name}}">{{ f.name }}</strong></td>
+		    <td><span ng-if="f.progress > 0">{{f.loaded}}/</span>{{ f.size>10486?(f.size/1024/1024|number:2)+'MB':(f.size/1024|number:2)+'KB' }} </td>
+		    <td>
+		      <div class="progress" style="border:none;margin-bottom:0;">
+		        <div class="progress-bar" role="progressbar" ng-style="{ 'width': f.progress + '%' }" style="background:#428bca;">{{f.progress}}%</div>
+		      </div>
+		    </td>
+		    <td nowrap>
+		      <button type="button" class="btn btn-danger btn-xs" ng-click="remove($index)">
+		        <span class="glyphicon glyphicon-trash"></span>
+		      </button>
+		    </td>
+		  </tr>
+		  </tbody>
+		  </table>
+    	<!-- <div ng-repeat = "f in file" class="margin-top:5px;">
+    		<div style="display:inline-block;">{{f.name}}</div>
+    		<div class="progress" style="border:none;margin-bottom:-5px;margin-left:20px;">
+	    		<div class="progress-bar" role="progressbar" ng-style="{ 'width': f.progress + '%' }" style="background:#428bca;">
+			        <span class="sr-only">{{f.progress}}% Complete</span>
+			     </div>
+		     </div>
+    		
+    	</div> -->
+    </div>
+    
+</div>
+<div class="modal-footer">
+        <span><button class="btn btn-primary" ng-disabled="!file" ng-click="ok()">确定</button></span>
+        <span><button class="btn btn-default" ng-click="cancel()">取消</button></span>
+ 
+</div>

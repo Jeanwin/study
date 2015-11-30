@@ -1,0 +1,273 @@
+package com.zonekey.study.common;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.io.FileUtils;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.zonekey.study.vo.FileBean;
+import com.zonekey.study.vo.MergeResult;
+import com.zonekey.study.vo.Trans;
+
+/**
+ * @author Administrator
+ * 
+ */
+public class CommonUtil {
+	public static String getBody(HttpServletRequest request) throws IOException {
+		String body = null;
+		StringBuilder stringBuilder = new StringBuilder();
+		BufferedReader bufferedReader = null;
+		try {
+			InputStream inputStream = request.getInputStream();
+			if (inputStream != null) {
+				bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+				char[] charBuffer = new char[128];
+				int bytesRead = -1;
+				while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+					stringBuilder.append(charBuffer, 0, bytesRead);
+				}
+			} else {
+				stringBuilder.append("");
+			}
+		} catch (IOException ex) {
+			throw ex;
+		} finally {
+			if (bufferedReader != null) {
+				try {
+					bufferedReader.close();
+				} catch (IOException ex) {
+					throw ex;
+				}
+			}
+		}
+
+		body = stringBuilder.toString();
+		return body;
+	}
+
+	/****************************************************************** 上传start *********************************/
+	/**
+	 * 上传
+	 * 
+	 * @param resourcePath
+	 *            上传相对路径
+	 * @param req
+	 * @return返回结果为以逻辑名为key,真实文件名为value的map的集合
+	 */
+	public static List<FileBean> upload(String resourcePath, MultipartHttpServletRequest req) {
+		/*
+		 * if(StringUtils.isEmpty(resourcePath)){ resourcePath =
+		 * AppConstants.upload_PATH; }
+		 */
+
+		List<FileBean> list = new ArrayList<FileBean>();
+		MultiValueMap<String, MultipartFile> mfiles = req.getMultiFileMap();
+		for (List<MultipartFile> f : mfiles.values()) {
+			FileBean bean = getFile(f.get(0), resourcePath);
+			if (bean != null) {
+				list.add(bean);
+			}
+		}
+		return list;
+	}
+
+	private static FileBean getFile(MultipartFile imgFile, String path) {
+		FileBean bean = new FileBean();
+		String filename = imgFile.getOriginalFilename();
+		// String fileName=DateUtils.getFormat("yyyyMMddHHmmsss");
+		String fileName = IdUtils.uuid();
+		try {
+			// 扩展名
+			String ext = filename.substring(filename.indexOf("."));
+			fileName += ext;
+			// 校验文件类型并进行分类存储
+			String rePath = "";
+			if (path == null) {
+				path = AppConstants.upload_PATH;
+				rePath = getTypePath(ext);
+				path += rePath;
+			}
+			File file = creatFolder(path, fileName);
+			imgFile.transferTo(file);
+			// filename为逻辑名称,file.getName为物理名
+			bean.setName(filename);
+			bean.setNametype(getnametype(filename));
+			bean.setFileurl(rePath + file.getName());
+			bean.setSize(file.length());
+			bean.setResource_uuid(IdUtils.uuid2());
+			return bean;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * 创建文件
+	 * 
+	 * @param path
+	 *            绝对路径
+	 * @param fileName
+	 *            文件名
+	 * @return
+	 */
+	private static File creatFolder(String path, String fileName) {
+		File file = new File(path);
+		if (!file.exists()) {
+			file.mkdirs();
+		}
+		file = new File(file, fileName);
+		return file;
+	}
+
+	/****************************************************************** 上传end *********************************/
+	/**
+	 * 创建路径
+	 * 
+	 * @param path
+	 *            绝对路径
+	 * @param fileName
+	 *            文件名
+	 * @return
+	 */
+	public static void creatFolder(String path) {
+		File file = new File(path);
+		if (!file.exists()) {
+			
+			
+			file.mkdirs();
+		}
+	}
+
+	public static boolean delete(String path) {
+		return FileUtils.deleteQuietly(new File(path));
+	}
+
+	/**
+	 * 分类存储路径
+	 */
+	private static String getTypePath(String ext) {
+		String path = DateUtils.getFormat("yyyy") + File.separator + DateUtils.getFormat("yyyyMMdd") + File.separator;
+		if (AppConstants.IMG_EXT_LIST.contains(ext)) {
+			return AppConstants.TYPE_PATH_LIST.get(0) + path;
+		} else if (AppConstants.VIDEO_EXT_LIST.contains(ext)) {
+			return AppConstants.TYPE_PATH_LIST.get(1) + path;
+		} else if (AppConstants.DOC_EXT_LIST.contains(ext)) {
+			return AppConstants.TYPE_PATH_LIST.get(2) + path;
+		} else {
+			return AppConstants.TYPE_PATH_LIST.get(3) + path;
+		}
+	}
+
+	public static String getFormatSize(double size) {
+		double kiloByte = size / 1024;
+		if (kiloByte < 1) {
+			return size + "B";
+		}
+
+		double megaByte = kiloByte / 1024;
+		if (megaByte < 1) {
+			BigDecimal result1 = new BigDecimal(Double.toString(kiloByte));
+			return result1.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + "KB";
+		}
+
+		double gigaByte = megaByte / 1024;
+		if (gigaByte < 1) {
+			BigDecimal result2 = new BigDecimal(Double.toString(megaByte));
+			return result2.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + "MB";
+		}
+
+		double teraBytes = gigaByte / 1024;
+		if (teraBytes < 1) {
+			BigDecimal result3 = new BigDecimal(Double.toString(gigaByte));
+			return result3.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + "GB";
+		}
+		BigDecimal result4 = new BigDecimal(teraBytes);
+		return result4.setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + "TB";
+	}
+
+	/**
+	 * 通过文件名字获取文件类型
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public static String getnametype(String name) {
+		String fileSufix;
+		String fileUrl = name == null ? "" : name;
+		if (fileUrl.lastIndexOf(".") > 0) {
+			fileSufix = fileUrl.substring(fileUrl.lastIndexOf("."));
+		} else {
+			fileSufix = "";
+		}
+		if (AppConstants.IMG_EXT_LIST.contains(fileSufix)) {
+			return "Pictrue";
+		} else if (AppConstants.VIDEO_EXT_LIST.contains(fileSufix)) {
+			return "Videos";
+		} else if (fileSufix.equals(".doc") || fileSufix.equals(".docx")) {
+			return "Word";
+		} else if (fileSufix.equals(".xls") || fileSufix.equals(".xlsx")) {
+			return "Excel";
+		} else if (fileSufix.equals(".ppt")) {
+			return "PowerPoint";
+		} else if (fileSufix.equals(".pdf")) {
+			return "PDF";
+		} else if (fileSufix.equals(".txt")) {
+			return "Documents";
+		} else if (fileSufix.equals("")) {
+			return "Folder";
+		} else {
+			return "Default";
+		}
+	}
+
+	/**
+	 * 视频资源转码申请接口
+	 * 
+	 * @param trans
+	 * @return { "response_code":0, "response_code_string":"SUCCESS" }
+	 */
+	public static String transCode(String url,Trans trans) {
+
+		String result = HttpSend.post(url, trans);
+		return result;
+	}
+
+	/**
+	 * 说明:视频转码状态查询。（0表示转码未完成，1表示转码完成 2表示转码失败）
+	 * 
+	 * @param trans
+	 * @return
+	 */
+	public static String tranResult(String url,Trans trans) {
+		String fileid = trans.getFile_id();
+		String result = HttpSend.get(url + "?file_id=" + fileid);
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param fileId
+	 * @return
+	 */
+	public static MergeResult mergeResult(String url,String fileId) {
+		String result = HttpSend.get(url + "?file_id=" + fileId);
+		if (result != null && !"".equals(result)) {
+			return JsonUtil.jsonToObject(result, MergeResult.class);
+		} else {
+			return null;
+		}
+	}
+}

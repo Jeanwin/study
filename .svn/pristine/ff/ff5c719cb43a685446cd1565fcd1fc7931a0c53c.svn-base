@@ -1,0 +1,109 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/include/taglib.jsp"%>
+<!DOCTYPE html>
+<html>
+<head lang="en">
+   <%@ include file="/WEB-INF/views/include/mobileHead.jsp"%>
+    <title>我的收藏</title>
+</head>
+<body>
+    <header id="header">
+        <div class="back"><a href="index.html"><i class="icon-chevron-left"></i></a></div>
+        <div class="iconBar"><a href="collectionDel.html"><i class="icon-delete"></i></a></div>
+        我的收藏
+    </header>
+    <div class="mainContent paddingTop50">
+        <!--我的收藏开始-->
+        <div class="contentLive">
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt">剩余10:23</div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt">已看完</div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <div class="liveInfo">
+                <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+                <div class="liveInfoCont">
+                    <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span></div>
+                    <div class="liveInfoOpt"><span><i class="icon-chat-3"></i>24</span><span><i class="icon-visibility"></i>308</span></div>
+                </div>
+                <div class="time">1:24:01</div>
+            </div>
+            <!--<div class="nocollect">
+                <i class="icon-star"></i>
+                <div class="noResentLiveTip">
+                    <div>您最近没有收藏的视频</div>
+                    <div>请进入<a href="demandDetail.html">点播栏目</a>收藏</div>
+                </div>
+            </div>-->
+        </div>
+        <!--我的收藏结束-->
+    </div>
+</body>
+</html>

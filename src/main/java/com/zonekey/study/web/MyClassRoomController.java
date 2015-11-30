@@ -1,0 +1,705 @@
+package com.zonekey.study.web;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springside.modules.web.MediaTypes;
+
+import com.zonekey.study.common.JsonMsg;
+import com.zonekey.study.common.JsonUtil;
+import com.zonekey.study.entity.Curriculum;
+import com.zonekey.study.entity.CurriculumMaterials;
+import com.zonekey.study.entity.PageBean;
+import com.zonekey.study.entity.Pagebar;
+import com.zonekey.study.entity.SysUser;
+import com.zonekey.study.entity.Wisclassroom;
+import com.zonekey.study.service.MyClassRoomService;
+import com.zonekey.study.service.ResourceService;
+import com.zonekey.study.service.SysCodeService;
+import com.zonekey.study.service.SysUserService;
+import com.zonekey.study.service.auth.ShiroDbRealm;
+import com.zonekey.study.vo.ResourceView;
+import com.zonekey.study.vo.Tree;
+
+/**
+ * @author Administrator
+ * 
+ */
+@RestController
+@RequestMapping(value = "/rest/myClassRoom")
+public class MyClassRoomController {
+	private static final Logger LOG = LoggerFactory.getLogger(MyClassRoomController.class);
+	@Autowired
+	private MyClassRoomService myClassRoomService;
+	@Resource
+	private ResourceService reService;
+	@Resource
+	private SysCodeService syscodeService;
+	@Autowired
+	private SysUserService userService;
+
+	/**
+	 * @Title:findMyWeekCurriculumList
+	 * @Description: 周课表
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "findMyWeekCurriculumList", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> findMyWeekCurriculumList(HttpServletRequest req) {
+		Curriculum curriculum = JsonUtil.jsonToObject(req, Curriculum.class);
+		SysUser user = userService.getByLoginname(ShiroDbRealm.getCurrentLoginName());
+		if (user.getUsertype().equals("1")) {
+			return myClassRoomService.findMyWeekCurriculumList(curriculum);
+		} else {
+			curriculum.setDeptid(user.getDeptid());
+			return myClassRoomService.stufindMyWeekCurriculumList(curriculum);
+		}
+
+	}
+
+	/**
+	 * 查询当前学期下所有周次
+	 * 
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping(value = "findAllWeeksForShearch", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	List<LinkedHashMap<String, Object>> findAllWeeksForShearch(HttpServletRequest req) {
+		// Map<String,Object> map = JsonUtil.jsonToObject(req, Map.class);
+		List<LinkedHashMap<String, Object>> data = myClassRoomService.findAllWeeksForShearch();
+		return data;
+	}
+
+	/**
+	 * 查询学期提示
+	 * 
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping(value = "findTermtips", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> findTermtips(HttpServletRequest req) {
+		Map<String, Object> data = myClassRoomService.findTermtips();
+		return data;
+	}
+
+	/**
+	 * @Title:findCurriculumDetailList
+	 * @Description: 查找课堂内容
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "findCurriculumDetailList", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> findCurriculumDetailList(HttpServletRequest req) {
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		myClassRoomService.findCurriculumDetailList(curriculumMaterials);
+		return null;
+	}
+
+	/**
+	 * @Title:showResourceBeforeClass
+	 * @Description:课前资料的
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "showResourceBeforeClass", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> showResourceBeforeClass(HttpServletRequest req) {
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		SysUser user = userService.getByLoginname(ShiroDbRealm.getCurrentLoginName());
+		if (user.getUsertype().equals("1")) {
+			return myClassRoomService.showResourceBeforeClass(curriculumMaterials);
+		} else {
+			return myClassRoomService.stushowResourceBeforeClass(curriculumMaterials);
+		}
+	}
+
+	/**
+	 * @Title:selectResourceBeforeClass
+	 * @Description:课前资料的（接口）
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "selectResourceBeforeClass", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> selectResourceBeforeClass(HttpServletRequest req) {
+		Map<String, Object> map = JsonUtil.jsonToObject(req, Map.class);
+		return myClassRoomService.selectResourceBeforeClass(map);
+	}
+
+	/**
+	 * @Description: 课前资料的
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 * @return
+	 */
+	@RequestMapping(value = "initshowResourceBeforeClass", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	List<CurriculumMaterials> initshowResourceBeforeClass(HttpServletRequest req) {
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		List<CurriculumMaterials> curriculumMaterialsList = myClassRoomService.initshowResourceBeforeClass(curriculumMaterials);
+		return curriculumMaterialsList;
+	}
+
+	/**
+	 * @Title:showAllResourceBeforeClass
+	 * @Description:展示全部课前资料的
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "showAllResourceBeforeClass", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> showAllResourceBeforeClass(HttpServletRequest req) {
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		return myClassRoomService.showAllResourceBeforeClass(curriculumMaterials);
+	}
+
+	/**
+	 * @Title:updateCurriculum
+	 * @Description: 编辑课堂内容（主题、学科、阶段、简介）
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "updateCurriculum", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg updateCurriculum(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		int flag = 0;
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		CurriculumMaterials initCurriculum = myClassRoomService.selectCMaterials(curriculumMaterials);
+		if (initCurriculum == null) {
+			flag = myClassRoomService.insertCurriculumMaterials(curriculumMaterials);
+		} else {
+			flag = myClassRoomService.updateCurriculum(curriculumMaterials);
+		}
+
+		if (flag >= 0) {
+
+			msg.setId("1");
+			msg.setOperation("编辑成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("编辑失败");
+		}
+
+		return msg;
+	}
+
+	/**
+	 * 上传课堂
+	 * 
+	 * @param req
+	 */
+	@RequestMapping(value = "uploadImage", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public JsonMsg uploadImage(MultipartHttpServletRequest req, CurriculumMaterials curriculumMaterials) {
+		JsonMsg msg = new JsonMsg();
+		int flag = 0;
+		flag = myClassRoomService.uploadImage(req, curriculumMaterials);
+
+		if (flag >= 0) {
+
+			msg.setId("1");
+			msg.setOperation("编辑成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("编辑失败");
+		}
+
+		return msg;
+	}
+
+	/**
+	 * @Title:selectCurriculumMaterials
+	 * @Description: 查找课表信息表
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "selectCurriculumMaterials", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> selectCurriculumMaterials(HttpServletRequest req) {
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		CurriculumMaterials cvo = myClassRoomService.selectCurriculumMaterials(curriculumMaterials);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("total", "");
+		map.put("data", cvo);
+		return map;
+	}
+
+	/**
+	 * @Title:uploadDateForCurriculum
+	 * @Description: 上传课前准备资料
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "uploadDateForCurriculum", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> uploadDateForCurriculum(HttpServletRequest req) {
+		return null;
+	}
+
+	/**
+	 * @Title:importDateForCurriculum
+	 * @Description: 导入课前准备资料
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "importDateForCurriculum", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	int importDateForCurriculum(HttpServletRequest req) {
+		Map<String, Object> map = JsonUtil.jsonToObject(req, Map.class);
+		return myClassRoomService.importDateForCurriculum(map);
+	}
+
+	/**
+	 * @Title:setupVisibilityClassReady
+	 * @Description:设置课前准备资料的学生可见性
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "setupVisibilityClassReady", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg setupVisibilityClassReady(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		int flag = myClassRoomService.setupVisibilityClassReady(curriculumMaterials);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("设置成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("设置失败");
+		}
+
+		return msg;
+	}
+
+	/**
+	 * @Title:moveClassReady
+	 * @Description:移除课前准备资料
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "moveClassReady", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg moveClassReady(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		int flag = myClassRoomService.moveClassReady(curriculumMaterials);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("设置成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("设置失败");
+		}
+
+		return msg;
+	}
+
+	/**
+	 * @Title:updateResourcename
+	 * @Description:修改课前准备资料名称
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "updateResourcename", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg updateResourcename(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("id", curriculumMaterials.getReadyresourcid());
+		map.put("name", curriculumMaterials.getReadyresourcename());
+		int flag = reService.modify(map);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("修改成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("修改失败");
+		}
+
+		return msg;
+	}
+
+	/**
+	 * @Title:collectPrepareDate
+	 * @Description:学生收藏课前准备资料
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "collectPrepareDate", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg collectPrepareDate(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		ResourceView res = JsonUtil.jsonToObject(req, ResourceView.class);
+		int flag = myClassRoomService.collectPrepareDate(res);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("修改成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("修改失败");
+		}
+
+		return msg;
+	}
+	/**
+	 * @Title:collectOneVideo
+	 * @Description:学生收藏录播机单一资料
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	//TODO
+	@RequestMapping(value = "collectOneVideo", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg collectOneVideo(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		ResourceView res = JsonUtil.jsonToObject(req, ResourceView.class);
+		int flag = myClassRoomService.collectOneVideo(res);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("修改成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("修改失败");
+		}
+
+		return msg;
+	}
+	/**
+	 * @Title:setcollectAfterResource
+	 * @Description:收藏智慧教室
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "setcollectAfterResource", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg setcollectAfterResource(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		ResourceView res = JsonUtil.jsonToObject(req, ResourceView.class);
+		int flag = myClassRoomService.setcollectAfterResource(res);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("修改成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("修改失败");
+		}
+
+		return msg;
+	}
+	/**
+	 * @Title:setOnecollectAfterResource
+	 * @Description:收藏智慧教室单一文件
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	//TODO
+	@RequestMapping(value = "setOnecollectAfterResource", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg setOnecollectAfterResource(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		Map<String, String> map = JsonUtil.jsonToObject(req, Map.class);
+		int flag = myClassRoomService.setOnecollectAfterResource(map);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("修改成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("修改失败");
+		}
+
+		return msg;
+	}
+	/**
+	 * 上传资源
+	 * 
+	 * @param req
+	 */
+	@RequestMapping(value = "upload", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public int upload(MultipartHttpServletRequest req, ResourceView resource) {
+		String parentid = resource.getParentid();
+		String curriculumid = resource.getId();
+		List<Integer>  result=myClassRoomService.addResource(req, parentid, curriculumid);
+		if(result != null){
+			return result.size();
+		}else{
+			return 0; 
+		}
+	}
+
+	/**
+	 * @Title:showVideoAfterClass
+	 * @Description:录播机生成资料的展示 
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "showVideoAfterClass", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> showVideoAfterClass(HttpServletRequest req) {
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		SysUser user = userService.getByLoginname(ShiroDbRealm.getCurrentLoginName());
+		// 老師
+		if (user.getUsertype().equals("1")) {
+			return myClassRoomService.showVideoAfterClass(curriculumMaterials);
+		} else {
+			return myClassRoomService.stushowVideoAfterClass(curriculumMaterials);
+		}
+	}
+
+	/**
+	 * @Title:showWisclassroomResource
+	 * @Description:智慧教室资源的展示文件夹
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "showWisclassroomResource", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> showWisclassroomResource(HttpServletRequest req) {
+		Wisclassroom wisclassroom = JsonUtil.jsonToObject(req, Wisclassroom.class);
+		// Wisclassroom wisclassroom=new Wisclassroom();
+		// wisclassroom.setCurriculumid("5abc3f54-5458-4f32-a3df-903621779db1");
+		SysUser user = userService.getByLoginname(ShiroDbRealm.getCurrentLoginName());
+		// 教师
+		if (user.getUsertype().equals("1")) {
+			return myClassRoomService.showWisclassroomResource(wisclassroom);
+		} else {
+			// 学生
+			return myClassRoomService.stushowWisclassroomResource(wisclassroom);
+		}
+	}
+
+	/**
+	 * @Title:showWisclassroomFiles
+	 * @Description:智慧教室资源的展示文件夹内所有文件
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "showWisclassroomFiles", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> showWisclassroomFiles(HttpServletRequest req) {
+		Wisclassroom wisclassroom = JsonUtil.jsonToObject(req, Wisclassroom.class);
+		// Wisclassroom wisclassroom = new Wisclassroom();
+		// wisclassroom.setCurriculumid("5abc3f54-5458-4f32-a3df-903621779db1");
+		// wisclassroom.setParentid("153");
+		SysUser user = userService.getByLoginname(ShiroDbRealm.getCurrentLoginName());
+		// 教师
+				if (user.getUsertype().equals("1")) {
+					return myClassRoomService.showWisclassroomFiles(wisclassroom);
+				} else {
+					// 学生
+					return myClassRoomService.stushowWisclassroomFiles(wisclassroom);
+				}
+	}
+
+	/**
+	 * @Title:collectGenerateClass
+	 * @Description:收藏课堂生成资料（好像不用）
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "collectGenerateClass", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> collectGenerateClass(HttpServletRequest req) {
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		myClassRoomService.collectGenerateClass(curriculumMaterials);
+		return null;
+	}
+
+	/**
+	 * @Title:setupVisibilityAfterClass
+	 * @Description:老师设置录播机资料的可见性
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "setupVisibilityAfterClass", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg setupVisibilityAfterClass(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		int flag = myClassRoomService.setupVisibilityAfterClass(curriculumMaterials);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("修改成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("修改失败");
+		}
+
+		return msg;
+	}
+	
+	/**
+	 * @Title:oneafterclassvisibility
+	 * @Description:老师设置录播机资料的可见性(单一文件)
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "oneafterclassvisibility", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg oneafterclassvisibility(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		CurriculumMaterials curriculumMaterials = JsonUtil.jsonToObject(req, CurriculumMaterials.class);
+		int flag = myClassRoomService.oneafterclassvisibility(curriculumMaterials);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("修改成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("修改失败");
+		}
+
+		return msg;
+	}
+	/**
+	 * @Title:onesetafterclassvisibility
+	 * @Description:老师设置智慧教室的可见性(单一文件)
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "onesetafterclassvisibility", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg onesetafterclassvisibility(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		Wisclassroom wisclassroom = JsonUtil.jsonToObject(req, Wisclassroom.class);
+		int flag = myClassRoomService.onesetafterclassvisibility(wisclassroom);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("修改成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("修改失败");
+		}
+
+		return msg;
+	}
+	/**
+	 * @Title:previewTrans
+	 * @Description:智慧教室转码
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "previewTrans", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg previewTrans(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		Wisclassroom wisclassroom = JsonUtil.jsonToObject(req, Wisclassroom.class);
+		return  myClassRoomService.previewTrans(wisclassroom);
+	}
+	/**
+	 * @Title:setafterclassvisibility
+	 * @Description:老师设置智慧教室的可见性
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "setafterclassvisibility", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg setafterclassvisibility(HttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		Wisclassroom wisclassroom = JsonUtil.jsonToObject(req, Wisclassroom.class);
+		int flag = myClassRoomService.setafterclassvisibility(wisclassroom);
+		if (flag >= 0) {
+			msg.setId("1");
+			msg.setOperation("修改成功");
+		} else {
+			msg.setId("0");
+			msg.setOperation("修改失败");
+		}
+
+		return msg;
+	}
+	/**
+	 * @Title:videotimelength
+	 * @Description:计算视频时长
+	 * @author niuxl
+	 * @date 2015年3月19日 下午1:18:29
+	 * @param res
+	 */
+	@RequestMapping(value = "videotimelength", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	Map<String, Object> videotimelength(HttpServletRequest req) {
+		return null;
+	}
+
+	/**
+	 * 获取目录树-所有
+	 * 
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping(value = "trees", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public List<Tree> getTrees(HttpServletRequest req) {
+		return reService.getTrees();
+	}
+
+	/**
+	 * 点播
+	 * 
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping(value = "onDemand", method = RequestMethod.POST, consumes = MediaTypes.JSON)
+	public Map<String, Object> onDemand(HttpServletRequest req) {
+		
+		SysUser user = userService.getByLoginname(ShiroDbRealm.getCurrentLoginName());
+		// 教师
+				if (user.getUsertype().equals("1")) {
+					return myClassRoomService.onDemand(req);
+				} else {
+					// 学生
+					return myClassRoomService.stuonDemand(req);
+				}
+	}
+
+	// 跟踪机编号
+	@RequestMapping(value = "/code", method = RequestMethod.POST)
+	public List<Map<String, Object>> code(HttpServletRequest req) {
+		Map<String, String> map = JsonUtil.jsonToObject(req, Map.class);
+		if (map == null || map.get("value") == null)
+			return null;
+		return syscodeService.getCode(map.get("value"));
+	}
+
+}

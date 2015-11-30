@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.ActiveMapper">
+	<resultMap id="deptWithUsersAmount" type="com.zonekey.study.vo.ActiveView">
+		<id property="id" column="id" />
+		<association property="userAmount" column="id" javaType="int" select="getUserAmount"></association>
+	</resultMap>
+	<!-- sql绑定资源ip -->
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+	<!-- 新建活动 -->
+	<insert id="insertActive" parameterType="com.zonekey.study.vo.ActiveView" useGeneratedKeys="true" keyProperty="id">
+		insert into
+		study_active(name,type,picture,regbegintime,regendtime,conbegintime,conendtime,description,contemplate,model,createdate)
+		values(#{name},#{type},#{picture},#{regbegintime},#{regendtime},#{conbegintime},#{conendtime},#{description},#{contemplate},#{model},sysDate())
+	</insert>
+	<!-- 管理活动》》修改 -->
+	<update id="updateActive" parameterType="com.zonekey.study.vo.ActiveView">
+		update study_active
+		<set>
+			<if test="name != null and name !=''">
+				name = #{name},
+			</if>
+			<if test="type != null and type !=''">
+				type = #{type},
+			</if>
+			<if test="picture != null and picture !=''">
+				picture = #{picture},
+			</if>
+			<if test="regbegintime != null and regbegintime !=''">
+				regbegintime= #{regbegintime},
+			</if>
+			<if test="regendtime != null and regendtime !=''">
+				regendtime= #{regendtime},
+			</if>
+			<if test="conbegintime != null and conbegintime !=''">
+				conbegintime= #{conbegintime},
+			</if>
+			<if test="conendtime != null and conendtime !=''">
+				conendtime= #{conendtime},
+			</if>
+			<if test="description != null and description !=''">
+				description= #{description},
+			</if>
+			<if test="contemplate != null and contemplate !=''">
+				contemplate= #{contemplate},
+			</if>
+			<if test="model != null and model !=''">
+				model= #{model}
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 根据id查询 -->
+	<select id="findActiveById" parameterType="int" resultType="com.zonekey.study.vo.ActiveView">
+		<include refid="resourceIp"></include>
+		select id,name,type,CONCAT(#{_ip},picture) picture,
+		(CASE
+		WHEN <![CDATA[sysDate() < regbegintime and sysDate() < conbegintime]]>
+		THEN '未开始'
+		WHEN <![CDATA[regbegintime <= sysDate() and sysDate() <= regendtime and sysDate() < conbegintime]]>
+		THEN '报名中,评审未开始'
+		WHEN <![CDATA[regbegintime <= sysDate() and sysDate() <= regendtime and conbegintime <= sysDate() and sysDate() <= conendtime]]>
+		THEN '报名中,评审中'
+		WHEN <![CDATA[sysDate() > regendtime and sysDate() < conbegintime]]>
+		THEN '报名已结束,评审未开始'
+		WHEN <![CDATA[sysDate() > regendtime and conbegintime <= sysDate() and sysDate() <= conendtime]]>
+		THEN '报名已结束,评审中'
+		WHEN <![CDATA[sysDate() > regendtime and sysDate() > conendtime]]>
+		THEN '已结束' ELSE '' END) status,
+		concat(DATE_FORMAT(regbegintime,'%Y-%c-%e'),' 至 ',DATE_FORMAT(regendtime,'%Y-%c-%e')) regdate,
+		concat(DATE_FORMAT(conbegintime,'%Y-%c-%e'),' 至 ',DATE_FORMAT(conendtime,'%Y-%c-%e')) condate,
+		description,contemplate,model,createdate
+		from
+		study_active where id = #{id}
+	</select>
+	<!-- 统计本次活动各部门报名情况 -->
+	<select id="findSignerDept" resultType="Map" parameterType="int">
+		SELECT d.id,d.name
+		FROM zonekey_dept d WHERE d.id IN (SELECT u.deptid FROM sys_user u LEFT JOIN study_works w ON u.loginname =
+		w.userid WHERE w.activeid = #{activeid})
+	</select>
+	<!-- 统计本次活动各部门的报名人数 -->
+	<select id="findSignerAmount" resultType="int">
+		select count(*) from (select distinct(w.userid) from study_works w left join sys_user u on w.userid = u.loginname left join
+		zonekey_dept d on u.deptid =
+		d.id where w.activeid = #{acId} and d.id = #{deptid}) q
+	</select>
+	<!-- 统计活动评审记录数，已评，未评 -->
+	<select id="findReviewAmount" resultType="int">
+		select count(*) from study_review_detail rd left join study_works w on rd.worksid = w.id where w.activeid = #{aid}
+		<if test="isover != null and isover != ''">
+			and rd.isover = #{isover}
+		</if>
+	</select>
+
+	<select id="getAllActives" parameterType="com.zonekey.study.entity.Pagebar" resultType="map">
+		<include refid="resourceIp"></include>
+		select id,name,CONCAT(#{_ip},picture) picture,
+		Date_format(regbegintime,'%Y-%m-%d')regbegintime,Date_format(regendtime,'%Y-%m-%d')regendtime,Date_format(conbegintime,'%Y-%m-%d')conbegintime,Date_format(conendtime,'%Y-%m-%d')conendtime,description,createdate,
+		(CASE
+		WHEN sysDate() > conendtime THEN '4'
+		when (date_format(sysDate(),'%Y-%m-%d') between regbegintime and regendtime) and (date_format(sysDate(),'%Y-%m-%d') between conbegintime and conendtime) then '2'
+		when date_format(sysDate(),'%Y-%m-%d') between conbegintime and conendtime then '3'
+		when date_format(sysDate(),'%Y-%m-%d') between regbegintime and regendtime THEN '1'
+		else '5' end
+		)status
+		from study_active where 1=1
+
+		<if test="keywords != null and keywords != ''">
+			<if test="keywords.value != null and keywords.value != ''">
+				and type = #{keywords.value}
+			</if>
+			<if test="keywords.name != null and keywords.name != ''">
+				and name like concat('%',#{keywords.name},'%')
+			</if>
+		</if>
+
+		order by status,createdate desc
+
+
+		<if test="page != null and offset != null">
+			limit #{offset},#{pageSize}
+		</if>
+	</select>
+
+
+	<select id="count" parameterType="com.zonekey.study.entity.Pagebar" resultType="long">
+		select count(*) from study_active where 1=1
+		<if test="keywords != null and keywords != ''">
+			<if test="keywords.value != null and keywords.value != ''">
+				and type = #{keywords.value}
+			</if>
+			<if test="keywords.name != null and keywords.name != ''">
+				and name like concat('%',#{keywords.name},'%')
+			</if>
+		</if>
+	</select>
+
+
+
+	<select id="countAllActives" parameterType="String" resultType="long">
+		select count(*) from study_active where 1=1
+
+		<if test="value!=null and value!=''">
+			and type=#{value}
+
+		</if>
+
+	</select>
+	<!-- 编辑活动时查找活动 -->
+	<select id="getActiveEdit" parameterType="int" resultType="com.zonekey.study.vo.ActiveView">
+		<!-- 2015-06-20T00:00 -->
+		<include refid="resourceIp"></include>
+		select id,name,type,CONCAT(#{_ip},picture) picture,DATE_FORMAT(regbegintime,'%Y-%m-%d') regbegintime,
+		DATE_FORMAT(regendtime,'%Y-%m-%d') regendtime,
+		DATE_FORMAT(conbegintime,'%Y-%m-%d') conbegintime,
+		DATE_FORMAT(conendtime,'%Y-%m-%d') conendtime,
+		description,contemplate,model,createdate from study_active where id = #{editid}
+	</select>
+	<!-- getActiveByWorkId-->
+	<select id="getActiveByWorkId" parameterType="int" resultType="com.zonekey.study.vo.ActiveView">
+		select a.id,a.name,a.type,
+		(CASE
+		WHEN <![CDATA[sysDate() < a.regbegintime and sysDate() < a.conbegintime]]>
+		THEN '未开始'
+		WHEN <![CDATA[a.regbegintime <= sysDate() and sysDate() <= a.regendtime and sysDate() < a.conbegintime]]>
+		THEN '报名中,评审未开始'
+		WHEN <![CDATA[a.regbegintime <= sysDate() and sysDate() <= a.regendtime and a.conbegintime <= sysDate() and sysDate() <= a.conendtime]]>
+		THEN '报名中,评审中'
+		WHEN <![CDATA[sysDate() > a.regendtime and sysDate() < a.conbegintime]]>
+		THEN '报名已结束,评审未开始'
+		WHEN <![CDATA[sysDate() > a.regendtime and a.conbegintime <= sysDate() and sysDate() <= a.conendtime]]>
+		THEN '报名已结束,评审中'
+		WHEN <![CDATA[sysDate() > a.regendtime and sysDate() > a.conendtime]]>
+		THEN '已结束' ELSE '' END) status,
+	    a.contemplate
+		from study_works w left join study_active a on w.activeid = a.id where w.id = #{workid}
+	</select>
+	
+	<select id="findLiveDept" resultType="map">
+		<!-- select a.name,a.id value
+		from zonekey_dept a,zonekey_curriculum b,sys_user c  
+		where a.deleteflag=0  and a.attribute='3' and a.parentid='1' AND b.live='1' and b.deleteflag='0' 
+    AND c.id=b.userid AND c.deleteflag='0' AND c.user_type="1"
+    AND concat(b.date ,' ',b.endtime)>sysdate()
+    and FIND_IN_SET(c.deptid,getdeptChildLst(a.id)) GROUP BY a.`code` -->
+    select a.name,a.id value  from zonekey_dept a where a.deleteflag=0  and a.attribute='3' and a.parentid='1'
+	</select>
+	<select id="findClassicDept" resultType="map">
+		<!-- select a.name,a.id value  
+		from zonekey_dept a ,sys_user b,zonekey_resource c
+		where a.deleteflag=0  and a.attribute='3' and a.parentid='1' and
+			b.user_type=1 and b.deleteflag=0  AND c.userid=b.id AND c.publishstate=1
+		and c.deleteflag='0' and FIND_IN_SET(b.deptid,getdeptChildLst(a.id)) group by a.code -->
+		select a.name,a.id value  from zonekey_dept a where a.deleteflag=0  and a.attribute='3' and a.parentid='1'
+	</select>
+	<select id="findLiveUser" parameterType="string" resultType="map">
+		select a.name,a.loginname value 
+		from sys_user a,zonekey_curriculum b 
+		where a.user_type=1 and a.deleteflag=0  AND b.userid=a.id AND b.live='1' 
+		and b.deleteflag='0' and FIND_IN_SET(a.deptid,getdeptChildLst(#{deptid}))
+		 AND concat(b.date ,' ',b.endtime)>sysdate() GROUP BY a.loginname
+	</select>
+	<select id="findClassicUser" parameterType="string" resultType="map">
+		select a.name,a.loginname value 
+		from sys_user a,zonekey_resource b 
+		where a.user_type=1 and a.deleteflag=0  AND b.userid=a.id AND b.publishstate=1
+		and b.deleteflag='0' and FIND_IN_SET(a.deptid,getdeptChildLst(#{deptid})) GROUP BY a.loginname
+	</select>
+</mapper>

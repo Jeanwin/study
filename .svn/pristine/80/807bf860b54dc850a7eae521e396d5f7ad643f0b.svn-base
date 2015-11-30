@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.CurriculumResourceMapper">
+
+	<!-- sql绑定资源ip -->
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+
+	<!-- sql绑定用户名 -->
+	<!-- <include refid="bindLoginname" /> -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+
+	<!-- 点播列表 -->
+	<select id="getUnicast" parameterType="com.zonekey.study.entity.PageBean" resultType="com.zonekey.study.vo.UnicastResourceView">
+		<include refid="bindLoginname"></include>
+		<include refid="resourceIp"></include>
+		select c.id,c.subject as courseName,
+		<!-- username -->
+		us.name as username,
+		<!-- isCollection -->
+		(SELECT count(*) from study_collection_record scr LEFT JOIN zonekey_resource zr on scr.resourceid = zr.id WHERE zr.curriculumid = c.id) as isCollection,
+		<!-- 收藏id -->
+		(SELECT co.id FROM study_collection_record co LEFT JOIN zonekey_resource zr2 on co.resourceid = zr2.id WHERE zr2.curriculumid = c.id LIMIT 1) as collectionId,
+		<!-- picture -->
+		concat(#{_ip},us.pictureURL) as picture,
+		<!-- deptName -->
+		concat(
+		(select IFNULL(CONCAT((select dd.name from zonekey_dept dd where dd.id = (select ddd.parentid from zonekey_dept ddd left join sys_user suu on ddd.id = suu.deptid where suu.loginname =
+		us.loginname)),''),"")),
+		(select d.name from zonekey_dept d where d.id = us.deptid)) deptName,
+		<!-- duration -->
+		(select r.timelength from zonekey_resource r where r.curriculumid = c.id and REVERSE(LEFT(REVERSE(r.name),INSTR(REVERSE(r.name),'.'))) = '.mp4' limit 1) as duration,
+		<!-- commentNum -->
+		(select count(*) from study_comment cm where cm.resourceid=c.resourcefloder or cm.resourceid = c.id ) as commentNum,
+		<!-- viewNum -->
+		(select r2.watchwatchnum from zonekey_resource r2 where r2.curriculumid = c.id limit 1) as viewNum,
+		<!-- playtime -->
+		(select spr.playtime from study_play_record spr left join zonekey_resource r3 on spr.resourceid = r3.id where spr.loginname = #{_loginname} and r3.curriculumid = c.id limit 1) as playtime
+		from
+		zonekey_curriculum c left join sys_user us on c.userid = us.id where
+		(select r4.publishstate from zonekey_resource r4 where r4.curriculumid = c.id limit 1) = '1'
+		<if test="keywords.name != null and keywords.name !=''">
+			and c.subject like concat("%",#{keywords.name},"%") or us.name like concat("%",#{keywords.name},"%")
+		</if>
+		<if test="keywords.deptId != null and keywords.deptId != ''">
+			and FIND_IN_SET(us.deptid,getdeptChildLst(#{deptid}))
+		</if>
+		<if test="keywords.loginname != null and keywords.loginname != ''">
+			and us.loginname = #{keywords.loginname}
+		</if>
+		order by (select r5.publishdate from zonekey_resource r5 where r5.curriculumid = c.id limit 1) desc
+		<if test="page != null and page.offset != null and page.limit != null">
+			limit #{page.offset} ,#{page.limit}
+		</if>
+	</select>
+	<!-- 统计 -->
+	<select id="countUnicast" parameterType="map" resultType="long">
+		select count(*) from zonekey_curriculum c left join sys_user us on c.userid = us.id where
+		(select r4.publishstate from zonekey_resource r4 where r4.curriculumid = c.id limit 1) = '1'
+		<if test="name != null and name !=''">
+			and c.subject like concat("%",#{name},"%") or us.name like concat("%",#{name},"%")
+		</if>
+		<if test="deptId != null and deptId != ''">
+			and FIND_IN_SET(us.deptid,getdeptChildLst(#{deptid}))
+		</if>
+		<if test="loginname != null and loginname != ''">
+			and us.loginname = #{loginname}
+		</if>
+	</select>
+
+	<!-- 点播详情 -->
+	<select id="getUnicastDetail" parameterType="String" resultType="map">
+		<include refid="resourceIp"></include>
+		select r.id,r.timelength,r.name,
+		case when LOWER(r.name) LIKE "full%" THEN 1
+		WHEN LOWER(r.name) LIKE "vga%" THEN 2
+		WHEN LOWER(r.name) LIKE "teacher%" THEN 3
+		WHEN LOWER(r.name) LIKE "student%" THEN 4
+		else 0 end as pos,
+		concat(#{_ip},r.resourcePath,r.floder,'/',r.name) fileUrl,concat(#{_ip},r.transPath,r.floder,'/',r.name) transUrl,r.transFlag from zonekey_resource r where
+		REVERSE(LEFT(REVERSE(r.name),INSTR(REVERSE(r.name),'.'))) = '.mp4' and r.curriculumid =
+		#{curriculumid}
+	</select>
+
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.CollectionRecordMapper">
+
+	<!-- sql绑定资源ip -->
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+
+	<!-- sql绑定用户名 -->
+	<!-- <include refid="bindLoginname" /> -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+
+	<!--收藏 -->
+	<insert id="add" parameterType="com.zonekey.study.entity.CollectionRecord" useGeneratedKeys="true" keyProperty="id">
+		insert into study_collection_record (loginname,resourceid,createdate)
+		values(#{loginname},#{resourceid},sysDate())
+	</insert>
+
+	<!-- 取消收藏 -->
+	<delete id="delCollection" parameterType="int">
+		delete from study_collection_record where id = #{id}
+	</delete>
+
+	<!-- 删除收藏信息 -->
+	<delete id="delAll" parameterType="java.util.List">
+		delete from study_collection_record where id in
+		<foreach collection="ids" open="(" separator="," close=")" item="id">
+			#{id}
+		</foreach>
+	</delete>
+
+	<!-- 分页查询 -->
+	<select id="list" parameterType="com.zonekey.study.entity.PageBean" resultType="com.zonekey.study.vo.CollectionRecordView">
+		<include refid="resourceIp"></include>
+		<include refid="bindLoginname" />
+		select scr.id,scr.resourceid,
+		<!-- curriculumid -->
+		(select cur.curriculumid from zonekey_resource cur where cur.id = scr.resourceid) as curriculumid,
+		<!-- courseName -->
+		(select c.subject from zonekey_curriculum c left join zonekey_resource r on r.curriculumid = c.id where r.id = scr.resourceid limit 1) as courseName,
+		<!-- duration -->
+		(select r2.timelength from zonekey_resource r2 where r2.id = scr.resourceid) as duration,
+		<!-- viewNum -->
+		(select r3.watchwatchnum from zonekey_resource r3 where r3.id = scr.resourceid) as viewNum,
+		<!-- commentNum -->
+		(select count(*) from study_comment cm left join zonekey_resource r4 on cm.resourceid=r4.floder
+		where r4.floder = (select r5.floder from zonekey_resource r5 where r5.id = scr.resourceid limit 1) ) as commentNum,
+		<!-- deptName -->
+		concat(
+		(select IFNULL(CONCAT((select dd.name from zonekey_dept dd where dd.id = (select ddd.parentid from zonekey_dept ddd left join sys_user suu on ddd.id = suu.deptid where suu.loginname = scr.loginname)),''),"")),
+		(select d.name from zonekey_dept d left join sys_user su on d.id = su.deptid where su.loginname = scr.loginname)) deptName,
+		<!-- username -->
+		(select u.name from sys_user u where u.loginname = scr.loginname ) as username,
+		<!-- picture -->
+		(select concat(#{_ip},u2.pictureURL) from sys_user u2 where u2.loginname = scr.loginname ) as picture,
+		<!-- playtime -->
+		(select pr.playtime from study_play_record pr where pr.loginname = scr.loginname and pr.resourceid = scr.resourceid limit 1) as playtime,
+		<!-- watchtime -->
+		(select DATE_FORMAT(pr2.createdate,'%Y-%c-%e %T') from study_play_record pr2 where pr2.loginname = scr.loginname and pr2.resourceid = scr.resourceid limit 1) as watchtime
+		from
+		study_collection_record scr where scr.loginname = #{_loginname}
+		order by scr.createdate desc
+		<if test="page != null and page.offset != null and page.limit != null">
+			limit #{page.offset} ,#{page.limit}
+		</if>
+	</select>
+
+	<!-- 分页count -->
+	<select id="count" parameterType="map" resultType="long">
+	    <include refid="bindLoginname" />
+		select count(*) from study_collection_record scr where scr.loginname = #{_loginname}
+	</select>
+
+</mapper>

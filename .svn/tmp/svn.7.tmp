@@ -1,0 +1,42 @@
+package com.zonekey.study.dao;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+
+import com.zonekey.study.common.SpringTxTestCase;
+import com.zonekey.study.vo.ActiveView;
+
+@ContextConfiguration(locations = { "/applicationContext.xml" })
+public class ActiveMapperTest extends SpringTxTestCase {
+
+	@Autowired
+	private ActiveMapper aMapper;
+
+	@Test
+	public void testAll() {
+		ActiveView view  = new ActiveView();
+		view.setConbegintime(new Date().toString());
+		view.setConendtime(new Date().toString());
+		view.setContemplate("1");
+		view.setCreatedate(new Date());
+		view.setDescription("121132334544");
+		view.setModel("0");
+		view.setName("优秀教师评比大赛");
+		view.setPicture("/picture/34909.jpg");
+		view.setRegbegintime(new Date().toString());
+		view.setRegendtime(new Date().toString());
+		view.setType("1");
+		aMapper.insertActive(view);
+		aMapper.updateActive(view);
+		aMapper.findActiveById(0);
+		aMapper.findSignerDept(15);
+		aMapper.findSignerAmount(15, "1");
+		aMapper.findReviewAmount(15,null);
+		//System.out.println(new SimpleDateFormat().format(new Date()));
+		//aMapper.insertActive(view);
+	}   
+}

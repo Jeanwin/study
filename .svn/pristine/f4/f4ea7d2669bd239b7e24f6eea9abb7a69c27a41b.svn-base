@@ -1,0 +1,9 @@
+$(function(){ 
+        document.getElementsByClassName('datePicker').valueAsDate = new Date();      
+        $.datepicker.setDefaults($.datepicker.regional['zh-CN']);
+        $(".datepicker").datepicker({
+            changeMonth:true,
+            changeYear:true
+        });
+        $(".datepicker").datepicker('option', 'dateFormat','yy-mm-dd');
+    })

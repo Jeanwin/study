@@ -1,0 +1,24 @@
+package com.zonekey.study.dao;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+
+import com.zonekey.study.common.SpringTxTestCase;
+import com.zonekey.study.entity.PageBean;
+import com.zonekey.study.entity.SysUser;
+
+@ContextConfiguration(locations = { "/applicationContext.xml" })
+public class SysUserMapperTest extends SpringTxTestCase {
+
+	@Autowired
+	private SysUserMapper userMapper;
+
+	@Test
+	public void testAll() {}
+}

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.MsgStatusMapper">
+	<!-- 定义resultMap，获得消息记录，发送者记录，接收者记录 -->
+	<resultMap id="messageWithUser" type="com.zonekey.study.entity.MsgStatus">
+		<id property="id" column="id" />
+		<result property="uuid" column="uuid" />
+		<result property="msgid" column="msgid" />
+		<result property="senderid" column="senderid" />
+		<result property="recieverid" column="recieverid" />
+		<result property="readstatus" column="readstatus" />
+		<result property="sendstatus" column="sendstatus" />
+		<result property="senderdel" column="senderdel" />
+		<result property="recieverdel" column="recieverdel" />
+		<result property="replyid" column="replyid" />
+		<result property="readtime" column="readtime" />
+		<result property="sendtime" column="sendtime" />
+		<result property="createdate" column="createdate" />
+		<result property="createuser" column="createuser" />
+		<result property="modifydate" column="modifydate" />
+		<result property="modifyuser" column="modifyuser" />
+		<!-- many to one -->
+		<association property="message" column="msgid" select="getMessage" />
+		<association property="reciever" column="recieverid" select="getReciever" />
+		<association property="sender" column="senderid" select="getSender" />
+	</resultMap>
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+	<!-- 分页查询收件箱 DATE_FORMAT(sendtime, '%Y-%c-%e %H:%I') DATE_FORMAT(logindate,'%Y年%c月%e日 %T') -->
+	<select id="findInbox" parameterType="com.zonekey.study.entity.PageBean" resultMap="messageWithUser">
+		select
+		id,uuid,msgid,senderid,recieverid,readstatus,sendstatus,senderdel,recieverdel,replyid,DATE_FORMAT(readtime,'%Y-%c-%e
+		%H:%i') readtimestring, DATE_FORMAT(sendtime,'%Y-%c-%e %H:%i')
+		sendtimestring,createdate,createuser,DATE_FORMAT(modifydate,'%Y-%c-%e %H:%i') modifydatestring,modifyuser
+		from
+		study_msg_status where
+		recieverid=#{keywords.loginname} and recieverdel =
+		'0'
+		order by
+		sendtime desc
+		<if test="page != null and page.offset != null and page.limit != null">
+			limit #{page.offset} ,#{page.limit}
+		</if>
+	</select>
+	<!-- 查询收件箱记录总条数 -->
+	<select id="countInbox" parameterType="String" resultType="int">
+		select count(*) from (select
+		id,uuid,msgid,senderid,recieverid,readstatus,sendstatus,senderdel,recieverdel,replyid,readtime,sendtime,createdate,createuser,modifydate,modifyuser
+		from study_msg_status where
+		recieverid=#{recieverid}
+		and recieverdel = '0'
+		order by sendtime desc) a
+	</select>
+	<!-- 根据msgid查询消息记录 -->
+	<select id="getMessage" parameterType="int" resultType="com.zonekey.study.entity.Message">
+		select
+		id,uuid,typeid,title,content,createdate,createuser,modifydate,modifyuser,deleteflag
+		from study_message where id = #{msgid}
+	</select>
+	<!-- 根据senderid查询消息的发送者 -->
+	<select id="getSender" parameterType="String" resultType="com.zonekey.study.entity.SysUser">
+        <include refid="resourceIp"></include> 
+		select loginname,name,concat(#{_ip},pictureURL) pictureURL from sys_user where loginname = #{senderid}
+	</select>
+	<!-- 根据接收者的id查找接收者 -->
+	<select id="getReciever" parameterType="String" resultType="com.zonekey.study.entity.SysUser">
+		select * from sys_user where loginname = #{recieverid}
+	</select>
+
+	<!-- 根据msgid查询消息状态记录条数，如果记录数为0.则删除消息内容 -->
+	<select id="countRecord" parameterType="int" resultType="int">
+		select
+		count(*) from study_msg_status where msgid = #{msgid} and
+		recieverdel='0'
+	</select>
+	<!-- 根据id查询 -->
+	<select id="findOne" parameterType="java.lang.Integer" resultType="com.zonekey.study.entity.MsgStatus">
+		select * from sys_msg_status where id = #{id}
+	</select>
+
+	<!-- 添加记录 -->
+	<insert id="sendMessages" parameterType="java.util.List">
+		insert into
+		study_msg_status(id,uuid,msgid,senderid,recieverid,replyid,sendtime,createuser,modifydate,modifyuser)
+		values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(id,REPLACE(UUID(),'-',''),#{item.msgid},#{item.senderid},#{item.recieverid},#{item.replyid},sysDate(),#{item.createuser},sysDate(),#{item.createuser})
+		</foreach>
+	</insert>
+
+	<!-- 批量删除消息 -->
+	<delete id="deleteMessages" parameterType="java.util.List">
+		delete from study_msg_status where id in
+		<foreach collection="list" open="(" close=")" separator="," item="msgid">
+			#{msgid}
+		</foreach>
+	</delete>
+	<!-- 将消息标记为已阅读 -->
+	<update id="viewMessage" parameterType="com.zonekey.study.entity.MsgStatus">
+		update study_msg_status
+		<set>
+			readstatus='1',readtime=sysDate(),modifydate=sysDate(),modifyuser=#{modifyuser}
+		</set>
+		where id=#{id}
+	</update>
+</mapper>

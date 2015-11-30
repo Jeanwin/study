@@ -1,0 +1,620 @@
+package com.zonekey.study.service;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.zonekey.study.common.UploadImg;
+import com.zonekey.study.dao.ActiveMapper;
+import com.zonekey.study.dao.ReviewDetailMapper;
+import com.zonekey.study.dao.ReviewUserMapper;
+import com.zonekey.study.dao.WorksMapper;
+import com.zonekey.study.entity.Pagebar;
+import com.zonekey.study.vo.ActiveView;
+import com.zonekey.study.vo.ReviewDetailView;
+import com.zonekey.study.vo.ReviewUserView;
+import com.zonekey.study.vo.WorksView;
+
+@Service
+@Transactional(readOnly = true)
+public class ActiveService {
+	private static final Logger LOG = LoggerFactory.getLogger(ActiveService.class);
+	@Resource
+	private ActiveMapper activeMapper;
+	@Resource
+	private WorksMapper worksMapper;
+	@Resource
+	private ReviewDetailMapper detailMapper;
+	@Resource
+	private ReviewUserMapper rUserMapper;
+	@Resource
+	private ReviewUserService ruService;
+
+	/**
+	 * 新建活动》》没有图片上传
+	 * 
+	 * @param activeView
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int addActive(ActiveView activeView) {
+		if (activeView != null) {
+			if (activeView.getModel() != null && !"".equals(activeView.getModel())) {
+				// "1"自动分配专家
+				if ("1".equals(activeView.getModel())) {
+
+					List<ReviewUserView> reviewUserList = new ArrayList<ReviewUserView>();
+					int active = activeMapper.insertActive(activeView);
+					if (active > 0) {
+						if (activeView.getReviewUsers() != null && activeView.getReviewUsers().size() > 0) {
+							for (int i = 0; i < activeView.getReviewUsers().size(); i++) {
+								ReviewUserView u = new ReviewUserView();
+								u.setActiveId(activeView.getId());
+								u.setUserid(activeView.getReviewUsers().get(i).toString());
+								reviewUserList.add(u);
+							}
+							int ruResult = ruService.addReviewUsers(reviewUserList);
+							if (ruResult > 0) {
+								return active;
+							} else {
+								return 0;
+							}
+						} else {
+							return active;
+						}
+					} else {
+						return 0;
+					}
+
+				}
+				// "0"手动分配专家,添加活动专家
+				else if ("0".equals(activeView.getModel())) {
+					List<ReviewUserView> reviewUserList = new ArrayList<ReviewUserView>();
+					int active = activeMapper.insertActive(activeView);
+					if (active > 0) {
+						if (activeView.getReviewUsers() != null && activeView.getReviewUsers().size() > 0) {
+							for (int i = 0; i < activeView.getReviewUsers().size(); i++) {
+								ReviewUserView u = new ReviewUserView();
+								u.setActiveId(activeView.getId());
+								// System.out.println("activeid:"+activeView.getId());
+								u.setUserid(activeView.getReviewUsers().get(i).toString());
+								reviewUserList.add(u);
+							}
+							int ruResult = ruService.addReviewUsers(reviewUserList);
+							if (ruResult > 0) {
+								return active;
+							} else {
+								return 0;
+							}
+						} else {
+							return active;
+						}
+					} else {
+						return 0;
+					}
+				} else {
+					return 0;
+				}
+			} else {
+				return 0;
+			}
+		} else {
+			return 0;
+		}
+	}
+
+	/**
+	 * 新建活动，有封面图片上传时
+	 * 
+	 * @param req
+	 * @param view
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int newActive(MultipartHttpServletRequest req, ActiveView view) {
+		String picturePath;
+		if (view.getPicture() != null && !"".equals(view.getPicture())) {
+			picturePath = UploadImg.uploadImage(null, req, view.getPicture());
+		} else {
+			picturePath = UploadImg.uploadImage(null, req, null);
+		}
+		int result = 0;
+		if (picturePath != null && !"".equals(picturePath)) {
+			view.setPicture(picturePath);
+			result = this.addActive(view);
+		} else {
+			// 图片没有上传成功
+			result = -1;
+		}
+		return result;
+	}
+
+	/**
+	 * 活动管理，修改活动>>无图上传
+	 * 
+	 * @param activeView
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int managerActive(ActiveView activeView) {
+		if (activeView != null) {
+			if (activeView.getModel() != null && !"".equals(activeView.getModel())) {
+				// 旧的专家列表
+				List<ReviewUserView> oldusers = rUserMapper.findUserList(activeView.getId());
+				// 查询原活动数据
+				ActiveView oldView = activeMapper.findActiveById(activeView.getId());
+				// 查询所有的作品
+				List<WorksView> works = worksMapper.findWorksByActiveId(activeView.getId());
+				List<String> oldu = new ArrayList<String>();
+				for (ReviewUserView ou : oldusers) {
+					oldu.add(ou.getUserid());
+				}
+				List<String> reviewUsers = activeView.getReviewUsers();
+				// 如果用户修改了评审专家
+				if (!equalList(reviewUsers, oldu)) {
+					// 新添加的专家
+					List<ReviewUserView> users = new ArrayList<ReviewUserView>();
+					// 要删除的专家
+					List<ReviewUserView> usersDel = new ArrayList<ReviewUserView>();
+					// 原来已有的专家
+					List<ReviewUserView> userO = new ArrayList<ReviewUserView>();
+					// 新的专家列表
+					for (String user : reviewUsers) {
+						// 找出新专家列表中新添加的专家,插入专家表，评审分配表中
+						if (!oldu.contains(user)) {
+							ReviewUserView uView = new ReviewUserView();
+							uView.setActiveId(activeView.getId());
+							uView.setUserid(user);
+							users.add(uView);
+						}
+					}
+					// 将要删除的专家，同时删除评审记录
+					for (String us : oldu) {
+						if (!reviewUsers.contains(us)) {
+							ReviewUserView uView = new ReviewUserView();
+							uView.setActiveId(activeView.getId());
+							uView.setUserid(us);
+							usersDel.add(uView);
+						} else {
+							ReviewUserView uView = new ReviewUserView();
+							uView.setActiveId(activeView.getId());
+							uView.setUserid(us);
+							userO.add(uView);
+						}
+					}
+					if (users.size() > 0) {
+						// 重新添加专家
+						rUserMapper.insertUsers(users);
+					}
+					if (usersDel.size() > 0) {
+						// 删除专家
+						List<String> useDel = new ArrayList<String>();
+						for (ReviewUserView reviewUserView : usersDel) {
+							useDel.add(reviewUserView.getUserid());
+						}
+						rUserMapper.delByActiveAndUser(activeView.getId(),useDel);
+					}
+					// 删除原来添加的专家
+					// rUserMapper.deleteByActiveid(activeView.getId());
+					// 删除原来的分配
+					// detailMapper.deleteByActiveId(activeView.getId());
+					// 如果用户修改了分配方式
+					if (!activeView.getModel().equals(oldView.getModel())) {
+						// 要删除的专家
+						if (usersDel.size() > 0) {
+							List<String> usDel = new ArrayList<String>();
+							for (ReviewUserView re : usersDel) {
+								usDel.add(re.getUserid());
+							}
+							// 要删除的分配记录
+							for (WorksView w : works) {
+								detailMapper.delByWorkIdAndSpe(w.getId(), usDel);
+							}
+						}
+						// 手动改自动
+						if ("1".equals(activeView.getModel())) {
+							if (works != null && works.size() > 0) {
+								List<ReviewDetailView> rdView = new ArrayList<ReviewDetailView>();
+								// 新添加的专家
+								if (users.size() > 0) {
+									for (ReviewUserView u : users) {
+										for (WorksView w : works) {
+											ReviewDetailView v = new ReviewDetailView();
+											v.setWorksid(w.getId());
+											v.setUserid(u.getUserid());
+											v.setTemplateid(activeView.getContemplate());
+											v.setIsover("0");
+											rdView.add(v);
+										}
+									}
+									detailMapper.insertDetails(rdView);
+								}
+								// 原来已有的专家，可能已经分配，也可能未分配
+								if (userO.size() > 0) {
+									List<ReviewDetailView> rView = new ArrayList<ReviewDetailView>();
+									for (ReviewUserView uv : userO) {
+										for (WorksView wv : works) {
+											String flag = detailMapper.checkIsOver(wv.getId(), uv.getUserid());
+											// 原来已分配
+											if (flag != null && !"".equals(flag)) {
+												LOG.info("Specailist was changed and assign menthod was changed to auto mode");
+											}
+											// 原来未分配
+											else {
+												ReviewDetailView v = new ReviewDetailView();
+												v.setWorksid(wv.getId());
+												v.setUserid(uv.getUserid());
+												v.setTemplateid(activeView.getContemplate());
+												v.setIsover("0");
+												rView.add(v);
+											}
+										}
+									}
+									detailMapper.insertDetails(rView);
+								}
+							}
+						}
+						// 自动改手动
+						else {
+							if (userO.size() > 0) {
+								List<String> ud = new ArrayList<String>();
+								for (ReviewUserView st : userO) {
+									ud.add(st.getUserid());
+								}
+								// 将原来已有的并且未评的分配记录删除
+								for (WorksView wov : works) {
+									detailMapper.delByWorkIdAndSpe(wov.getId(), ud);
+								}
+							}
+						}
+					}
+					// 如果用户没有修改分配方式
+					else {
+						if (works != null && works.size() > 0) {
+							List<ReviewDetailView> rdView = new ArrayList<ReviewDetailView>();
+							if (usersDel.size() > 0) {
+								List<String> usDel = new ArrayList<String>();
+								for (ReviewUserView re : usersDel) {
+									usDel.add(re.getUserid());
+								}
+								// 要删除的分配记录
+								for (WorksView w : works) {
+									detailMapper.delByWorkIdAndSpe(w.getId(), usDel);
+								}
+							}
+							// 分配方式为自动
+							if ("1".equals(activeView.getModel())) {
+								if (users.size() > 0) {
+									// 新添加的用户
+									for (ReviewUserView r : users) {
+										for (WorksView w : works) {
+											ReviewDetailView v = new ReviewDetailView();
+											v.setWorksid(w.getId());
+											v.setUserid(r.getUserid());
+											v.setTemplateid(activeView.getContemplate());
+											v.setIsover("0");
+											rdView.add(v);
+										}
+									}
+									detailMapper.insertDetails(rdView);
+								}
+							}
+							// 分配方式为手动，删除
+							else {
+								LOG.info("Spacialist not be change and assign method is manual");
+							}
+						}
+					}
+				}
+				// 评审专家不变，分配方式变
+				else {
+					if (!activeView.getModel().equals(oldView.getModel())) {
+						// 手动改自动
+						if ("1".equals(activeView.getModel())) {
+							if (works != null && works.size() > 0) {
+								List<ReviewDetailView> details = new ArrayList<ReviewDetailView>();
+								for (String u : reviewUsers) {
+									for (WorksView w : works) {
+										String isOver = detailMapper.checkIsOver(w.getId(), u);
+										if (isOver != null && !"".equals(isOver)) {
+											if ("0".equals(isOver)) {
+												LOG.info("SPECIAL WAS ASSINED,NOT REVIEW");
+											}else{
+												LOG.info("specail was assigned, reviewed");
+											}
+										}else{
+											ReviewDetailView v = new ReviewDetailView();
+											v.setWorksid(w.getId());
+											v.setUserid(u);
+											v.setTemplateid(activeView.getContemplate());
+											v.setIsover("0");
+											details.add(v);
+										}
+									}
+								}
+								if (details.size() > 0) {
+									detailMapper.insertDetails(details);
+								}
+							}
+						}
+						// 自动改手动
+						else {
+							// 删除原来的分配
+							detailMapper.deleteByActiveId(activeView.getId());
+						}
+					}
+				}
+				// 如果用户没有修改评审专家
+				return activeMapper.updateActive(activeView);
+			} else {
+				return 0;
+			}
+		} else {
+			return 0;
+		}
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean equalList(List<String> a, List<String> b) {
+		if (a.size() != b.size())
+			return false;
+		Collections.sort(a);
+		Collections.sort(b);
+		for (int i = 0; i < a.size(); i++) {
+			if (!a.get(i).equals(b.get(i)))
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 更新活动信息，带图片上传
+	 * 
+	 * @param req
+	 * @param view
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int updateActivePicture(MultipartHttpServletRequest req, ActiveView view) {
+		String picturePath;
+		ActiveView av = activeMapper.getActiveEdit(view.getId());
+		if (av.getPicture() != null && !"".equals(av.getPicture())) {
+			picturePath = UploadImg.uploadImage(null, req, av.getPicture());
+		} else {
+			picturePath = UploadImg.uploadImage(null, req, null);
+		}
+		int result = 0;
+		if (picturePath != null && !"".equals(picturePath)) {
+			view.setPicture(picturePath);
+			result = this.managerActive(view);
+		} else {
+			// 图片没有上传成功
+			result = -1;
+		}
+		return result;
+	}
+
+	/**
+	 * 查询柱状统计图数据
+	 * 
+	 * @param activeid
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findSingerDept(int activeid) {
+		if (Integer.valueOf(activeid) != null && !"".equals(Integer.valueOf(activeid).toString())) {
+			List<Map<String, Object>> dataMap = new ArrayList<Map<String, Object>>();
+			Map<String, Object> map;
+			// 查询参加本次活动的部门
+			List<Map<String, Object>> depts = activeMapper.findSignerDept(activeid);
+			for (Map<String, Object> dept : depts) {
+				map = new HashMap<String, Object>();
+				int signerNum = activeMapper.findSignerAmount(activeid, dept.get("id").toString());
+				map.put(dept.get("name").toString(), signerNum);
+				dataMap.add(map);
+			}
+			return dataMap;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * 查询饼图数据
+	 * 
+	 * @param activeid
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findPieData(int activeid) {
+		List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
+		Map<String, Object> map1;
+		Map<String, Object> map2;
+		if (Integer.valueOf(activeid) != null && !"".equals(Integer.valueOf(activeid).toString())) {
+			map1 = new HashMap<String, Object>();
+			map2 = new HashMap<String, Object>();
+			int unReviewAmount = activeMapper.findReviewAmount(activeid, "0");
+			int reviewedAmount = activeMapper.findReviewAmount(activeid, "1");
+			System.out.println(unReviewAmount);
+			System.out.println(reviewedAmount);
+			// String percent = Math.round(reviewedAmount / reviewAmount * 100)
+			// + "%";
+			map1.put("未评审", unReviewAmount);
+			map2.put("已评审", reviewedAmount);
+			data.add(map1);
+			data.add(map2);
+			return data;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * 查询本次活动各专家的评审情况
+	 * 
+	 * @param activeid
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> findReviewResultBySpecialist(int activeid) {
+		if (Integer.valueOf(activeid) != null && !"".equals(Integer.valueOf(activeid).toString())) {
+			List<Map<String, Object>> dataMap = new ArrayList<Map<String, Object>>();
+			Map<String, Object> map;
+			List<Map<String, Object>> specialist = detailMapper.findSpecialistByActiveId(activeid);
+			if (specialist != null && specialist.size() > 0) {
+				for (Map<String, Object> map2 : specialist) {
+					map = new HashMap<String, Object>();
+					int reviewTotal = detailMapper.countReview(activeid, map2.get("loginname").toString(), null);
+					int reviewedNum = detailMapper.countReview(activeid, map2.get("loginname").toString(), "1");
+					int unReviewNum = reviewTotal - reviewedNum;
+					String percent = Math.round(reviewedNum / 1.000 / reviewTotal * 100) + "%";
+					map.put("specialName", map2.get("name").toString());
+					map.put("reviewTotal", reviewTotal);
+					map.put("reviewedNum", reviewedNum);
+					map.put("unReviewNum", unReviewNum);
+					map.put("percent", percent);
+					dataMap.add(map);
+				}
+				return dataMap;
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * 根据活动id查询活动详情
+	 * 
+	 * @param activeid
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public ActiveView findActiveById(int activeid) {
+		if (Integer.valueOf(activeid).toString() != null && !"".equals(Integer.valueOf(activeid).toString())) {
+			return activeMapper.findActiveById(activeid);
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * 编辑模式查询活动详情
+	 * 
+	 * @param activeid
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public Map<String, Object> getActiveEdit(int activeid) {
+		if (Integer.valueOf(activeid).toString() != null && !"".equals(Integer.valueOf(activeid).toString())) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			ActiveView activeView = activeMapper.getActiveEdit(activeid);
+			List<ReviewUserView> ruList = rUserMapper.findUserList(activeid);
+			map.put("active", activeView);
+			map.put("reviewUsers", ruList);
+			return map;
+		} else {
+			return null;
+		}
+	}
+
+	public Map<String, Object> getAllActives(Pagebar bean) {
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		// bean.setPageSize(10);
+		long count = activeMapper.count(bean);
+		int offset = setOffSet(bean);
+		bean.setOffset(offset);
+		List<Map<String, Object>> list = activeMapper.getAllActives(bean);
+		Page<Map<String, Object>> page = new PageImpl<Map<String, Object>>(list, null, count);
+		dataMap.put("total", page.getTotalElements());
+		dataMap.put("data", page.getContent());
+		return dataMap;
+	}
+
+	public int setOffSet(Pagebar page) {
+		int pageSize = page.getPageSize();
+		int pagenum = page.getPage();
+		int offset = 0;
+		offset = (pagenum - 1) * pageSize;
+		if (pagenum < 1) {
+			pagenum = 1;
+			offset = (pagenum - 1) * pageSize;
+		} else {
+			offset = (pagenum - 1) * pageSize;
+		}
+		return offset;
+	}
+
+	public Map<String, Object> findActiveList(String type, String name,Pagebar page) {
+		Map<String, Object> keywords = new HashMap<String, Object>();
+		keywords.put("value", type);
+		keywords.put("name", name);
+		page.setKeywords(keywords);
+		long total = activeMapper.count(page);
+		int offset = setOffSet(page);
+		page.setOffset(offset);
+		List<Map<String, Object>> listCurriculum = activeMapper.getAllActives(page);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("total", total);
+		map.put("data", listCurriculum);
+		map.put("isSuccess", "1");
+		return map;
+	}
+	/**
+	 * 
+	 * @param deptid
+	 * @param type 1代表直播
+	 * @return
+	 */
+	public Map<String, Object> findDeptOrUser(String deptid,String type) {
+		List<Map<String, Object>> codes = null;
+		if(deptid == null){
+			
+			codes = activeMapper.findLiveDept();
+			codes = activeMapper.findClassicDept();
+			
+		}else{
+			if("1".equals(type)){
+				codes = activeMapper.findLiveUser(deptid);
+			}else{
+				codes = activeMapper.findClassicUser(deptid);
+			}
+		}
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("data", codes);
+		if(codes !=null){
+			map.put("isSuccess", "1");
+		}else{
+			map.put("isSuccess", "0");
+		}
+		return map;
+	}
+	public long countAllActives(String value) {
+		// TODO Auto-generated method stub
+		return activeMapper.countAllActives(value);
+	}
+
+	public ActiveView getActiveByWorkId(int workid) {
+		if (Integer.valueOf(workid) != null) {
+			return activeMapper.getActiveByWorkId(workid);
+		} else {
+			return null;
+		}
+	}
+}

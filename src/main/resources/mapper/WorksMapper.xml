@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.WorksMapper">
+	<resultMap id="worksMap" type="com.zonekey.study.vo.WorksView">
+		<id property="id" column="id" />
+		<!-- one to many -->
+		<collection property="specialers" ofType="String" column="id" select="getSpecialers">
+			<id property="id" column="id" />
+		</collection>
+	</resultMap>
+	<!-- sql绑定资源ip -->
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+	<!-- sql绑定用户名 -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+	<!-- 根据活动id查询所有作品 -->
+	<select id="findWorksByActiveId" resultType="com.zonekey.study.vo.WorksView" parameterType="int">
+		select id,name from study_works where activeid = #{activeId}
+	</select>
+	<!-- 查询活动作品总数 -->
+	<select id="findCount" resultType="long" parameterType="com.zonekey.study.entity.PageBean">
+		select count(*) from (select id from study_works
+		where activeid = #{keywords.activeId}) a
+	</select>
+	<!-- 分页查询作品 -->
+	<select id="findWorksByPage" parameterType="com.zonekey.study.entity.PageBean" resultType="com.zonekey.study.vo.WorksView">
+	    <include refid="resourceIp"></include>
+		select id,name,(select c.name from sys_code c where c.value = subject and c.parentid='d5bf57476d02487dbb19055b6a208cbe')subject,grade,description,type,CONCAT(#{_ip},picture) picture,resourceid,activeid,userid,
+		<!--部门名称 -->
+		(select u.name from sys_user u where u.loginname = userid) authorName,
+		(select c.weeks from zonekey_curriculum c where c.id=resourceid) weeks,
+		(select c2.sameclass from zonekey_curriculum c2 where c2.id=resourceid) sameclass,
+		<!-- 标题 -->
+		case when type = '2' then '[录像]'
+		when type = '1' then '[直播]'
+		end as title, 
+		<!-- 部门 -->
+		concat(
+		(select IFNULL(CONCAT((select dd.name from zonekey_dept dd where dd.id = (select ddd.parentid from zonekey_dept ddd left join sys_user suu on ddd.id = suu.deptid where suu.loginname = userid)),'-'),"")),
+		(select d.name from zonekey_dept d left join sys_user su on d.id = su.deptid where su.loginname = userid)) deptName,
+		<!-- 专家姓名 -->
+		(select group_concat(concat(us.name,"-",det.isover)) from sys_user us left join study_review_detail det on us.loginname = det.userid where det.worksid = study_works.id) specialers,
+		<!-- 专家登录名 -->
+		(select group_concat(us2.loginname) from sys_user us2 left join study_review_detail det2 on us2.loginname = det2.userid where det2.worksid = study_works.id) specialLoginName,
+		DATE_FORMAT(createdate,'%Y-%c-%e %H:%i') createdateString,
+		CASE WHEN type = '1' THEN '直播课'
+		WHEN type = '2' THEN (select r.source from study_resource r where r.id = resourceid)
+		END AS resourceSource
+		from study_works
+		where activeid = #{keywords.activeId}
+		order by createdate desc
+		<if test="page != null and page.offset != null and page.limit != null">
+			limit #{page.offset} ,#{page.limit}
+		</if>
+	</select>
+	<!-- 查询作品的评审专家 -->
+	<select id="getSpecialers" parameterType="int" resultType="String">
+		select u.name from sys_user u left join study_review_detail de on u.loginname = de.userid where de.worksid = #{id}
+	</select>
+	<!-- 添加作品 -->
+	<insert id="insertWorks" parameterType="com.zonekey.study.vo.WorksView" useGeneratedKeys="true" keyProperty="id">
+		<include refid="bindLoginname" />
+		insert into study_works(name,subject,grade,description,type,picture,resourceid,activeid,userid,createdate)
+		values
+		(#{name},#{subject},#{grade},#{description},#{type},#{picture},#{resourceid},#{activeid},#{_loginname},sysDate())
+	</insert>
+	<!-- 修改作品 -->
+	<update id="updateWorks" parameterType="com.zonekey.study.vo.WorksView">
+		update study_works
+		<set>
+			<if test="name != null and name != ''">
+				name=#{name},
+			</if>
+			<if test="subject != null and subject != ''">
+				subject=#{subject},
+			</if>
+			<if test="grade != null and grade != ''">
+				grade=#{grade},
+			</if>
+			<if test="description != null and description != ''">
+				description=#{description},
+			</if>
+			<if test="type != null and type != ''">
+				type=#{type},
+			</if>
+			<if test="picture != null and picture != ''">
+				picture=#{picture},
+			</if>
+			<if test="resourceid != null and resourceid != ''">
+				resourceid=#{resourceid},
+			</if>
+			<if test="activeid != null and activeid != ''">
+				activeid=#{activeid},
+			</if>
+			<if test="userid != null and userid != ''">
+				userid=#{userid}
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+	<!-- 批量删除作品 -->
+	<delete id="delWorks" parameterType="List">
+		delete from study_works where id in
+		<foreach collection="worksList" open="(" close=")" separator="," item="id">
+			#{id}
+		</foreach>
+	</delete>
+	<!-- 分页查询活动作品及评审情况 -->
+	<select id="findWorksWithReview" parameterType="com.zonekey.study.entity.PageBean" resultType="com.zonekey.study.vo.WorksView">
+	    <include refid="resourceIp"></include>
+		select w.id,CONCAT(#{_ip},w.picture) picture,u.name authorName,w.name,
+		<!-- 查询专家总人数 -->
+		(select count(*) from study_review_detail srd7 where srd7.worksid = w.id) specialnum,
+		<!-- 查询未评分人数 -->
+		(select count(*) from study_review_detail srd8 where srd8.worksid = w.id and srd8.isover = '0') notreviewnum,
+		<!-- 查询评审进度 -->
+		concat((select count(*) from study_review_detail srd1 where srd1.worksid = w.id and isover = '1'),'/',
+		(select count(*) from study_review_detail srd2 where srd2.worksid = w.id)) reviewprogress,
+		<!-- 查询最高评分 -->
+		(select max(srd3.score) from study_review_detail srd3 where srd3.worksid = w.id) maxscore,
+		<!-- 查询最低分 -->
+		(select min(srd4.score) from study_review_detail srd4 where srd4.worksid = w.id) minscore,
+		<!-- 查询综合得分 -->
+		(select round((select sum(srd5.score) from study_review_detail srd5 where srd5.worksid = w.id)/
+		(select count(*) from study_review_detail srd6 where srd6.worksid = w.id ),1)) avgscore
+		<!-- end -->
+		from study_works w left join sys_user u on w.userid = u.loginname
+		where activeid = #{keywords.activeId}
+		order by w.name asc,w.createdate desc
+		<if test="page != null and page.offset != null and page.limit != null">
+			limit #{page.offset} ,#{page.limit}
+		</if>
+	</select>
+	<!-- 查询总数 -->
+	<select id="findWrCount" parameterType="com.zonekey.study.entity.PageBean" resultType="long">
+		select count(*) from (select w.id from study_works w left join sys_user u on w.userid = u.loginname
+		where
+		activeid = #{keywords.activeId}) q
+	</select>
+	<!-- 验证是否报名 -->
+	<select id="checkIsSigned" parameterType="int" resultType="int">
+		<include refid="bindLoginname" />
+		select count(*) from study_works where userid = #{_loginname} and activeid = #{activeid}
+	</select>
+</mapper>

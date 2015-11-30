@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.SysCodeMapper">
+	<select id="getCode" parameterType="string" resultType="map">
+		select a.name,a.value 
+		from sys_code a,sys_code b 
+		where a.deleteflag=0 and b.deleteflag=0 and a.parentid = b.id and b.value =#{value} order by a.sort
+	</select>
+	<select id="getCodeByParentId" parameterType="string" resultType="map">
+		select
+		name,value
+		from sys_code
+		where parentid = #{id,jdbcType=CHAR} and deleteflag='0' order by sort
+	</select>
+</mapper>

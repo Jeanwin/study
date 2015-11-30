@@ -1,0 +1,125 @@
+package com.zonekey.study.vo;
+
+import java.util.List;
+import java.util.Map;
+
+import com.zonekey.study.entity.Resource;
+
+/**
+ * 点播资源
+ * 
+ * @author admin
+ * 
+ */
+public class UnicastResourceView extends Resource {
+
+	private static final long serialVersionUID = -4851823178099666476L;
+
+	private List<Map<String, Object>> videos;
+	private String courseName;
+	private String username;
+	private String deptName;
+	private String picture;
+	private long duration;
+	private int commentNum;
+	private int viewNum;
+	private long playtime;
+	private int isCollection;
+	private int collectionId;
+
+	public List<Map<String, Object>> getVideos() {
+		return videos;
+	}
+
+	public void setVideos(List<Map<String, Object>> videos) {
+		this.videos = videos;
+	}
+
+	public String getCourseName() {
+		return courseName;
+	}
+
+	public void setCourseName(String courseName) {
+		this.courseName = courseName;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getDeptName() {
+		return deptName;
+	}
+
+	public void setDeptName(String deptName) {
+		this.deptName = deptName;
+	}
+
+	public String getPicture() {
+		return picture;
+	}
+
+	public void setPicture(String picture) {
+		this.picture = picture;
+	}
+
+	public long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
+
+	public int getCommentNum() {
+		return commentNum;
+	}
+
+	public void setCommentNum(int commentNum) {
+		this.commentNum = commentNum;
+	}
+
+	public int getViewNum() {
+		return viewNum;
+	}
+
+	public void setViewNum(int viewNum) {
+		this.viewNum = viewNum;
+	}
+
+	public long getPlaytime() {
+		return playtime;
+	}
+
+	public void setPlaytime(long playtime) {
+		this.playtime = playtime;
+	}
+
+	public int getIsCollection() {
+		return isCollection;
+	}
+
+	public void setIsCollection(int isCollection) {
+		this.isCollection = isCollection;
+	}
+
+	public int getCollectionId() {
+		return collectionId;
+	}
+
+	public void setCollectionId(int collectionId) {
+		this.collectionId = collectionId;
+	}
+
+	@Override
+	public String toString() {
+		return "UnicastResourceView [videos=" + videos + ", courseName=" + courseName + ", username=" + username + ", deptName=" + deptName + ", picture=" + picture + ", duration=" + duration
+				+ ", commentNum=" + commentNum + ", viewNum=" + viewNum + ", playtime=" + playtime + ", isCollection=" + isCollection + ", collectionId=" + collectionId + ", toString()="
+				+ super.toString() + "]";
+	}
+
+}

@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.ResourceMapper">
+	<!-- sql绑定用户名 -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+	<!-- sql绑定资源ip -->
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+	<!-- 文件树 start -->
+	<resultMap type="com.zonekey.study.vo.Tree" id="treeMap">
+		<result property="id" column="id" />
+		<association property="nodes" column="id" select="getData" />
+	</resultMap>
+	<select id="getData" resultMap="treeMap">
+		<include refid="bindLoginname" />
+		select id,resource_uuid,name title,isfolder from study_resource where
+		parentid =#{id} and isfolder="0"
+		and (if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect'))
+		order
+		by id
+	</select>
+	<select id="getTree" resultMap="treeMap">
+		<include refid="bindLoginname" />
+		select id,resource_uuid,name title,isfolder from study_resource where
+		id ="1"
+		and (if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect'))
+	</select>
+	<!-- 文件树 end -->
+
+	<!-- 文件树 start -->
+	<resultMap type="com.zonekey.study.vo.Tree" id="treeMaps">
+		<result property="id" column="id" />
+		<association property="nodes" column="id" select="getDatas" />
+	</resultMap>
+	<select id="getDatas" resultMap="treeMaps">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+		select id,resource_uuid,name title,nametype
+		titletype,isfolder,CASE WHEN nametype = 'Videos' THEN CONCAT(#{_ip},transPath)
+		ELSE CONCAT(#{_ip},fileurl) END AS fileUrl,CONCAT(#{_ip},imageurl) imageurl
+		from study_resource where parentid =#{id}
+		and (if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect'))
+		order by id
+	</select>
+	<select id="getTrees" resultMap="treeMaps">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+		select id,resource_uuid,name title,nametype
+		titletype,isfolder,CASE WHEN nametype = 'Videos' THEN CONCAT(#{_ip},transPath)
+		ELSE CONCAT(#{_ip},fileurl) END AS fileUrl,CONCAT(#{_ip},imageurl) imageurl
+		from study_resource where id ="1"
+		and (if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect'))
+	</select>
+	<!-- 根据父id查找文件夹下面的所有文件 -->
+	<!-- <resultMap type="com.zonekey.study.entity.resource" id="folderMaps"> <result property="id" column="id" /> <association property="children" column="id" select="getChildren" /> </resultMap> <select 
+		id="getResourcesByParentId" parameterType="com.zonekey.study.entity.Resource" resultMap="folderMaps"> select * from study_resource where id = #{id} </select> <select id="getChildren" parameterType="int" 
+		resultMap="folderMaps" > select * from study_resource where parentid =#{id} </select> -->
+	<!-- 文件树 end -->
+	<!-- 视频树 start -->
+	<resultMap type="com.zonekey.study.vo.Tree" id="videoMaps">
+		<result property="id" column="id" />
+		<association property="nodes" column="id" select="getVideoDatas" />
+	</resultMap>
+	<select id="getVideoDatas" resultMap="videoMaps">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+		select id,resource_uuid,name title,nametype
+		titletype,isfolder,CASE WHEN nametype = 'Videos' THEN CONCAT(#{_ip},transPath)
+		ELSE CONCAT(#{_ip},fileurl) END AS fileUrl,CONCAT(#{_ip},imageurl) imageurl,subject,grade,description from study_resource where parentid
+		=#{id}
+		and
+		(if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect')) and
+		if(isfolder='1',nametype='Videos',1=1)
+		<!-- if(isfolder='1',SUBSTRING_INDEX(fileurl,'.',-1) IN
+		('avi','rmvb','mp4','mkv','wmv','rm','asf','divx','mpg','mpeg','mpe','vob','3gp','swf'),1=1) -->
+		order by createdate desc
+	</select>
+	<select id="getVideoTrees" resultMap="videoMaps">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+		select id,resource_uuid,name title,nametype
+		titletype,isfolder,CASE WHEN nametype = 'Videos' THEN CONCAT(#{_ip},transPath)
+		ELSE CONCAT(#{_ip},fileurl) END AS fileUrl,CONCAT(#{_ip},imageurl) imageurl,subject,grade,description from study_resource where id ="1"
+		and
+		(if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect')) and
+		if(isfolder='1',nametype='Videos',1=1) order by createdate desc
+	</select>
+	<!-- 获取最新视频 -->
+	<select id="getLatestVideos" parameterType="String" resultType="map">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+		select id,name title,nametype
+		titletype,CASE WHEN nametype = 'Videos' THEN CONCAT(#{_ip},transPath)
+		ELSE CONCAT(#{_ip},fileurl) END AS fileUrl,CONCAT(#{_ip},imageurl) imageurl,description,DATE_FORMAT(createdate,'%Y-%m-%d %H:%i')
+		createdate,subject,createuser,isfolder from study_resource
+		where
+		(if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect')) and
+		nametype='Videos'
+		order by createdate desc
+		limit 8
+	</select>
+
+	<!-- 列表展示 -->
+	<select id="floderList" parameterType="com.zonekey.study.entity.PageBean" resultType="map">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+		select
+		id,name,nametype,parentid,concat(#{_ip},fileurl) fileurl,concat(#{_ip},transPath) transPath,CONCAT(#{_ip},imageurl) imageurl,description,publishstate,DATE_FORMAT(createdate,'%Y-%m-%d
+		%H:%i') createdate,type,source,subject,grade,createuser,isfolder,transFlag from
+		study_resource
+		where
+		(if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect'))
+		<!-- (if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect')) --> and 1=1
+		<if test="keywords != null and keywords != ''">
+			<if test="keywords.name == null || keywords.name == ''">
+				<if test="keywords.parentid==null">
+					and parentid = '1'
+				</if>
+				<if test="keywords.parentid!=null">
+					and parentid = #{keywords.parentid}
+				</if>
+			</if>
+			<if test="keywords.publishstate !=null and keywords.publishstate !=''">
+				and publishstate = #{keywords.publishstate}
+			</if>
+			<if test="keywords.type !=null and keywords.type !=''">
+				and type = #{keywords.type}
+			</if>
+			<if test="keywords.name != null and keywords.name !=''">
+				and name like concat('%',#{keywords.name},'%')
+			</if>
+			<if test="keywords.source != null and keywords.source !=''">
+				and source = #{keywords.source}
+			</if>
+		</if>
+		order by createdate desc
+		<if test="page != null and page.offset != null">
+			limit #{page.offset} ,#{page.pageSize}
+		</if>
+	</select>
+	<select id="count" parameterType="com.zonekey.study.entity.PageBean" resultType="long">
+		<include refid="bindLoginname" />
+		select count(*) from study_resource where
+		(if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect'))
+		<!-- (if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect')) --> and 1=1
+		<if test="keywords != null and keywords != ''">
+			<if test="keywords.parentid==null">
+				and parentid = '1'
+			</if>
+			<if test="keywords.parentid!=null">
+				and parentid = #{keywords.parentid}
+			</if>
+			<if test="keywords.publishstate !=null and keywords.publishstate !=''">
+				and publishstate = #{keywords.publishstate}
+			</if>
+			<if test="keywords.type !=null and keywords.type !=''">
+				and type = #{keywords.type}
+			</if>
+			<if test="keywords.name != null and keywords.name !=''">
+				and name like concat('%',#{keywords.name},'%')
+			</if>
+			<if test="keywords.source != null and keywords.source !=''">
+				and source = #{keywords.source}
+			</if>
+		</if>
+	</select>
+	<select id="comCount" parameterType="map" resultType="long">
+		<include refid="bindLoginname" />
+		select count(*) from study_resource where parentid = #{parentid} and
+		name = #{name} and (if(createuser is not null,createuser=#{_loginname} and (source = 'upload' or source = 'video_process' or source is NULL),1=1) or (storeuser = #{_loginname} and source = 'collect'))
+	</select>
+	<!-- 查询资源 -->
+	<select id="findById" parameterType="String" resultType="map">
+	    <include refid="resourceIp" />
+		select
+		name,fileurl,
+		<!-- CASE WHEN nametype = 'Videos' THEN CONCAT(#{_ip},transPath) ELSE CONCAT(#{_ip},fileurl) END AS fileurl, -->
+		nametype,createdate,type,source,parentid,createuser from
+		study_resource
+		where find_in_set(id,getPathChildList(#{id}))
+		and
+		isfolder="1"
+	</select>
+	<!-- 通过id查询资源 -->
+	<select id="findResourceById" parameterType="String" resultType="com.zonekey.study.vo.ResourceView">
+		select * from study_resource where id=#{id}
+	</select>
+	<!-- 添加资源 -->
+	<insert id="add" parameterType="map">
+		insert into
+		study_resource(name,nametype,fileurl,size,isfolder,resource_uuid,parentid,type,source,createdate,createuser)
+		value
+		<foreach collection="list" item="item" separator=",">
+			(#{item.name},#{item.nametype},#{item.fileurl},#{item.size},#{isfolder},#{item.resource_uuid},#{parentid},#{type},#{source},sysdate(),#{createuser})
+		</foreach>
+	</insert>
+	<!-- 添加资源，返回主键 -->
+	<insert id="addResourceReturnP" parameterType="com.zonekey.study.vo.ResourceView" useGeneratedKeys="true" keyProperty="id">
+		insert into
+		study_resource(name,nametype,fileurl,size,isfolder,resource_uuid,parentid,type,source,createdate,createuser)
+		value
+		(#{name},#{nametype},#{fileurl},#{size},#{isfolder},#{resource_uuid},#{parentid},#{type},#{source},sysdate(),#{createuser})
+	</insert>
+	<!-- 添加资源 -->
+	<insert id="addResource" parameterType="com.zonekey.study.vo.ResourceView">
+	    <include refid="bindLoginname" />
+		insert into
+		study_resource(name,nametype,fileurl,size,isfolder,resource_uuid,parentid,type,source,createdate,createuser,storeid,storetype,storeuser,author,transPath,transFlag)
+		value
+		(#{name},#{nametype},#{fileurl},#{size},#{isfolder},#{resource_uuid},#{parentid},#{type},#{source},sysdate(),#{createuser},#{storeid},#{storetype},#{storeuser},#{author},#{transPath},#{transFlag})
+	</insert>
+	<delete id="deleteResourceByAuthor" parameterType="com.zonekey.study.vo.ResourceView">
+		delete from
+		study_resource where createuser =#{createuser} and storeid=#{storeid}
+	</delete>
+	<insert id="addFolder" parameterType="map">
+		insert into
+		study_resource(name,nametype,isfolder,resource_uuid,parentid,type,createdate,createuser)
+		value
+		(#{name},#{nametype},#{isfolder},uuid(),#{parentid},#{type},sysdate(),#{createuser})
+	</insert>
+	<!-- 修改资源属性 -->
+	<update id="modify" parameterType="map">
+		update study_resource
+		<set>
+			<if test="parentid != null">
+				parentid = #{parentid},
+			</if>
+			<if test="modifyuser != null">
+				modifyuser =#{modifyuser},
+			</if>
+			<if test="name != null">
+				name = #{name},
+			</if>
+			<if test="type != null">
+				type = #{type},
+			</if>
+			<if test="source != null">
+				source =#{source},
+			</if>
+			<if test="subject != null">
+				subject = #{subject},
+			</if>
+			<if test="grade != null">
+				grade = #{grade},
+			</if>
+			<if test="description != null">
+				description = #{description},
+			</if>
+			modifydate = sysDate()
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 转码后更新 -->
+	<update id = "transUpdate" parameterType="com.zonekey.study.vo.ResourceView">
+	    update study_resource
+		<set>
+			<if test="transPath != null and transPath != ''">
+				transPath = #{transPath},
+			</if>
+			<if test="transFlag != null and transFlag != ''">
+				transFlag = #{transFlag},
+			</if>
+			modifydate = sysDate()
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除资源 -->
+	<delete id="delete" parameterType="string">
+		delete from study_resource
+		where find_in_set(id,getPathChildList(#{id}))
+	</delete>
+	<insert id="shareResource">
+		insert into
+		study_resource_share(uuid,userid,resourceid,shareuser,sharetime) value
+		<foreach collection="list" item="item" separator=",">
+			<foreach collection="resourceList" item="resource" separator=",">
+				(#{resource.uuid},#{item.loginname},#{resource.id},#{loginname},sysdate())
+			</foreach>
+		</foreach>
+	</insert>
+	<select id="selectbyid" parameterType="string" resultType="map">
+		select parentid,name,nametype from study_resource where id=#{parentid}
+	</select>
+	<!-- 查找分享列表 -->
+	<select id="shareList" parameterType="com.zonekey.study.entity.PageBean" resultType="map">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+		select
+		r.id,r.name,r.nametype,r.parentid,r.transFlag,
+		CONCAT(#{_ip},r.fileurl) fileurl,concat(#{_ip},r.transPath) transPath,CONCAT(#{_ip},r.imageurl) imageurl,r.description,r.publishstate,DATE_FORMAT(r.createdate,'%Y-%m-%d
+		%H:%i')
+		createdate,r.type,r.source,r.subject,r.grade,r.createuser,r.isfolder,s.storeid,
+		(select u.name from sys_user u where u.loginname = s.shareuser) shareuser,
+		DATE_FORMAT(s.sharetime,'%Y-%m-%d %H:%i') sharetime,s.userid,s.id as shareid,s.storeflag
+		from
+		study_resource r
+		left join
+		study_resource_share s on
+		r.id =
+		s.resourceid
+		where s.userid =
+		#{_loginname}
+		<if test="keywords != null and keywords != ''">
+			<if test="keywords.parentid==null">
+				and r.parentid = '1'
+			</if>
+			<if test="keywords.parentid!=null">
+				and r.parentid = #{keywords.parentid}
+			</if>
+			<if test="keywords.publishstate !=null and keywords.publishstate !=''">
+				and r.publishstate = #{keywords.publishstate}
+			</if>
+			<if test="keywords.type !=null and keywords.type !=''">
+				and r.type = #{keywords.type}
+			</if>
+			<if test="keywords.name != null and keywords.name !=''">
+				and r.name like concat('%',#{keywords.name},'%')
+			</if>
+			<if test="keywords.source != null and keywords.source !=''">
+				and r.source = #{keywords.source}
+			</if>
+		</if>
+		order by s.sharetime desc
+		<if test="page != null and page.offset != null">
+			limit #{page.offset} ,#{page.pageSize}
+		</if>
+	</select>
+	<!-- 统计分享列表记录数 -->
+	<select id="countShareList" parameterType="com.zonekey.study.entity.PageBean" resultType="long">
+		<include refid="bindLoginname" />
+		select count(*) from (select
+		r.id
+		from
+		study_resource r left join
+		study_resource_share s on r.id =
+		s.resourceid
+		where s.userid =
+		#{_loginname}
+		<if test="keywords != null and keywords != ''">
+			<if test="keywords.parentid==null">
+				and r.parentid = '1'
+			</if>
+			<if test="keywords.parentid!=null">
+				and r.parentid = #{keywords.parentid}
+			</if>
+			<if test="keywords.publishstate !=null and keywords.publishstate !=''">
+				and r.publishstate = #{keywords.publishstate}
+			</if>
+			<if test="keywords.type !=null and keywords.type !=''">
+				and r.type = #{keywords.type}
+			</if>
+			<if test="keywords.name != null and keywords.name !=''">
+				and r.name like concat('%',#{keywords.name},'%')
+			</if>
+			<if test="keywords.source != null and keywords.source !=''">
+				and r.source = #{keywords.source}
+			</if>
+		</if>
+		) u
+	</select>
+	<!-- 查找我的分享列表shareuser我分享的 -->
+	<select id="myShareList" parameterType="com.zonekey.study.entity.PageBean" resultType="map">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+		select
+		r.id,r.name,r.nametype,r.parentid,r.transFlag,
+		CONCAT(#{_ip},r.fileurl) fileurl,concat(#{_ip},r.transPath) transPath,CONCAT(#{_ip},r.imageurl) imageurl,r.description,r.publishstate,DATE_FORMAT(r.createdate,'%Y-%m-%d
+		%H:%i')
+		createdate,r.type,r.source,r.subject,r.grade,r.createuser,r.isfolder,s.shareuser,DATE_FORMAT(s.sharetime,'%Y-%m-%d
+		%H:%i') sharetime,s.userid,s.uuid as shareid,
+		(select GROUP_CONCAT(u.name) from sys_user u LEFT JOIN study_resource_share rs on u.loginname = rs.userid where rs.uuid = s.uuid ORDER BY u.name) users
+		from
+		study_resource r left join
+		study_resource_share s on
+		r.id =
+		s.resourceid
+		where s.shareuser =
+		#{_loginname}
+		<if test="keywords != null and keywords != ''">
+			<if test="keywords.parentid==null">
+				and r.parentid = '1'
+			</if>
+			<if test="keywords.parentid!=null">
+				and r.parentid = #{keywords.parentid}
+			</if>
+			<if test="keywords.publishstate !=null and keywords.publishstate !=''">
+				and r.publishstate = #{keywords.publishstate}
+			</if>
+			<if test="keywords.type !=null and keywords.type !=''">
+				and r.type = #{keywords.type}
+			</if>
+			<if test="keywords.name != null and keywords.name !=''">
+				and r.name like concat('%',#{keywords.name},'%')
+			</if>
+			<if test="keywords.source != null and keywords.source !=''">
+				and r.source = #{keywords.source}
+			</if>
+		</if>
+		group by s.uuid
+		order by s.sharetime desc
+		<if test="page != null and page.offset != null">
+			limit #{page.offset} ,#{page.pageSize}
+		</if>
+	</select>
+	<!-- 统计我的分享列表记录数 -->
+	<select id="countMyShareList" parameterType="com.zonekey.study.entity.PageBean" resultType="long">
+		<include refid="bindLoginname" />
+		select count(*) from (select
+		r.id
+		from
+		study_resource r left join
+		study_resource_share s on r.id =
+		s.resourceid
+		where s.shareuser =
+		#{_loginname}
+		<if test="keywords != null and keywords != ''">
+			<if test="keywords.parentid==null">
+				and r.parentid = '1'
+			</if>
+			<if test="keywords.parentid!=null">
+				and r.parentid = #{keywords.parentid}
+			</if>
+			<if test="keywords.publishstate !=null and keywords.publishstate !=''">
+				and r.publishstate = #{keywords.publishstate}
+			</if>
+			<if test="keywords.type !=null and keywords.type !=''">
+				and r.type = #{keywords.type}
+			</if>
+			<if test="keywords.name != null and keywords.name !=''">
+				and r.name like concat('%',#{keywords.name},'%')
+			</if>
+			<if test="keywords.source != null and keywords.source !=''">
+				and r.source = #{keywords.source}
+			</if>
+		</if>
+		group by s.uuid ) u
+	</select>
+	<!-- 删除验证 -->
+	<select id="deleteCheck" parameterType="String" resultType="long">
+		select count(*) from study_resource where fileurl = #{fileUrl}
+	</select>
+	<!-- 取消分享 -->
+	<delete id="cancelShare" parameterType="java.util.List">
+		delete from study_resource_share where uuid in
+		<foreach collection="shareList" open="(" separator="," close=")" item="uuid">
+			#{uuid}
+		</foreach>
+	</delete>
+	<!--从我的分享收藏 -->
+	<insert id="insertAll" parameterType="List">
+		<include refid="bindLoginname" />
+		insert into study_resource(name,nametype,fileurl,imageurl,description,size,isfolder,resource_uuid,parentid,type,source,createdate,createuser,storeid,storetype,author,storeuser,transPath,transFlag) values
+		<foreach collection="storelist" item="item" separator=",">
+			(#{item.name},#{item.nametype},#{item.fileurl},#{item.imageurl},#{item.description},#{item.size},#{item.isfolder},#{item.resource_uuid},#{item.parentid},#{item.type},#{item.source},sysDate(),#{item.createuser},#{item.storeid},#{item.storetype},#{item.author},#{_loginname},#{item.transPath},#{item.transFlag})
+		</foreach>
+	</insert>
+	<!--从我的分享中取消收藏 -->
+	<delete id="deleteAll" parameterType="List">
+		delete from study_resource where storeid in
+		<foreach collection="storeListDel" open="(" separator="," close=")" item="id">
+			#{id}
+		</foreach>
+	</delete>
+	<!-- 根据id查询所有信息 -->
+	<select id="findReById" parameterType="String" resultType="com.zonekey.study.vo.ResourceView">
+		select * from study_resource where id = #{id}
+	</select>
+
+	<!-- 更新分享表中的收藏标志 -->
+	<update id="updateShare" parameterType="Map">
+		update study_resource_share
+		<set>
+			<if test="storeid != null and storeid != ''">
+				storeid = #{storeid},
+			</if>
+			storeflag = #{storeflag}
+		</set>
+		where id = #{id}
+	</update>
+	
+		<!-- 更新分享表中的收藏标志 -->
+	<update id="updateHitCount" parameterType="String">
+		update zonekey_resource set watchwatchnum = watchwatchnum+1 where floder = #{floderid}
+	</update>
+	<!-- 根据uuid查询所有信息 -->
+	<select id="findReByUuid" parameterType="String" resultType="com.zonekey.study.vo.ResourceView">
+		select * from study_resource where resource_uuid = #{resource_uuid} limit 1
+	</select>
+	<!-- 根据id查询所有信息 -->
+	<select id="findReByid" parameterType="String" resultType="com.zonekey.study.vo.ResourceView">
+		select * from study_resource where id = #{id} limit 1
+	</select>
+	<!-- 根据storeid查询所有信息 -->
+	<select id="findReByStoreid" parameterType="String" resultType="com.zonekey.study.vo.ResourceView">
+		select * from study_resource where storeid = #{storeid} limit 1
+	</select>
+	<!-- 根据floder查一条资源信息 -->
+	<select id="selectResourceByFloder" parameterType="string" resultType="com.zonekey.study.vo.ResourceView">
+		select * ,CASE  name when 'film.mp4' then '1' when 'teacher.mp4' then '2' when 'vga.mp4' then '3' when 'students.mp4' then '4'  else '5' end as status from zonekey_resource where floder=#{floder} and name like '%mp4' 
+		ORDER BY status asc
+	</select>
+	<!-- 手动改获取id -->
+	<select id="getPrimaryKey" resultType="int">
+	    select max(id)+1 from study_resource
+	</select>
+	<!-- 添加资源 手动指定id-->
+	<insert id="addByPrimary" parameterType="com.zonekey.study.vo.ResourceView">
+	    <include refid="bindLoginname" />
+		insert into
+		study_resource(id,name,nametype,fileurl,size,isfolder,resource_uuid,parentid,type,source,createdate,createuser,storeid,storetype,storeuser,author,transPath,transFlag)
+		values
+		(#{id},#{name},#{nametype},#{fileurl},#{size},#{isfolder},#{resource_uuid},#{parentid},#{type},#{source},sysdate(),#{createuser},#{storeid},#{storetype},#{storeuser},#{author},#{transPath},#{transFlag})
+	</insert>
+	<!-- 根据资源id删除资源 -->
+	<delete id="deleteById" parameterType="String">
+	    delete r from study_resource r where r.id = #{rid} 
+	</delete>
+</mapper>

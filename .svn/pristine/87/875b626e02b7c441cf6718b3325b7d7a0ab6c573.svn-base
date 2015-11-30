@@ -1,0 +1,173 @@
+<div class="container-fluid" style="overflow:hidden;">
+    <div class="row" style="margin-top:16px;margin-bottom:100px;">
+        <!--tree-->
+       <!--  <div class="col-xs-2">
+            <div class="whiteframe">
+                <div style="padding-left: 8px" class="system-left-top font-overlay-1" ng-if="activeArea.title">当前教室：{{activeArea.title}}</div>
+                <div>
+                    <div ui-tree id="tree-root" data-drag-enabled="false">
+                        <ol ui-tree-nodes ng-model="areaTree">
+                            <li ng-repeat="node in areaTree" ui-tree-node ng-include="'nodes_renderer.html'"></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        <!--右边区域-->
+        <div class="col-xs-12 padding-left-none">
+            <div class="whiteframe" style="margin-left:16px">
+                <div style="padding:8px;" class="row">
+                    <div class="col-xs-5 padding-top-5" >
+                        <img src="assets/img/lemon-elements-14.png" style="width: 10px;height: 10px">&nbsp;直播课程
+                        <img src="assets/img/lemon-elements-16.png" style="width: 10px;height: 10px">&nbsp;录播课程
+                        <img src="assets/img/lemon-elements-15.png" style="width: 10px;height: 10px">&nbsp;有资源
+                    </div>                   
+                    <div class="col-xs-6 pull-right">
+                        <form class="form-inline" role="form">
+                            <select class="form-control pull-right" style="width: 96px;margin-left:20px;"  ng-model="scheduletype" ng-change="class(scheduletype)">
+                                <option value="3">全部</option>
+                                <option value="0">直播课</option>
+                                <option value="1">录像课</option>
+                                <option value="2">互动课</option>
+                            </select>
+                            <select class="form-control pull-right" style="width: 96px;" ng-model="schedule.weeks" ng-change="week(schedule)"
+                                    ng-options="weeks.id as weeks.value for weeks in WeekTimeList">
+                            </select>
+                        </form>
+                    </div>
+                </div>
+
+                <div>
+                    <button ng-if="notnum" class="ondata" ng-click="NewClassTimeSet()">
+                        <span class="ondatatext">该教室没有对应的<a>节次方案</a>！</span>
+                    </button>
+                </div>
+
+                <table class="table1 table-bordered table-boderCo" id="rightContent-height">
+                    <thead style="background-color: #c5e4fa;font-weight:bold">
+                        <tr style="text-align: center">
+                            <td></td>
+                            <td ng-repeat="weekDay in schedules[0].weekly" style="color: #3a699e;"
+                                ng-class="{'activeform':schedule.date === weekDay.classes[0].today}">
+                                <div>星期{{weekDay.day}}</div>
+                                <div>{{weekDay.classes[0].subtoday}}</div>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tr ng-repeat="weeklySchedule in schedules" ng-class="{'schedule-line':smaxclass === '{{$index+1}}'}">
+                        <td style="vertical-align: middle;text-align: center;WORD-WRAP: break-word" width="140" height="100">
+                            <div ng-if="weeklySchedule.classIndex>0">第{{$index+1}}节
+                                <!-- <div style="padding-top: 8px;color: #26a7db">{{weeklySchedule.weekly[0].classes[0].classstarttime}}至{{weeklySchedule.weekly[0].classes[0].classendtime}}</div> -->
+                            </div>
+                        </td>
+                        <td ng-repeat="classDay in weeklySchedule.weekly" style="vertical-align: middle;text-align:center;WORD-WRAP: break-word" width="140" height="100" class="tooltipTest tooltipTest-effect-3"
+                            ng-class="{'oldTimecolor':classDay.classes[0].today < schedule.date}">
+                            <div ng-repeat="class in classDay.classes " style="text-align: left">
+                            	<a  ng-href="#/PersonalInformation/detail?Jclass={{class}}" style="text-decoration:blink">
+                                
+								<!-- <div ng-if="class.subject" class="tooltipTest-item-edit" style="float:right;">
+                                    <a href ng-click="EditScheduleMessage(class,activeArea)" ng-if="classDay.classes[0].today > schedule.date" ng-mouseup="hidePopover()" class="btn btn-link"
+                                       tooltip-placement="top" tooltip-popup-delay="1000" tooltip="编辑">
+                                        <span class="glyphicon glyphicon-pencil"></span>
+                                    </a>
+                                </div> -->
+                                <div ng-if="showscheduletype===''" class="tooltipTest-item" >
+                                    <span ng-if="class.live==='1'">
+                                        <img src="assets/img/lemon-elements-14.png" style="width: 10px;height: 10px">
+                                    </span><span ng-if="class.record==='1'">
+                                        <img src="assets/img/lemon-elements-16.png" style="width: 10px;height: 10px">
+                                    </span><span ng-if="class.isresource==='1'">
+                                        <img src="assets/img/lemon-elements-15.png" style="width: 10px;height: 10px">
+                                    </span>
+                                    <ul ng-if="class.subject" style="list-style: none;padding-left: 0" >
+                                    	<li>
+                                        	<span class="scheduleWeek" style="color: #acacac;" title="{{class.subject}}">{{class.subject}}</span>
+                                        </li>
+                                        <li class="scheduleWeek" style="color: #acacac;" title="{{class.deptname}}">{{class.deptname}}</li>
+                                        <li>
+                                        	<span class="scheduleWeek" style="color: #1197e5;" title="{{class.username}}">{{class.username}}</span>
+                                        </li>
+                                        <li>
+											<span class="scheduleWeek" style="color: #1197e5;" title="{{class.username}}">{{class.areaname}}
+										</li>
+                                    </ul>
+                                </div>
+                                <div ng-if="showscheduletype==='0'&&class.subject&&class.live==='1'" class="tooltipTest-item">
+                                    <span ng-if="class.live==='1'">
+                                        <img src="assets/img/lemon-elements-14.png" style="width: 10px;height: 10px">
+                                    </span>
+                                    	<span ng-if="class.record==='1'">
+                                        <img src="assets/img/lemon-elements-16.png" style="width: 10px;height: 10px">
+                                    </span><span ng-if="class.isresource==='1'">
+                                        <img src="assets/img/lemon-elements-15.png" style="width: 10px;height: 10px">
+                                    </span>
+                                    <ul ng-if="class.subject" style="list-style: none;padding-left: 0">
+                                    	<li>
+                                        	<span class="scheduleWeek" style="color: #acacac;" title="{{class.subject}}">{{class.subject}}</span>
+                                        </li>
+                                        <li class="scheduleWeek" style="color: #acacac;" title="{{class.deptname}}">{{class.deptname}}</li>
+                                        <li>
+                                        	<span class="scheduleWeek" style="color: #1197e5;" title="{{class.username}}">{{class.username}}</span>
+                                        </li>
+                                        <li>
+											<span class="scheduleWeek" style="color: #1197e5;" title="{{class.username}}">{{class.areaname}}
+										</li>
+                                    </ul>
+                                </div>
+
+                                <div ng-if="showscheduletype==='1'&&class.subject&&class.record==='1'" class="tooltipTest-item">
+                                    <span ng-if="class.live==='1'">
+                                        <img src="assets/img/lemon-elements-14.png" style="width: 10px;height: 10px">
+                                    </span>
+                                    	<span ng-if="class.record==='1'">
+                                        <img src="assets/img/lemon-elements-16.png" style="width: 10px;height: 10px">
+                                    </span><span ng-if="class.isresource==='1'">
+                                        <img src="assets/img/lemon-elements-15.png" style="width: 10px;height: 10px">
+                                    </span>
+                                    <ul ng-if="class.subject" style="list-style: none;padding-left: 0">
+                                    	<li>
+                                        	<span class="scheduleWeek" style="color: #acacac;" title="{{class.subject}}">{{class.subject}}</span>
+                                        </li>
+                                        <li class="scheduleWeek" style="color: #acacac;" title="{{class.deptname}}">{{class.deptname}}</li>
+                                        <li>
+                                        	<span class="scheduleWeek" style="color: #1197e5;" title="{{class.username}}">{{class.username}}</span>
+                                        </li>
+                                        <li>
+											<span class="scheduleWeek" style="color: #1197e5;" title="{{class.username}}">{{class.areaname}}
+										</li>
+                                    </ul>
+                                </div>
+
+                                <div ng-if="showscheduletype==='2'&&class.subject&&class.isresource==='1'" class="tooltipTest-item">
+                                    <span ng-if="class.live==='1'">
+                                        <img src="assets/img/lemon-elements-14.png" style="width: 10px;height: 10px">
+                                    </span>
+                                    	<span ng-if="class.record==='1'">
+                                        <img src="assets/img/lemon-elements-16.png" style="width: 10px;height: 10px">
+                                    </span><span ng-if="class.isresource==='1'">
+                                        <img src="assets/img/lemon-elements-15.png" style="width: 10px;height: 10px">
+                                    </span>
+                                    <ul ng-if="class.subject" style="list-style: none;padding-left: 0">
+                                    	<li>
+                                        	<span class="scheduleWeek" style="color: #acacac;" title="{{class.subject}}">{{class.subject}}</span>
+                                        </li>
+                                        <li class="scheduleWeek" style="color: #acacac;" title="{{class.deptname}}">{{class.deptname}}</li>
+                                        <li>
+                                        	<span class="scheduleWeek" style="color: #1197e5;" title="{{class.username}}">{{class.username}}</span>
+                                        </li>
+                                        <li>
+											<span class="scheduleWeek" style="color: #1197e5;" title="{{class.username}}">{{class.areaname}}
+										</li>
+                                    	
+                                    </ul>
+                                </div>
+							   </a>
+                             </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

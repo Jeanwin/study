@@ -1,0 +1,65 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+        <title></title>
+            
+        <script type="text/javascript" src="swfobject.js"></script>
+        <script type="text/javascript">
+
+            var swfVersionStr = "15.0.0";
+
+            var xiSwfUrlStr = "playerProductInstall.swf";
+            var flashvars = {};
+            var params = {};
+            params.quality = "high";
+            params.bgcolor = "#000000";
+            params.allowscriptaccess = "sameDomain";
+            params.allowfullscreen = "true";
+			params.wmode = "opaque";
+            var attributes = {};
+            attributes.id = "lone_rtmp_player";
+            attributes.name = "lone_rtmp_player";
+            attributes.align = "middle";
+			attributes.style = "position:absolute;top:7px";
+            swfobject.embedSWF(
+                "lone_rtmp_player.swf", "flashContent", 
+                "100%", "100%", 
+                swfVersionStr, xiSwfUrlStr, 
+                flashvars, params, attributes);
+            // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
+            swfobject.createCSS("#flashContent", "display:block;text-align:left;");
+			
+			
+			function onRtmpPlayerload(){
+				//thisMovie('lone_rtmp_player').initRtmpPlayer("rtmp://127.0.0.1/vod/flvs/8");
+				//thisMovie('lone_rtmp_player').initRtmpPlayer(['rtmp://192.168.12.199/vod/flvs/8','rtmp://192.168.12.199/vod/flvs/4','rtmp://192.168.12.199/vod/flvs/3','rtmp://192.168.12.199/vod/flvs/2']);
+				//console.log('got urls',window.location.href)
+				var list = window.location.href.split('=')[1];
+				list =JSON.parse(list.replace(/%27/g,'"'));				
+				thisMovie('lone_rtmp_player').initRtmpPlayer(list)
+				
+			}
+			function thisMovie(movieName) {
+				if (navigator.appName.indexOf("Microsoft") != -1) {
+					return window[movieName]
+				}
+				else {
+					return document[movieName]
+				}
+			}
+        </script><style type="text/css" media="screen">#flashContent {visibility:hidden}#flashContent {display:block;text-align:left;}</style>
+    </head>
+    <body>
+        <object type="application/x-shockwave-flash" id="lone_rtmp_player" name="lone_rtmp_player" align="middle" style="position:absolute;top:0px;left:0px" data="lone_rtmp_player.swf" width="100%" height="100%">
+        <param name="quality" value="high"><param name="bgcolor" value="#000000"><param name="allowscriptaccess" value="sameDomain"><param name="allowfullscreen" value="true"><param name="wmode" value="opaque"></object>
+        
+        <noscript>
+           <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="100%" height="100%" id="lone_rtmp_player">
+               <param name="movie" value="lone_rtmp_player.swf" />
+               <param name="quality" value="high" />
+               <param name="bgcolor" value="#000000" />
+               <param name='allowScriptAccess' value ='always' />
+               <param name="allowFullScreen" value="true" />
+           </object>
+        </noscript>     
+   
+
+</body></html>

@@ -1,0 +1,140 @@
+<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ include file="/WEB-INF/views/include/taglib.jsp"%>
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<%@ include file="/WEB-INF/views/include/mobileHead.jsp"%>
+    <title>个人中心</title>
+</head>
+<body>
+<header id="header">
+    <div class="back"><a href="index.html"><i class="icon-chevron-left"></i></a></div>
+    <div class="iconBar"><i class="icon-format-list-bulleted" id="list" onclick="aaa()"></i><i class="icon-close" id="close" onclick="bbb()" style="display: none;"></i></div>
+    <nav id="nav" style="display: none;">
+        <a  href="liveCourses.html">直播</a>
+        <a  href="videoDemand.html">点播</a>
+        <a  href="collection.html">收藏</a>
+        <a  href="personalCenter.html">个人中心</a>
+        <a  href="information.html">公告</a>
+    </nav>
+    <script>
+        function aaa(){
+            var nav=document.getElementById("nav");
+            var list=document.getElementById("list");
+            var close=document.getElementById("close");
+            nav.style.display="block";
+            list.style.display="none";
+            close.style.display="block";
+        }
+        function bbb(){
+            var nav=document.getElementById("nav");
+            var list=document.getElementById("list");
+            var close=document.getElementById("close");
+            nav.style.display="none";
+            list.style.display="block";
+            close.style.display="none";
+        }
+    </script>
+    个人中心
+</header>
+<div class="personalInfo">
+    <div class="personal">
+        <img src="assets/images/lemonade-elements-27.png" />
+        <div class="personalNameCorp">
+            <div class="personalName">欧阳斌</div>
+            <div>山西大学数学组</div>
+        </div>
+        <div class="modPass">
+            <a href="modifyPassword.html"><i class="icon-password"></i><span>修改密码</span></a>
+        </div>
+    </div>
+</div>
+<div class="mainContent">
+    <div class="tabTitle">
+        <span class="current">最近点播</span>
+        <span><a href="collection.html">我的收藏</a></span>
+    </div>
+    <!--最近点播开始-->
+    <div class="contentLive">
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-stay_current_portrait mlIcon"></i><span>剩余49:27</span></div>
+                <div class="liveInfoOpt">今天</div>
+            </div>
+        </div>
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-desktop-windows mlIcon"></i><span>已看完</span></div>
+                <div class="liveInfoOpt">今天</div>
+            </div>
+        </div>
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-stay_current_portrait mlIcon"></i><span>不足一分钟</span></div>
+                <div class="liveInfoOpt">一周内</div>
+            </div>
+        </div>
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-desktop-windows mlIcon"></i><span>剩余49:27</span></div>
+                <div class="liveInfoOpt">今天</div>
+            </div>
+        </div>
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-stay_current_portrait mlIcon"></i><span>剩余49:27</span></div>
+                <div class="liveInfoOpt">今天</div>
+            </div>
+        </div>
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-stay_current_portrait mlIcon"></i><span>剩余49:27</span></div>
+                <div class="liveInfoOpt">今天</div>
+            </div>
+        </div>
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-stay_current_portrait mlIcon"></i><span>剩余49:27</span></div>
+                <div class="liveInfoOpt">一周内</div>
+            </div>
+        </div>
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-stay_current_portrait mlIcon"></i><span>剩余49:27</span></div>
+                <div class="liveInfoOpt">一周内</div>
+            </div>
+        </div>
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-stay_current_portrait mlIcon"></i><span>剩余49:27</span></div>
+                <div class="liveInfoOpt">一周内</div>
+            </div>
+        </div>
+        <div class="liveInfo">
+            <a href="liveDetail.html" class="liveTitle"><h3>中国近现代史 太平天国运动</h3></a>
+            <div class="liveInfoCont">
+                <div class="liveInfoAuthor"><i class="icon-person"></i><span>刘梅</span><i class="icon-stay_current_portrait mlIcon"></i><span>剩余49:27</span></div>
+                <div class="liveInfoOpt">一周内</div>
+            </div>
+        </div>
+        <!--<div class="noResentLive">
+            <i class="icon-stay_current_portrait"></i>
+            <div class="noResentLiveTip">
+                <div>您最近没有观看的视频</div>
+                <div>请进入<a href="demandDetail.html">点播栏目</a></div>
+            </div>
+        </div>-->
+    </div>
+    <!--最近点播结束-->
+</div>
+</body>
+</html>

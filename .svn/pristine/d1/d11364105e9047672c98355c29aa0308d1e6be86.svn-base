@@ -1,0 +1,394 @@
+package com.zonekey.study.entity;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 我的课堂
+ * @author Administrator
+ *
+ */
+public class CurriculumMaterials {
+	private int id;
+	private String uuid;//暂时不用
+	private String curriculumid;
+	private int subjectid;//
+	private String subjectname;// 主题
+	private String subject;// 主题(来源于课表)
+	private String userid;//教师++
+	private String username;//教师++
+	private String deptname;//班级++
+	private String datedetail;//时间(第几周、周几、第几节)++
+	private String classtime;//上课的年月日时分秒
+	private String classnum;
+	private String areaname;//地点++
+	private int scopeid;//暂时不用
+	private String scopename;// 学科
+	private int gradeid;
+	private String gradename;// 阶段
+	private String content;// 基本主题
+	private String introduce;// 课堂介绍
+	private String imageurl;//我的课堂图片路径
+	private String afterclassimageurl;//课后生成资源图片路径
+	private Date createdate;
+	private String createuser;
+	//课前资源name
+	private String readyresourcename;
+	private String nametype;
+	//课前资源uuid
+	private String readyresourcuuid;
+	//课前资源的id(为了调用公共的编辑功能)
+	private String readyresourcid;
+	//课前资源id
+//		private List<Map<String,Object>> readyresourcidlist;
+	//课后资源name
+//	private String afterclassresourcename;
+	//课后资源id
+//	private String afterclassresourcid;
+	//文件类型
+//	private String readyresourcetype;
+	//文件大小
+	private String readyresourcesize;
+	private String parentid;
+	//文件地址
+	private String readyresourcefileurl;
+	//课前、课后资源的可见性 0代表不可见，1代表可见
+	private String resourcevisable;
+	//课前、课后资源是否被收藏 0代表未收藏，1代表已收藏
+	private String resourcecollection;
+	//资源的文件夹名字
+	private String floder;
+	//点播状态
+	private String status;
+	//收藏表与资源表（study_resource、zonekey_resource）的关联字段
+	private String relation;
+	//收藏表 '1代表课前资源；2代表录播机资源，3代表智慧教室',
+	private String source;
+	private String transPath;//可能在线阅读用到
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	public String getCurriculumid() {
+		return curriculumid;
+	}
+
+	public void setCurriculumid(String curriculumid) {
+		this.curriculumid = curriculumid;
+	}
+
+	public int getSubjectid() {
+		return subjectid;
+	}
+
+	public void setSubjectid(int subjectid) {
+		this.subjectid = subjectid;
+	}
+
+	public String getSubjectname() {
+		return subjectname;
+	}
+
+	public void setSubjectname(String subjectname) {
+		this.subjectname = subjectname;
+	}
+
+	public int getScopeid() {
+		return scopeid;
+	}
+
+	public void setScopeid(int scopeid) {
+		this.scopeid = scopeid;
+	}
+
+	public String getScopename() {
+		return scopename;
+	}
+
+	public void setScopename(String scopename) {
+		this.scopename = scopename;
+	}
+
+	public int getGradeid() {
+		return gradeid;
+	}
+
+	public void setGradeid(int gradeid) {
+		this.gradeid = gradeid;
+	}
+
+	public String getGradename() {
+		return gradename;
+	}
+
+	public void setGradename(String gradename) {
+		this.gradename = gradename;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public String getIntroduce() {
+		return introduce;
+	}
+
+	public void setIntroduce(String introduce) {
+		this.introduce = introduce;
+	}
+
+	public Date getCreatedate() {
+		return createdate;
+	}
+
+	public void setCreatedate(Date createdate) {
+		this.createdate = createdate;
+	}
+
+	public String getCreateuser() {
+		return createuser;
+	}
+
+	public void setCreateuser(String createuser) {
+		this.createuser = createuser;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getDeptname() {
+		return deptname;
+	}
+
+	public void setDeptname(String deptname) {
+		this.deptname = deptname;
+	}
+
+	public String getDatedetail() {
+		return datedetail;
+	}
+
+	public void setDatedetail(String datedetail) {
+		this.datedetail = datedetail;
+	}
+
+	public String getClasstime() {
+		return classtime;
+	}
+
+	public void setClasstime(String classtime) {
+		this.classtime = classtime;
+	}
+
+	public String getAreaname() {
+		return areaname;
+	}
+
+	public void setAreaname(String areaname) {
+		this.areaname = areaname;
+	}
+
+	
+
+	public String getReadyresourcename() {
+		return readyresourcename;
+	}
+
+	public void setReadyresourcename(String readyresourcename) {
+		this.readyresourcename = readyresourcename;
+	}
+
+	public String getReadyresourcesize() {
+		return readyresourcesize;
+	}
+
+	public void setReadyresourcesize(String readyresourcesize) {
+		this.readyresourcesize = readyresourcesize;
+	}
+
+
+	public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
+	public String getImageurl() {
+		return imageurl;
+	}
+
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
+
+	public String getReadyresourcid() {
+		return readyresourcid;
+	}
+
+	public void setReadyresourcid(String readyresourcid) {
+		this.readyresourcid = readyresourcid;
+	}
+
+	public String getAfterclassimageurl() {
+		return afterclassimageurl;
+	}
+
+	public void setAfterclassimageurl(String afterclassimageurl) {
+		this.afterclassimageurl = afterclassimageurl;
+	}
+
+	public String getFloder() {
+		return floder;
+	}
+
+	public void setFloder(String floder) {
+		this.floder = floder;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getRelation() {
+		return relation;
+	}
+
+	public void setRelation(String relation) {
+		this.relation = relation;
+	}
+
+	public String getReadyresourcuuid() {
+		return readyresourcuuid;
+	}
+
+	public void setReadyresourcuuid(String readyresourcuuid) {
+		this.readyresourcuuid = readyresourcuuid;
+	}
+
+	public String getResourcevisable() {
+		return resourcevisable;
+	}
+
+	public void setResourcevisable(String resourcevisable) {
+		this.resourcevisable = resourcevisable;
+	}
+
+	public String getResourcecollection() {
+		return resourcecollection;
+	}
+
+	public void setResourcecollection(String resourcecollection) {
+		this.resourcecollection = resourcecollection;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public String getReadyresourcefileurl() {
+		return readyresourcefileurl;
+	}
+
+	public void setReadyresourcefileurl(String readyresourcefileurl) {
+		this.readyresourcefileurl = readyresourcefileurl;
+	}
+
+	public String getParentid() {
+		return parentid;
+	}
+
+	public void setParentid(String parentid) {
+		this.parentid = parentid;
+	}
+
+	public String getClassnum() {
+		return classnum;
+	}
+
+	public void setClassnum(String classnum) {
+		this.classnum = classnum;
+	}
+
+	public String getNametype() {
+		return nametype;
+	}
+
+	public void setNametype(String nametype) {
+		this.nametype = nametype;
+	}
+
+	public String getTransPath() {
+		return transPath;
+	}
+
+	public void setTransPath(String transPath) {
+		this.transPath = transPath;
+	}
+
+	@Override
+	public String toString() {
+		return "CurriculumMaterials [id=" + id + ", uuid=" + uuid
+				+ ", curriculumid=" + curriculumid + ", subjectid=" + subjectid
+				+ ", subjectname=" + subjectname + ", subject=" + subject
+				+ ", userid=" + userid + ", username=" + username
+				+ ", deptname=" + deptname + ", datedetail=" + datedetail
+				+ ", classtime=" + classtime + ", classnum=" + classnum
+				+ ", areaname=" + areaname + ", scopeid=" + scopeid
+				+ ", scopename=" + scopename + ", gradeid=" + gradeid
+				+ ", gradename=" + gradename + ", content=" + content
+				+ ", introduce=" + introduce + ", imageurl=" + imageurl
+				+ ", afterclassimageurl=" + afterclassimageurl
+				+ ", createdate=" + createdate + ", createuser=" + createuser
+				+ ", readyresourcename=" + readyresourcename + ", nametype="
+				+ nametype + ", readyresourcuuid=" + readyresourcuuid
+				+ ", readyresourcid=" + readyresourcid + ", readyresourcesize="
+				+ readyresourcesize + ", parentid=" + parentid
+				+ ", readyresourcefileurl=" + readyresourcefileurl
+				+ ", resourcevisable=" + resourcevisable
+				+ ", resourcecollection=" + resourcecollection + ", floder="
+				+ floder + ", status=" + status + ", relation=" + relation
+				+ ", source=" + source + ", transPath=" + transPath + "]";
+	}
+
+	
+}

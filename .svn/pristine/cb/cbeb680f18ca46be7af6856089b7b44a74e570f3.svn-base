@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.ReviewRecordMapper">
+	<!-- sql绑定用户名 -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+	
+		<!-- sql绑定资源ip -->
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+	<select id="getAllReviewRecords" parameterType="com.zonekey.study.entity.PageBean"   resultType="map">
+		<include refid="bindLoginname" />
+		<include refid="resourceIp" />
+	<!-- 	select srd.id,sw.id,name,subject,description,srd.isover,CONCAT("http://192.168.12.220/",picture)picture,DATE_FORMAT(srd.createdate,'%Y-%m-%d %H:%i')
+		  pksj from study_review_detail srd left join study_works sw on srd.worksid = sw.id where 1=1 
+		and srd.userid=#{_loginname}
+		    order by srd.createdate desc -->
+		<!--      select a.id activeid,b.id workid,c.id detailid,a.name activename,b.name workname,CONCAT("http://192.168.12.220/",b.picture)picture,a.conbegintime,a.conendtime,c.isover,DATE_FORMAT(c.createdate,'%Y-%m-%d %H:%i')pksj 
+            from study_works b,study_review_detail c,study_active a where c.worksid=b.id and a.id=b.activeid and c.userid= #{_loginname}
+            order by c.createdate desc -->
+         <!-- 参赛作品：type=3 直播课：type=1 精品课程type=2-->
+         select * from (
+          select d.source,c.`type`,c.worksid resourceid,b.name subjectname,b.name attribute,a.name beizhu,CONCAT(#{_ip},b.picture)picture,c.isover,DATE_FORMAT(c.reviewdate,'%Y-%m-%d %H:%i')pksj ,DATE_FORMAT(a.conbegintime,'%Y-%m-%d') conbegintime,DATE_FORMAT(a.conendtime,'%Y-%m-%d') conendtime 
+		 from study_works b,study_review_detail c,study_active a ,study_resource d where c.worksid=b.id and a.id=b.activeid and b.resourceid=d.id and c.type='3' and c.userid=#{_loginname}
+		 union
+		 select '' source,c.`type`,c.resourceid resourceid,d.subject subjectname,d.subjectattribute attribute,'' beizhu,imageurl picture,c.isover,DATE_FORMAT(c.reviewdate,'%Y-%m-%d %H:%i')pksj ,'' conbegintime,'' conendtime
+		 from  (select a.id,concat(#{_ip},b.imageurl) imageurl,a.subject,a.subjectattribute from zonekey_curriculum a left join study_curriculum_materials b on a.id=b.curriculumid)
+		  d,study_review_detail c
+		 where d.id=c.resourceid and c.`type`='1' and c.userid=#{_loginname}
+		 union
+			select '' source,c.`type`,a.floder resourceid,a.resourcename subjectname,a.name attribute,'' beizhu,concat(#{_ip},a.uploadPic) picture,c.isover,DATE_FORMAT(c.reviewdate,'%Y-%m-%d %H:%i')pksj,'' conbegintime,'' conendtime
+		from study_review_detail c left join zonekey_resource a on a.floder= c.resourceid  where  c.`type`='2' and c.userid=#{_loginname}  group by c.resourceid
+				)d order by d.isover asc, d.pksj desc
+		
+		<if test="page != null and page.offset != null">
+			limit #{page.offset} ,#{page.pageSize}
+		</if>
+		
+	</select>
+	
+	
+	<select id="count" parameterType="com.zonekey.study.entity.PageBean" resultType="long">
+		<include refid="bindLoginname" />
+		select count(*) from (
+          select d.source,c.`type`,c.worksid resourceid,b.name subjectname,b.name attribute,a.name beizhu,'' picture,c.isover,DATE_FORMAT(c.reviewdate,'%Y-%m-%d %H:%i')pksj ,DATE_FORMAT(a.conbegintime,'%Y-%m-%d') conbegintime,DATE_FORMAT(a.conendtime,'%Y-%m-%d') conendtime 
+		 from study_works b,study_review_detail c,study_active a ,study_resource d where c.worksid=b.id and a.id=b.activeid and b.resourceid=d.id and c.type='3' and c.userid=#{_loginname}
+		 union
+		 select '' source,c.`type`,c.resourceid resourceid,d.subject subjectname,d.subjectattribute attribute,'' beizhu,imageurl picture,c.isover,DATE_FORMAT(c.reviewdate,'%Y-%m-%d %H:%i')pksj ,'' conbegintime,'' conendtime
+		 from  (select a.id,'' imageurl,a.subject,a.subjectattribute from zonekey_curriculum a left join study_curriculum_materials b on a.id=b.curriculumid)
+		  d,study_review_detail c
+		 where d.id=c.resourceid and c.`type`='1' and c.userid=#{_loginname}
+		 union
+			select '' source,c.`type`,a.floder resourceid,a.resourcename subjectname,a.name attribute,'' beizhu,'' picture,c.isover,DATE_FORMAT(c.reviewdate,'%Y-%m-%d %H:%i')pksj,'' conbegintime,'' conendtime
+		from study_review_detail c left join zonekey_resource a on a.floder= c.resourceid  where  c.`type`='2' and c.userid=#{_loginname}  group by c.resourceid
+				)d
+	</select>
+	
+	
+	<select id="countReviewNum" parameterType="int" resultType="long">
+		<include refid="bindLoginname" />
+		select count(*) from (
+          select d.source,c.`type`,c.worksid resourceid,b.name subjectname,b.name attribute,a.name beizhu,'' picture,c.isover,DATE_FORMAT(c.reviewdate,'%Y-%m-%d %H:%i')pksj ,DATE_FORMAT(a.conbegintime,'%Y-%m-%d') conbegintime,DATE_FORMAT(a.conendtime,'%Y-%m-%d') conendtime 
+		 from study_works b,study_review_detail c,study_active a ,study_resource d where c.worksid=b.id and a.id=b.activeid and b.resourceid=d.id and c.type='3' and c.userid=#{_loginname}
+		 union
+		 select '' source,c.`type`,c.resourceid resourceid,d.subject subjectname,d.subjectattribute attribute,'' beizhu,imageurl picture,c.isover,DATE_FORMAT(c.reviewdate,'%Y-%m-%d %H:%i')pksj ,'' conbegintime,'' conendtime
+		 from  (select a.id,'' imageurl,a.subject,a.subjectattribute from zonekey_curriculum a left join study_curriculum_materials b on a.id=b.curriculumid)
+		  d,study_review_detail c
+		 where d.id=c.resourceid and c.`type`='1' and c.userid=#{_loginname}
+		 union
+			select '' source,c.`type`,a.floder resourceid,a.resourcename subjectname,a.name attribute,'' beizhu,'' picture,c.isover,DATE_FORMAT(c.reviewdate,'%Y-%m-%d %H:%i')pksj,'' conbegintime,'' conendtime
+		from study_review_detail c left join zonekey_resource a on a.floder= c.resourceid  where  c.`type`='2' and c.userid=#{_loginname}  group by c.resourceid
+				)d where d.isover=#{type}
+	</select>
+</mapper>

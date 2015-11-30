@@ -1,0 +1,22 @@
+#mysql database setting
+jdbc.driver=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://192.168.12.214/dis_production_8080?useUnicode=true&characterEncoding=utf-8
+jdbc.username=root
+jdbc.password=123456
+#common
+resource.ip = /data/
+common.ip=http\://study.zonekey.com.cn
+#dbcp settings
+dbcp.maxIdle=5
+dbcp.maxActive=40
+
+#memcached settings
+memcached.url=192.168.12.106:12000
+memcache.server=192.168.12.106:12000
+memcache.initConn=20
+memcache.minConn=10
+memcache.maxConn=50
+memcache.maintSleep=30
+memcache.nagle=false
+memcache.socketTO=3000
+memcache.time=6000

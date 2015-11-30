@@ -1,0 +1,39 @@
+
+/********space my-note*********/
+.bar-triple{background: #f2f2f2;border:1px #f1f1f1 solid;height:1000px;}
+.headPic{text-align: center;margin-bottom: 30px;}
+.headPic img{width:100px;height:100px;border-radius: 50px;border:1px #ccc solid;}
+.headPic p{margin-top:10px;}
+.border-left{border-left: 1px #f5f5f5 solid;}
+.tabTitle{border-left:7px #ffa727 solid;padding-left:10px;font-size: 20px;color:#000;height: 30px;line-height: 30px;}
+.nav-tabs {
+    border-bottom: none;
+    text-align: center;
+    color:#999;
+}
+.nav-tabs li a{color:#999;font-size: 16px;}
+.nav-tabs i{font-size: 20px;vertical-align:text-bottom;margin-right:5px;}
+.nav-tabs li.cur a{color:#2ca7ec;background: none;}
+.nav-tabs li a:hover{color:#2ca7ec;background: none;}
+.numWaiView{font-size: 16px;}
+.tab-space{color:#999;font-size: 14px;padding-left:0;}
+.spaceTab{margin-top:10px;}
+.spaceTab h3{height:40px;line-height:40px;background:#f7f7f7;border:1px #e5e5e5 solid;-webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;color:#999;font-size: 14px;margin-top:10px;}
+.spaceTab th,.spaceTab td{text-align: center;}
+.spaceTab td{padding:20px 0;border-bottom: 1px #e5e5e5 solid;}
+.spaceTab table{width:100%;margin:0 auto;}
+.spaceTab img{width:50px;height:40px;float: left;margin-right:10px;}
+.spaceTab td.text-left{text-align: left;}
+.spaceTab td a{color:#2ca7ec;text-decoration:none;}
+.spaceTab td a:hover{color:#0c79b7;text-decoration:none;}
+.icon-quill{font-size: 20px;vertical-align:text-bottom;}
+nav i{font-size: 20px;vertical-align: middle;}
+.table th,.table td{max-width: 300px;white-space: nowrap;overflow: hidden;text-overflow:ellipsis;}
+.table img,.table span{vertical-align: middle;}
+.color-orange{color:orange;}
+.color-green{color:#46be92;}
+.color-red{color:#ff7587;}
+.color-blue{color:#03aeda;}
+.color-gray{color:#999;}

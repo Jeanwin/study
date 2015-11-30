@@ -1,0 +1,190 @@
+package com.zonekey.study.service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.zonekey.study.common.ReadProperties;
+import com.zonekey.study.common.UploadImg;
+import com.zonekey.study.dao.ActiveMapper;
+import com.zonekey.study.dao.ReviewDetailMapper;
+import com.zonekey.study.dao.ReviewUserMapper;
+import com.zonekey.study.dao.WorksMapper;
+import com.zonekey.study.entity.PageBean;
+import com.zonekey.study.vo.ActiveView;
+import com.zonekey.study.vo.ReviewDetailView;
+import com.zonekey.study.vo.ReviewUserView;
+import com.zonekey.study.vo.WorksView;
+
+@Service
+@Transactional(readOnly = true)
+public class WorksService {
+	@Resource
+	private ActiveMapper activeMapper;
+	@Resource
+	private WorksMapper worksMapper;
+	@Resource
+	private ReviewDetailMapper detailMapper;
+	@Resource
+	private ReviewUserMapper rUserMapper;
+
+	/**
+	 * 添加作品》》没有图片上传
+	 * 
+	 * @param
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int addWorks(WorksView worksView) {
+		// 验证是否正在报名
+		ActiveView aview = activeMapper.findActiveById(worksView.getActiveid());
+		if (worksView.getImgSrc() != null && !"".equals(worksView.getImgSrc())) {
+			if (worksView.getImgSrc().indexOf(ReadProperties.getIp()) != -1) {
+				worksView.setPicture(worksView.getImgSrc().replace(ReadProperties.getIp(), ""));
+			}
+		}
+		int signFlag = worksMapper.checkIsSigned(worksView.getActiveid());
+		if ("未开始".equals(aview.getStatus())) {
+			return -6;
+		} else if ("报名已结束,评审未开始".equals(aview.getStatus())) {
+			return -5;
+		} else if ("报名已结束,评审中".equals(aview.getStatus())) {
+			return -4;
+		} else if ("已结束".equals(aview.getStatus())) {
+			return -3;
+		} else if (signFlag > 0) {
+			return -2;
+		} else {
+			/*
+			 * if (worksView.getType() != null &&
+			 * !"".equals(worksView.getType())) { // "1"为直播，resourceid为直播课id if
+			 * ("1".equals(worksView.getType())) { return
+			 * worksMapper.insertWorks(worksView); } //
+			 * "2"录像文件,resourceid为个人空间资源id else if
+			 * ("2".equals(worksView.getType())) { return
+			 * worksMapper.insertWorks(worksView); } else { return 0; } }
+			 */
+			/**
+			 * 1如果为自动分配专家
+			 */
+			if ("报名中,评审中".equals(aview.getStatus()) || "报名中,评审未开始".equals(aview.getStatus())) {
+				if (aview.getModel() != null && "1".equals(aview.getModel())) {
+					List<ReviewUserView> experts = rUserMapper.findUserList(worksView.getActiveid());
+					List<ReviewDetailView> details = new ArrayList<ReviewDetailView>();
+					int worid = worksMapper.insertWorks(worksView);
+					for (ReviewUserView u : experts) {
+						ReviewDetailView rd = new ReviewDetailView();
+						rd.setWorksid(worksView.getId());
+						rd.setUserid(u.getUserid());
+						rd.setTemplateid(aview.getContemplate());
+						details.add(rd);
+					}
+					int d = detailMapper.insertDetails(details);
+					System.out.println(d);
+					return worid;
+				} else {
+					return worksMapper.insertWorks(worksView);
+				}
+			} else {
+				return 0;
+			}
+		}
+	}
+
+	/**
+	 * 添加作品，有封面图片上传时
+	 * 
+	 * @param req
+	 * @param view
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int newWorks(MultipartHttpServletRequest req, WorksView view) {
+		String picturePath;
+		if (view.getPicture() != null && !"".equals(view.getPicture())) {
+			picturePath = UploadImg.uploadImage(null, req, view.getPicture());
+		} else {
+			picturePath = UploadImg.uploadImage(null, req, null);
+		}
+		int result = 0;
+		if (picturePath != null && !"".equals(picturePath)) {
+			view.setPicture(picturePath);
+			result = this.addWorks(view);
+		} else {
+			// 图片没有上传成功
+			result = -1;
+		}
+		return result;
+	}
+
+	/**
+	 * 分页查询活动相关的作品
+	 * 
+	 * @param pageBean
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public Map<String, Object> worksList(PageBean pageBean) {
+		Map<String, Object> data;
+		if (pageBean != null) {
+			data = new HashMap<String, Object>();
+			List<WorksView> works = worksMapper.findWorksByPage(pageBean);
+			long count = worksMapper.findCount(pageBean);
+			data.put("data", works);
+			data.put("total", count);
+			return data;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * 删除作品
+	 * 
+	 * @param worksIds
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int deleteWorks(List<Integer> worksIds) {
+		int count = 0;
+		int result = 0;
+		if (worksIds != null && worksIds.size() > 0) {
+			result = detailMapper.deleteByWorksId(worksIds);
+			count = worksMapper.delWorks(worksIds);
+			if (count > 0) {
+				return count;
+			} else {
+				return 0;
+			}
+		} else {
+			return 0;
+		}
+	}
+
+	/**
+	 * 根据活动id查询作品及评审情况
+	 * 
+	 * @param pageBean
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public Map<String, Object> getWorksWithDetail(PageBean pageBean) {
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		if (pageBean != null) {
+			List<WorksView> data = worksMapper.findWorksWithReview(pageBean);
+			long total = worksMapper.findWrCount(pageBean);
+			dataMap.put("data", data);
+			dataMap.put("total", total);
+			return dataMap;
+		} else {
+			return null;
+		}
+	}
+}

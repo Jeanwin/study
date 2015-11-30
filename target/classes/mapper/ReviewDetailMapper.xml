@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.ReviewDetailMapper">
+    <!-- sql绑定用户名 -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+	<!-- 自动分配评审专家 -->
+	<insert id="insertDetails" parameterType="List">
+		insert into study_review_detail(worksid,userid,templateid,createdate) values
+		<foreach collection="detailList" item="d" index="index" separator=",">
+			(#{d.worksid},#{d.userid},#{d.templateid},sysDate())
+		</foreach>
+	</insert>
+	<!-- 根据活动id删除专家分配 -->
+	<delete id="deleteByActiveId" parameterType="int">
+		delete from study_review_detail where worksid in (select id from study_works w where w.activeid = #{activeId}) and isover = '0'
+	</delete>
+	<!-- 根据作品id删除专家分配 -->
+	<delete id="deleteByWorksId" parameterType="List">
+		delete from study_review_detail where worksid in
+		<foreach collection="worksids" item="worksid" open="(" close=")" separator=",">
+			#{worksid}
+		</foreach>
+		and isover = '0'
+	</delete>
+	<!-- 根据作品id查询评审专家列表 -->
+	<select id="findByWorksId" resultType="com.zonekey.study.vo.ReviewDetailView" parameterType="int">
+	    select rd.id,u.name username,rd.userid,rd.templateid from sys_user u left join study_review_detail rd on u.loginname = rd.userid where
+	    rd.worksid = #{worksid}
+ 	</select>
+ 	<!-- 根据作品id查询作品评审详情 -->
+ 	<select id="findDetailByWorkId" resultType="com.zonekey.study.vo.ReviewDetailView" parameterType="int">
+ 	    select u.name username,DATE_FORMAT(de.reviewdate,'%Y-%c-%e %H:%i') reviewdateString,de.score,de.remark from study_review_detail de
+ 	    left join sys_user u on de.userid = u.loginname where de.worksid = #{workid}   
+ 	</select>
+ 	<!-- 查询本次活动专家名字 -->
+ 	<select id="findSpecialistByActiveId" parameterType="int" resultType="Map">
+        select u.loginname,u.name from study_review_user ru left join sys_user u on ru.userid = u.loginname where ru.activeId= #{aid} 
+        and u.deleteflag = '0'	  
+  	</select>
+  	<!-- 根据专家登录名和活动id查询评审情况 -->
+  	<select id="countReview" resultType="int">
+  	    select count(*) from study_review_detail srd left join study_works w on srd.worksid = w.id where srd.userid = #{userid} and 
+  	    w.activeid = #{acid} 
+  	    <if test="isover != null and isover != ''">
+  	         and srd.isover = #{isover}
+  	    </if> 
+  	</select>
+  	<!--  -->
+  	<select id="findReviewByUser" parameterType="int" resultType="com.zonekey.study.vo.ReviewDetailView">
+  	    <include refid="bindLoginname" />
+  	    select DATE_FORMAT(de.reviewdate,'%Y-%c-%e %H:%i') reviewdateString,de.score,de.remark,de.isover from study_review_detail de
+ 	    where de.worksid = #{woid} and de.userid = #{_loginname}  
+  	</select>
+  	<!--  -->
+  	<select id="checkIsOver" resultType="String">
+  	    select d.isover from study_review_detail d where d.worksid = #{worid} and d.userid = #{speid} limit 1
+  	</select>
+  	<!-- 根据作品id和专家列表删除评审记录 -->
+  	<delete id="delByWorkIdAndSpe">
+  	    delete d from study_review_detail d where d.worksid=#{wid}  and d.isover = '0' and d.userid in 
+  	    <foreach collection="slist" item="sp" open="(" close=")" separator=",">
+  	        #{sp}
+  	    </foreach>
+  	</delete>
+</mapper>

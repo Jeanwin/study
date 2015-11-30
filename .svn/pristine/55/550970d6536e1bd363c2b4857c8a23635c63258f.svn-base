@@ -1,0 +1,82 @@
+package com.zonekey.study.mobile.web;
+
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springside.modules.web.MediaTypes;
+
+import com.zonekey.study.common.AppConstants;
+import com.zonekey.study.common.JsonUtil;
+import com.zonekey.study.dao.SysCodeMapper;
+import com.zonekey.study.entity.Note;
+import com.zonekey.study.entity.PageBean;
+import com.zonekey.study.entity.Pagebar;
+import com.zonekey.study.mobile.service.MobileIndexService;
+import com.zonekey.study.service.ActiveService;
+import com.zonekey.study.service.CurriculumDetailsService;
+import com.zonekey.study.service.ResourceService;
+import com.zonekey.study.service.SysCodeService;
+import com.zonekey.study.service.SysUserService;
+@Controller
+@RequestMapping(value = "/mobile")
+public class MobileIndexController {
+	@Autowired
+	private MobileIndexService mobileIndexService;
+	@Resource
+	private CurriculumDetailsService curriculumDetailsService;
+	@Autowired
+	private SysCodeService sysCodeService;
+	@Autowired
+	private SysCodeMapper syscodeMapper;
+	@Resource
+	private SysUserService userService;
+	@Resource
+	private ResourceService reService;
+	@Resource
+	private ActiveService activeService;
+	
+	
+	
+	
+	
+	/**
+	 * 获取直播课表(全部和按条件均可，以后加上分页参数)
+	 */
+	@RequestMapping(value = "/liveList")
+	public @ResponseBody
+	Map<String, Object> liveList(String deptid,String loginname,String name,Pagebar page) {
+		Map<String,Object> keywords = new HashMap<String,Object>();
+		try {
+			if(name != null){
+				name = new String(name.getBytes("iso8859-1"),"utf-8");
+				name = new String(name.getBytes("iso8859-1"),"utf-8");
+			}
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		keywords.put("name", name);
+		page.setKeywords(keywords);
+		try {
+			return mobileIndexService.findLiveCurriculum(deptid,loginname, page);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("isSuccess", "0");
+			return map;
+		}
+	}
+}

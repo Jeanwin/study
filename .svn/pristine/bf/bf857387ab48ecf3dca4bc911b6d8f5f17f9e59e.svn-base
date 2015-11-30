@@ -1,0 +1,88 @@
+<html>
+<head>
+<title>视屏加工播放器</title>
+<script type="text/javascript" src="js/zk_player_v1.0.js"></script>
+<link href="css/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
+<style>
+
+</style>
+<script>
+function init(){
+	document.getElementById("zk_player_v1.0").style.height=document.body.clientHeight-70+'px';
+	parent.IframeOnLoad();
+	//var list = window.location.href.split('=')[1];
+	//list =JSON.parse(list.replace(/%27/g,'"'));
+	//console.log(list)
+	//initvideo(list);
+}
+function initvideo(videolist){
+/*	var videolist = [
+	["http://127.0.0.1/video/video3_0.mp4","http://127.0.0.1/video/video3_1.mp4","http://127.0.0.1/video/video3_2.mp4",900]
+	,["http://127.0.0.1/video/video3_3.mp4","http://127.0.0.1/video/video3_4.mp4","http://127.0.0.1/video/video3_5.mp4",900]
+	]*/
+	var dom=[document.getElementById('player')]
+	for(var i=0;i<3;i++){
+		if(i<videolist.length-1){
+			dom.push(document.getElementsByClassName("videoContent")[i].childNodes[0])
+		}else{
+			document.getElementsByClassName("videoContent")[i].style.display="none";
+		}
+	}
+	if(videolist.length==1){
+		document.getElementById("zk_player_v1.0").style.width='100%'
+	}	
+	zk_player.init_Bar_Controller('#zk_player_v1.0');
+	zk_player.init_Video_Controller(dom,videolist)
+}
+</script>
+</head>
+<body onLoad="init()" style="margin: 0;">
+<div id="zk_player_v1.0" class="zk-video zk-video-360p" role="application" aria-label="media player">
+	<div class="zk-type-single">
+		<div id="jquery_zkplayer" class="zk-jplayer" style="width: 100%; height: 100%;">
+       	  <div id="player"></div>
+      </div>
+		<div class="zk-gui">
+			<div class="zk-video-play">
+				<button class="zk-video-play-icon" role="button" tabindex="0">play</button>
+			</div>
+			<div class="zk-interface">				
+<!--<div class="zk-play-circle" style="left:10%">
+<div class="zk-play-circleInfomation">				 	
+<div class="zk-play-circleInfo"><h2>1008611</h2></div></div>
+</div>-->
+				<div class="zk-progress">
+					<div class="zk-seek-bar" style="width: 100%;">
+						<div class="zk-play-bar">
+						</div>
+					</div>
+				</div>
+				<div class="zk-current-time" role="timer" aria-label="time">&nbsp;</div>
+				<div class="zk-duration" role="timer" aria-label="duration">&nbsp;</div>
+				<div class="zk-controls-holder">
+					<div class="zk-controls">
+						<button class="zk-play" role="button" tabindex="0">play</button>
+						<button class="zk-stop" role="button" tabindex="0">stop</button>
+					</div>
+					<div class="zk-volume-controls">
+						<button class="zk-mute" role="button" tabindex="0">mute</button>
+						<button class="zk-volume-max" role="button" tabindex="0">max volume</button>
+						<div class="zk-volume-bar">
+							<div class="zk-volume-bar-value"></div>
+						</div>
+					</div>
+					<div class="zk-toggles">
+						<button class="zk-full-screen" role="button" tabindex="0">full screen</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div style="width:18%; height:100%; float: right">
+<div class="videoContent"><div></div></div>
+<div class="videoContent"><div></div></div>
+<div class="videoContent"><div></div></div>
+</div>
+</body>
+</html>

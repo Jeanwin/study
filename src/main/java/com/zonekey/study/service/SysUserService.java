@@ -1,0 +1,345 @@
+package com.zonekey.study.service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.zonekey.study.common.JsonMsg;
+import com.zonekey.study.common.JsonUtil;
+import com.zonekey.study.common.MD5Utils;
+import com.zonekey.study.common.RegexUtils;
+import com.zonekey.study.common.UploadImg;
+import com.zonekey.study.dao.SysUserMapper;
+import com.zonekey.study.entity.PageBean;
+import com.zonekey.study.entity.SysUser;
+import com.zonekey.study.service.auth.ShiroDbRealm;
+import com.zonekey.study.vo.SysUserView;
+
+/**
+ *  
+ * 
+ * @className:SysUserService.java
+ * @classDescription:
+ * @author:JeanwinHuang@live.com
+ * @createTime:2015年3月20日
+ */
+@Service
+@Transactional(readOnly = false)
+public class SysUserService {
+	@Resource
+	private SysUserMapper userMapper;
+
+	/**
+	 * 修改用户个人信息
+	 * 
+	 * @param sysUser
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public JsonMsg modifyPersonalInfo(SysUser sysUser, MultipartHttpServletRequest req) {
+		JsonMsg msg = new JsonMsg();
+		System.out.println(sysUser.getEmail());
+		msg.setOperation("修改个人信息");
+		if (sysUser.getLoginname() == null || "".equals(sysUser.getLoginname())) {
+			msg.setId("1");
+			msg.setContent("用户loginname为空");
+		} else if (userMapper.findByLoginname(sysUser.getLoginname()) == null) {
+			msg.setId("2");
+			msg.setContent("未找到该用户信息");
+		} else if (sysUser.getPhone() != null && !"".equals(sysUser.getPhone()) && !RegexUtils.isPhone(sysUser.getPhone()) && !RegexUtils.isMobile(sysUser.getPhone())) {
+			msg.setId("3");
+			msg.setContent("电话号码格式不正确");
+		} else if (sysUser.getEmail() != null && !"".equals(sysUser.getEmail()) && !RegexUtils.isEmail(sysUser.getEmail())) {
+			msg.setId("4");
+			msg.setContent("邮箱格式不正确");
+		} else {
+			String imgPath = UploadImg.uploadImage(null, req, sysUser.getPictureURL());
+			msg.setId("5");
+			if (imgPath == null) {
+				msg.setContent("图片上传失败");
+			} else {
+				// 保存用户图片路径
+				sysUser.setPictureURL(imgPath);
+				sysUser.setModifyuser(ShiroDbRealm.getCurrentLoginName());
+				int isSuccess = userMapper.update(sysUser);
+				if (isSuccess > 0) {
+					msg.setId("6");
+					msg.setContent("用户信息修改成功");
+				} else {
+					msg.setContent("用户信息修改失败");
+				}
+			}
+		}
+		return msg;
+	}
+
+	/**
+	 * 修改用户密码
+	 * 
+	 * @param user
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public JsonMsg modifyPassword(SysUserView user) {
+		JsonMsg msg = new JsonMsg();
+		msg.setOperation("修改密码");
+		if (user.getLoginname() == null || "".equals(user.getLoginname()) || user.getOldPassword() == null || "".equals(user.getOldPassword()) || user.getNewPassword() == null
+				|| "".equals(user.getNewPassword()) || user.getRepPassword() == null || "".equals(user.getRepPassword())) {
+			msg.setId("1");
+			msg.setContent("请输入完整的密码");
+		} else if (userMapper.findByLoginname(user.getLoginname()) == null) {
+			msg.setId("2");
+			msg.setContent("未找到该用户");
+		} else if (!MD5Utils.md5(user.getOldPassword()).equals(userMapper.findByLoginname(user.getLoginname()).getPassword())) {
+			msg.setId("3");
+			msg.setContent("原密码不正确，请重新输入");
+		} else if (!RegexUtils.isPassword(user.getNewPassword())) {
+			msg.setId("4");
+			msg.setContent("新密码格式不正确");
+		} else if (!user.getNewPassword().equals(user.getRepPassword())) {
+			msg.setId("5");
+			msg.setContent("新密码与重复密码不一致");
+		} else {
+			msg.setId("6");
+			SysUser saveUser = new SysUser();
+			saveUser.setId(user.getId());
+			saveUser.setLoginname(user.getLoginname());
+			/*
+			 * 设置修改用户的loginaname
+			 */
+			saveUser.setModifyuser(ShiroDbRealm.getCurrentLoginName());
+			// System.out.println(saveUser.getModifyuser());
+			saveUser.setPassword(MD5Utils.md5(user.getNewPassword()));
+			int isSuccess = userMapper.modifyPassword(saveUser);
+			if (isSuccess > 0) {
+				msg.setContent("密码修改成功");
+			} else {
+				msg.setContent("密码修改失败");
+			}
+		}
+		// System.out.println(msg.getContent());
+		return msg;
+	}
+
+	/**
+	 * 根据部门id查找用户信息
+	 * 
+	 * @param depts
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public List<SysUser> getUsersByDeptIds(List<Map<String, String>> depts) {
+		if (depts != null && !"[]".equals(depts.toString())) {
+			return userMapper.getByDeptIds(depts);
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * 根据用户id查找用户信息
+	 */
+	@Transactional(readOnly = true)
+	public SysUser getUserById(String id) {
+		if (id == null || "".equals(id)) {
+			return null;
+		} else {
+			return userMapper.findOne(id);
+		}
+	}
+
+	/**
+	 * 根据用户名查找用户
+	 * 
+	 * @param loginname
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public SysUser getByLoginname(String loginname) {
+		if (loginname == null || "".equals(loginname)) {
+			return null;
+		} else {
+			SysUser user = userMapper.findByLoginname(loginname);
+			/*
+			 * if (Integer.valueOf(user.getDeptAttribute()) > 2) { int attribute
+			 * = Integer.valueOf(user.getDeptAttribute()); Map<String, Object>
+			 * dept = new HashMap<String, Object>(); while (attribute > 2) {
+			 * dept = userMapper.getDeptName(user.getParentDeptId()); attribute
+			 * = Integer.valueOf(dept.get("attribute").toString()); }
+			 * user.setSecondDeptName(dept.get("name").toString()); }
+			 */
+			return user;
+		}
+	}
+
+	/**
+	 * 查询所有用户
+	 */
+	@Transactional(readOnly = true)
+	public List<SysUser> getAllUsers(SysUser user) {
+		return (List<SysUser>) userMapper.findUsers(user);
+	}
+
+	/**
+	 * 更新用户信息>>重置密码
+	 * 
+	 * @param user
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int updateUser(SysUser user) {
+		if (user == null || user.getLoginname() == null || "".equals(user.getLoginname())) {
+			return 0;
+		}
+		return userMapper.update(user);
+	}
+
+	/**
+	 * 找回密码>>添加验证码uuid
+	 * 
+	 * @param loginname
+	 * @param validateCode
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public int addEmailCode(String loginname, String validateCode) {
+		if (null == loginname || null == validateCode || "".equals(loginname) || "".equals(validateCode)) {
+			return 0;
+		}
+		return userMapper.addEmailCode(loginname, validateCode);
+	}
+
+	public List<Map<String, Object>> getAllUser(Map<String, Object> map) {
+		String loginname = null;
+		if (map != null)
+			loginname = map.get("loginname") + "";
+		return userMapper.getAllUser(loginname);
+	}
+
+	/**
+	 * 验证邮箱是否重复
+	 * 
+	 * @param email
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public JsonMsg validateEmail(String email) {
+		JsonMsg msg = new JsonMsg();
+		msg.setOperation("验证邮箱是否重复");
+		System.out.println(email);
+		if (email != null && !"".equals(email)) {
+			int code = userMapper.validateEmail(email);
+			if (code == 0) {
+				msg.setId("1");
+				msg.setContent("恭喜您，您的邮箱可用");
+			} else {
+				msg.setId("2");
+				msg.setContent("不好意思，该邮箱已经被使用");
+			}
+		} else {
+			msg.setId("3");
+			msg.setContent("对不起，您输入的邮箱没有通过验证");
+		}
+		return msg;
+	}
+
+	/**
+	 * 验证手机号
+	 * 
+	 * @param phone
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public JsonMsg validatePhone(String phone) {
+		JsonMsg msg = new JsonMsg();
+		msg.setOperation("验证手机号是否重复");
+		if (phone != null && !"".equals(phone)) {
+			int code = userMapper.validatePhone(phone);
+			if (code == 0) {
+				msg.setId("1");
+				msg.setContent("恭喜您，您输入的手机号可用");
+			} else {
+				msg.setId("2");
+				msg.setContent("不好意思，该手机号已经被使用");
+			}
+		} else {
+			msg.setId("3");
+			msg.setContent("对不起，您输入的手机号没有通过验证");
+		}
+		return msg;
+	}
+
+	/**
+	 * 验证密码
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public JsonMsg validatePassword(SysUser user) {
+		JsonMsg msg = new JsonMsg();
+		msg.setOperation("修改密码>>验证原密码");
+		if (user.getLoginname() != null && !"".equals(user.getLoginname()) && user.getPassword() != null && !"".equals(user.getPassword())) {
+			msg.setId("1");
+			msg.setContent("未找到该用户");
+			SysUser existUser = userMapper.findByLoginname(user.getLoginname());
+			if (existUser != null) {
+				System.out.println("password" + existUser.getPassword() + "loginname:" + existUser.getLoginname());
+				if (MD5Utils.md5(user.getPassword()).equals(existUser.getPassword())) {
+					msg.setId("2");
+					msg.setContent("密码验证成功");
+				} else {
+					msg.setId("3");
+					msg.setContent("密码验证失败");
+				}
+			} else {
+				msg.setContent("未找到该用户的信息");
+			}
+		}
+		return msg;
+	}
+
+	/**
+	 * 根据部门id分页查询用户
+	 * 
+	 * @param pb
+	 * @return
+	 */
+	@Transactional(readOnly = false)
+	public Map<String, Object> findUsersByDeptPage(PageBean pb) {
+		Map<String, Object> mapData;
+		if (pb != null) {
+			mapData = new HashMap<String, Object>();
+			mapData.put("data", userMapper.getByDeptId(pb));
+			mapData.put("total", userMapper.findUserCountByDeptId(pb));
+			return mapData;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * 判断用户是否有管理员权限
+	 * 
+	 * @return
+	 */
+	public int isAdminAcount() {
+		return userMapper.hasAdminPermission();
+	}
+
+	/**
+	 * 查询用户角色
+	 */
+	public String getUserRole() {
+		return userMapper.getUserRole().toString();
+	}
+
+	public int inserUser(SysUser user) {
+		return userMapper.insert(user);
+	}
+}

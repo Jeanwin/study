@@ -1,0 +1,18 @@
+<div class="container-fluid" style="background-color: #f2f2f2;border-radius: 5px">
+	<div class="modal-header">
+		<h3 style="font-size: 24px;">新建文件夹</h3>
+	</div>
+	<div class="modal-body">
+		<div class="row">
+			<div class="col-xs-5">
+				<span style="float: right;height: 34px;line-height: 34px;font-size:16px">请输入文件夹名称</span>
+			</div>
+			<div class="col-xs-6" style="padding-left: 0px;">
+				<input class="form-control" ng-model="folder">
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<span><button class="btn btn-primary" ng-click="ok(folder)">确定</button></span> <span><button class="btn btn-default" ng-click="cancel()">取消</button></span>
+	</div>
+</div>

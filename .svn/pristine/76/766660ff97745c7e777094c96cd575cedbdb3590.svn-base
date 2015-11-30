@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.CurriculumIntroduceMapper">
+	<!-- 标题（直播） -->
+	<select id="selectSubjectByLive" parameterType="map" resultType="com.zonekey.study.entity.CurriculumDetails">
+		select subject ,date from zonekey_curriculum where 
+		  id = #{curriculumid} 
+	</select>
+	<!-- 标题、课程介绍（精品） -->
+	<select id="selectSubjectCourseByGood" parameterType="map" resultType="com.zonekey.study.entity.CurriculumDetails">
+		select resourcename as subject,description as courseIntroduce from zonekey_resource where 
+		  floder = #{floder} limit 1
+	</select>
+	<!-- 标题、课程介绍（教研中心） -->
+	<select id="selectSubjectCourseByStudy" parameterType="map" resultType="com.zonekey.study.entity.CurriculumDetails">
+	select name as subject,description as courseIntroduce ,resourceid from study_works where 
+		  id = #{workid} 
+	</select>
+	<!-- 课程介绍（直播） -->
+	<select id="selectCourseByLive" parameterType="map" resultType="com.zonekey.study.entity.CurriculumDetails">
+	select introduce as courseIntroduce from study_curriculum_materials where 
+		  curriculumid = #{curriculumid}
+	</select>
+	<!-- 教师介绍 -->
+	<select id="selectTeacherByLoginname" parameterType="map" resultType="com.zonekey.study.entity.CurriculumDetails">
+		select name as teachername,remark as teacherIntroduce ,pictureURL ,loginname from sys_user where loginname=(select userid from study_works where id=#{workid})
+	</select>
+	<!-- 教师介绍 -->
+	<select id="selectTeacherByClass" parameterType="map" resultType="com.zonekey.study.entity.CurriculumDetails">
+		select name as teachername,remark as teacherIntroduce ,pictureURL ,loginname from sys_user where 
+		id=(select userid from zonekey_curriculum where 
+		<if test="curriculumid != null and curriculumid !=''">id=#{curriculumid}</if>
+		<if test="floder != null and floder !=''">resourcefloder=#{floder}</if>
+		limit 1)
+	</select>
+	
+	<!-- 评审明细 -->
+	<select id="selectReviewDetailByStudy"  parameterType="map" resultType="map">
+		select id,resourceid,worksid,userid,content,score,templateid,reviewdate,remark,isover,createdate,type from study_review_detail where userid=#{userid} and worksid=#{worksid}
+	</select>
+	<select id="selectReviewDetailFromStudy" parameterType="map" resultType="map">
+		select a.contemplate as templateid from study_works w,study_active a  where w.id=#{worksid} and w.activeid=a.id
+	</select>
+	<!-- 评审明细 -->
+	<select id="selectReviewDetailByLive"  parameterType="map" resultType="map">
+		select id,resourceid,worksid,userid,content,score,templateid,reviewdate,remark,isover,createdate,type from study_review_detail where userid=#{userid} and resourceid=#{resourceid}
+	</select>
+	
+	<!-- 查看评审明细（合并） -->
+	<select id="selectReviewDetail"  parameterType="map" resultType="map">
+		select id,resourceid,worksid,userid,content,score,templateid,reviewdate,remark,isover,createdate,type from study_review_detail where userid=#{userid} 
+		<if test="floder != null and floder != ''">and resourceid=#{floder}</if>
+		<if test="curriculumid != null and curriculumid != ''">and resourceid=#{curriculumid}</if>
+		<if test="worksid != null and worksid != ''">and worksid=#{worksid}</if>
+	</select>
+	<!-- 修改评审明细 -->
+	<update id="updateReviewDetail" parameterType="map" >
+		update study_review_detail set
+		<if test="score != null and score != ''">
+				score = #{score},
+		</if>
+		<if test="remark != null and remark != ''">
+				remark = #{remark},
+		</if>
+		<if test="content != null and content != ''">
+				content = #{content},
+		</if>
+		reviewdate=sysDate(),isover='1'
+		where 1=1 
+		<if test="userid != null and userid != ''">
+			and userid = #{userid}
+		</if>
+		<if test="resourceid != null and resourceid != ''">
+			and resourceid = #{resourceid}
+		</if>
+		<if test="worksid != null and worksid != ''">
+			and	worksid = #{worksid}
+		</if>
+	</update>
+	<!-- 新增评审明细 -->
+	<insert id="addReviewDetail" parameterType="map" >
+	insert into study_review_detail (resourceid,worksid,userid,content,score,templateid,reviewdate,remark,isover,createdate,type) values (#{resourceid},#{worksid},#{userid},#{content},#{score},#{templateid},#{reviewdate},#{remark},#{isover},sysDate(),#{type})
+	</insert>
+	
+	<!-- 新增听课明细 -->
+	<insert id="addRecordDetails" parameterType="map" >
+	insert into study_record (resourceid,worksid,userid,content,templateid,createdate,type) values (#{resourceid},#{worksid},#{userid},#{content},#{recordtemplateid},sysDate(),#{type})
+	</insert>
+	
+	<!-- 修改听课明细 -->
+	<update id="updateRecordDetails" parameterType="map" >
+		update study_record set
+		<if test="content != null">
+				content = #{content},
+		</if>
+		createdate=sysDate()
+		where 1=1 
+		<if test="userid != null">
+			and	userid = #{userid}
+		</if>
+		<if test="resourceid != null">
+			and	resourceid = #{resourceid}
+		</if>
+		<if test="worksid != null">
+			and	worksid = #{worksid}
+		</if>
+	</update>
+	
+	<!-- 查看评审明细（合并） -->
+	<select id="selectRecordDetail"  parameterType="map" resultType="map">
+		select id,resourceid,worksid,userid,content,templateid,createdate,type from study_record where userid=#{userid} 
+		<if test="floder != null and floder !=''">and resourceid=#{floder}</if>
+		<if test="curriculumid != null and curriculumid !=''">and resourceid=#{curriculumid}</if>
+		<if test="worksid != null and worksid !=''">and worksid=#{worksid}</if>
+	</select>
+	
+	
+	<!-- 查看当前使用的听课表表 -->
+	<select id="selectNowLecture" resultType="map">
+		select id ,lectureName ,description ,usetimes , status ,createuser ,createtime , modifyuser ,modifytime ,deleteflag  from zonekey_lecture where status='1' and deleteflag=0
+	</select>
+	<!-- 根据听课表模板id，查听课模板 -->
+	<select id="selectLectureTemplate" parameterType="string" resultType="com.zonekey.study.entity.RecordTemplate">
+		select id,parentid,childKey,childValue,sort,deleteflag from zonekey_lecture_children where parentid=#{id} and deleteflag=0 ORDER BY sort
+	</select>
+	<!-- 查询评审表中的一级\子级 分类 -->
+	<select id="selectReviewChildren" parameterType="string" resultType="com.zonekey.study.entity.ReviewTemplate">
+		select c.id,c.parentid,c.reviewid,c.childKey,c.childValue,c.sort,c.deleteflag,(select childKey from zonekey_review_children where id=#{parentid}) parentneme from zonekey_review_children c where c.reviewid=#{reviewid} and c.parentid=#{parentid} ORDER BY c.sort asc
+	</select>
+	<!-- 查询任一的评审模板 -->
+	<select id="selectOneReview" resultType="com.zonekey.study.entity.ParentReviewTemplate" parameterType="string" >
+		select id,name,assess from zonekey_review where 
+		<!-- <if test="id!= null and id!=''">id=#{id} and </if> -->
+		id=#{id} and 
+		deleteflag='0' limit 1
+	</select>
+	<!-- 查询所有的评审模板 -->
+	<select id="selectAllReview" resultType="com.zonekey.study.entity.ParentReviewTemplate" >
+		select id,name,assess from zonekey_review where 
+		deleteflag='0' 
+	</select>
+</mapper>

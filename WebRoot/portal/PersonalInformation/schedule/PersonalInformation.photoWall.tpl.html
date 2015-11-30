@@ -1,0 +1,81 @@
+﻿
+<div class="row padding-left-right-none padding-top-10 padding-bottom-10" style="width: 100%;background: #fff;z-index: 1003;position: relative;left: 0;">
+        <!--<div style="width:94%;margin-left:2.5%;" class="row">
+        	<div class="row">
+        		<div class="col-xs-1">
+        			<i class="icon-chevron-left large-chevron"></i>
+        		</div>
+        		<div class="col-xs-10 padding-right-none text-center photoShowContainer">
+        			<img ng-if="activePhotoShow.nametype == 'Pictrue'" ng-src="{{activePhotoShow.fileurl}}" onload="imgonloade(this)"> 
+        			
+					<video ng-if="activePhotoShow.nametype == 'Videos'"   ng-src="{{activePhotoShow.fileurl}}" controls style="width:100%;height:100%;">
+
+					</video>
+					
+        		</div>
+        		<div class="col-xs-1 padding-left-none">
+        			<i class="icon-chevron-right large-chevron"></i>    			
+        		</div>
+        	</div>
+        </div>-->
+        <div class="col-xs-12 padding-left-right-none" style="padding: 5px 0;
+margin: 5px 0;">
+        	<div class="row" >
+        		<!--<div class="col-xs-1 padding-left-right-none" style="text-align:right;">
+        			<i class="icon-chevron-left small-chevron"></i>
+        		</div>-->
+                <div  class="col-xs-12" style="overflow:hidden;">
+            		<div class="col-xs-12 overContainer">
+            			<div  class="pohotContainer" ng-repeat="p in photo" id="photowalldiv{{$index+1}}"   ng-class="{'activeborder':activePhoto==$index}" style="position:relative;"> <!--ng-click="ToactivePhoto($index)"-->
+
+							<a ng-href="{{p.fileurl}}" ng-if="p.nametype == 'Pictrue'" target="_blank"><img src="{{p.fileurl}}" onload="imgonloade2(this)" /></a>
+    						<!-- <a ng-href="{{p.fileurl}}"  target="_blank"  ng-click="openVideo(p)"><img ng-if="p.nametype == 'Videos'" src="assets/img/default-V.png" style="width:100%;height:100%;"></a> -->
+    						<img ng-if="p.nametype == 'Videos'" src="assets/img/default-V.png" style="width:100%;height:100%;"  ng-click="openVideo(p)">
+<!--
+							
+							<span ng-if="p.nametype == 'Videos'" class="glyphicon glyphicon-facetime-video videoIcon"></span>-->
+							<div class="fontSize-25 optionStyle">
+    			<span ng-show="user.usertype != 2" ng-click="oneafterclassvisibility(p)">
+                     <i ng-show="p.resourcevisable === '0' || p.resourcevisable==='' || p.resourcevisable===null" class="blue-color icon-visibility-off" title="可见"></i>
+                     <i ng-show="p.resourcevisable === '1'" class="blue-color icon-visibility" title="不可见"></i>
+                 </span>
+                 <span  ng-click="onecollectAfterResource(p)" class="padding-left-10">
+                     <i ng-show="!p.resourcecollection || p.resourcecollection === '0'" class="blue-color icon-star-o" title="收藏"></i>
+                     <i ng-show="p.resourcecollection === '1'" class="blue-color icon-star" title="取消收藏"> </i>
+                 </span>
+								<i class="blue-color  icon-cloud-download padding-left-10"></i>
+							</div>
+            			
+            			</div>
+                	</div>
+                </div>
+        		<!--<div class="col-xs-1">
+        			<i class="icon-chevron-right small-chevron"></i>    			
+        		</div>-->
+        	</div>
+        </div>
+<script>
+				
+function imgonloade(e){
+	var maxWidth=e.parentNode.clientWidth,maxHeight=e.parentNode.clientHeight, w = e.width,h = e.height;
+	if(w < maxWidth && h < maxHeight) return;
+	e.height = '-1';e.width='-1';
+	w/h > maxWidth/maxHeight ? e.width = maxWidth: e.height = maxHeight;
+	
+}
+function imgonloade2(e){
+	var maxWidth=e.parentNode.parentNode.clientWidth,maxHeight=e.parentNode.parentNode.clientHeight, w = e.width,h = e.height;
+	if(w < maxWidth && h < maxHeight) return;
+	w/h > maxWidth/maxHeight ? e.width = maxWidth : e.height = maxHeight;
+}
+
+</script>
+    	<div class="row">
+    		<span class="col-xs-3 fontSize-20 blue-color">
+    			<span>来源：</span>
+    			<span ng-if="type == '1'">智慧教室</span>
+    			<span ng-if="type == '2'">录播机</span>
+    		</span>
+
+    	</div>
+</div>

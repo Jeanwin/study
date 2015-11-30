@@ -1,0 +1,28 @@
+define({
+    app: {
+        name: '录播系统',
+        client: 'tbb',
+        version: 'alpha 1.0',
+        lan: 'zh-cn',
+        debug: false
+    },
+    data:{
+        method: 'urls' //files:urls
+    },
+    resourceIp : 'http://study.zonekey.com.cn/data/',
+    backend: {
+        ip: 'http://localhost:8100',
+        base: '/study/',
+        timeout: 10000
+    },
+    pagination: {
+        pageSize: 20,
+        previousText: '上一页',
+        nextText: '下一页',
+        firstText: '第一页',
+        lastText: '最后一页'
+    },
+    display: {
+        dateFormat: 'yyyy-MM-dd'
+    }
+});

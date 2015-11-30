@@ -1,0 +1,9 @@
+(function($) {
+	$.config = {
+		appName : "/study",
+		pageSize : 12
+	}
+	$.urls = {
+		unicastList : "/mobile/unicastList"
+	}
+})(Zepto)

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.ProcessMapper">
+	<!-- <resultMap id="processWithUserAndResource" type="com.zonekey.study.vo.ProcessView">
+		<id property="id" column="id" />
+		<association property="resource" column="resourceid" javaType="int" select="getResource"></association>
+		<association property="user" column="userid" javaType="String" select="getUser"></association>
+	</resultMap> -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql>
+	<!-- 查询打点信息列表 -->
+	<select id="processList" parameterType="String" resultType="Map">
+		<include refid="bindLoginname" />
+		select id,resourceid,content description,dottime dotTime,concat(dotTime/videoLength*100,'%') margin from study_process where userid = #{_loginname} and resourceid = #{resourceid} order by dottime asc
+	</select>
+	<!-- <select id="getResource" parameterType="int">
+		select * from study_resource where id = #{resourceid}
+	</select>
+	<select id="getUser" parameterType="String">
+		select * from sys_user where loginname = #{userid}
+	</select> -->
+	<!-- 验证打点是否重复 -->
+	<select id="check" parameterType="com.zonekey.study.entity.ProcessInfo" resultType="int">
+	    <include refid="bindLoginname" />
+		select count(*) from study_process where resourceid = #{resourceid} and userid = #{_loginname} and dottime =
+		#{dottime}
+	</select>
+	<!-- 批量插入 -->
+	<insert id="insertAll" parameterType="java.util.List">
+		<include refid="bindLoginname" />
+		insert into study_process(resourceid,userid,createdate,content,dottime,videolength) values
+		<foreach collection="processes" item="p" separator=",">
+			(#{p.resourceid},#{_loginname},sysDate(),#{p.content},#{p.dottime},#{p.videoLength})
+		</foreach>
+	</insert>
+	<!-- 插入打点信息 -->
+	<insert id="insert" parameterType="com.zonekey.study.entity.ProcessInfo">
+		<include refid="bindLoginname" />
+		insert into study_process(resourceid,userid,createdate,content,dottime,videolength) values
+		(#{resourceid},#{_loginname},sysDate(),#{content},#{dottime},#{videoLength})
+	</insert>
+	<!-- 更新打点信息 -->
+	<update id="update" parameterType="com.zonekey.study.entity.ProcessInfo">
+	    <include refid="bindLoginname" />
+		update study_process
+		<set>
+			content = #{content},
+			modifydate = sysDate()
+		</set>
+		where resourceid = #{resourceid} and userid=#{_loginname} and dottime= #{dottime}
+	</update>
+	<!-- 删除打点信息 -->
+	<delete id="delete" parameterType="java.util.List">
+		delete from study_process where id in
+		<foreach collection="list" open="(" separator="," close=")" item="proc">
+			#{proc}
+		</foreach>
+	</delete>
+</mapper>

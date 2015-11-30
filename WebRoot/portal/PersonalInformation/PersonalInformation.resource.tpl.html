@@ -1,0 +1,130 @@
+<div class="container-fluid" id="myResource">
+	<div class="modal-body">
+		<div>
+			<div style="height: 24px;width: 8px;background-color: #fcb750"></div>
+			<div style="margin-left: 20px;margin-top: -30px;font-size: 24px">我的资源</div>
+		</div>
+		<div class="pull-right" style="color: #8e8e8e">
+			<span class="upload-resource margin-right-20" ng-click="uploadResource()"> <i class="glyphicon glyphicon-plus"></i> <span>上传</span>
+			</span> <span class="new-folder" ng-click="newFolder()"> <i class="icon-my-library-add"></i> <span>新建文件夹</span>
+			</span>
+
+		</div>
+		<div class="row form-inline margin-left-none margin-right-none"
+			style="margin-top: 30px;
+             background-color: #f2f2f2;
+             border: solid 1px #cecece;
+             border-radius: 3px">
+			<div class="col-xs-4" style="padding-top: 15px;padding-bottom:15px">
+				<input class="form-control" ng-model="keywords.name" ng-change="searchResource(keywords)" style="width: 100%;border: solid 1px #c1c1c1" placeholder="资源名称">
+			</div>
+			<div class="col-xs-2 from-group" style="padding: 15px 0px;min-width:120px;">
+				<!-- <label class="control-label pull-left" style="line-height: 30px;">资源来源：</label> -->
+				<select class="form-control" ng-model="keywords.source" ng-options="nsource.value as nsource.name for nsource in source" ng-change="searchResource(keywords)">
+					<option selected="selected" value="">资源来源</option>
+				</select>
+			</div>
+			<!-- 资源类型筛选 -->
+			<div class="col-xs-2 from-group" style="padding: 15px 0px;min-width:120px;">
+				<!-- <label class="control-label pull-left" style="line-height: 30px;">资源来源：</label> -->
+				<select class="form-control" ng-model="keywords.type" ng-options="tsource.value as tsource.name for tsource in type" ng-change="searchResource(keywords)">
+					<option selected="selected" value="">资源类型</option>
+				</select>
+			</div>
+			<div class="col-xs-2 form-group" style="padding:15px 0px;display:none">
+				<!-- <label class="control-label pull-left" style="line-height: 30px;">是否发布：</label>  -->
+				<select class="form-control" ng-model="keywords.publishstate" ng-change="searchResource(keywords)">
+					<option value="" slected="selected">是否发布</option>
+					<option value="0">未发布</option>
+					<option value="1">已发布</option>
+				</select>
+			</div>
+			<div class="col-xs-1" style="padding:15px 0">
+				<button class="btn btn-primary" ng-click="searchResource(keywords)">查询</button>
+			</div>
+		</div>
+
+		<div style="margin-top: 10px">
+			<div class="row form-inline margin-left-none margin-right-none" style="margin-bottom: 10px;
+             background-color: #f2f2f2;border-radius: 3px;  height: 30px;line-height: 30px;padding-left: 10px;"> 
+                         	
+				<a href="" ng-if="lastLevel.length>1" style="float:left;margin-right:20px;" ng-click="lastDir(lastLevel[1])">{{lastLevel[0]}}</a>
+				<span style="float:left;">文件路径：</span>
+				<div ng-repeat="tmp in dir">
+					<a style="float:left" ng-click="lastDir(tmp[1],$index)" ng-if="$index+1<dir.length" href="">{{tmp[0]}}&gt;</a> 
+					<span style="float:left" ng-if="$index+1==dir.length">{{tmp[0]}}</span>
+				</div>
+			</div>
+			<table class="table" style="color: #8e8e8e;">
+				<thead ng-if="selectedCount==0" style="border: solid 1px #cecece;border-radius: 5px">
+					<tr style="text-align: left;vertical-align: middle">
+						<td style="vertical-align: middle;width:30px;"><input type="checkbox" ng-model="checkAll" ng-click="checkAllFacilitys()"></td>
+						<td class="col-sm-4" style="WORD-WRAP: break-word;vertical-align: middle" width="300">资源名称</td>
+						<td class="col-sm-2" style="vertical-align: middle;">创建时间</td>
+						<td class="col-sm-2" style="vertical-align: middle;" class="nowrap">类型</td>
+						<td class="col-sm-2" style="vertical-align: middle;" class="nowrap">来源</td>
+						<!-- <td class="nowrap">作者</td> -->
+						<td class="col-sm-2" style="vertical-align: middle;">操作</td>
+
+					</tr>
+				</thead>
+				<thead ng-if="selectedCount>0" style="border: solid 1px #cecece;border-radius: 5px">
+					<tr style="text-align: left;vertical-align: middle">
+						<td style="vertical-align: middle;width:30px;"><input type="checkbox" ng-model="checkAll" ng-click="checkAllFacilitys()"></td>
+						<td class="col-sm-4" style="vertical-align: middle;">资源名称</td>
+						<td class="col-sm-2" style="vertical-align: middle;"><i class="blue-color icon-publish_yes"></i> <a href ng-click="ResourseShare()">分享</a></td>
+						<!-- <td style="vertical-align: middle;"></td> -->
+						<td class="col-sm-2" style="vertical-align: middle;" class="nowrap"><i class="blue-color  icon-file_move"></i> <a href ng-click="pleaceChange()">移动到</a></td>
+						<td class="col-sm-2" style="vertical-align: middle;" class="nowrap"><i class="red-color  icon-delete"></i> <a href ng-click="delResourse()"> 删除</a></td>
+						<td class="col-sm-2" style="vertical-align: middle;"></td>
+					</tr>
+				</thead>
+				<tbody style="border-bottom: solid 1px #d1d1d1">
+					<tr style="text-align: left;border-top:1px solid #ddd" ng-repeat="resource in resourceList">
+						<td style="vertical-align: middle;width:30px;"><input ng-model="resource.checked" type="checkbox"></td>
+						<td style="vertical-align: middle;" class="inline-block">
+						<a ng-if="resource.isfolder=== '0'" class="domBrow" style="white-space: nowrap;" ng-click="enterDir(resource)" href=""> <i class="icon-{{resource.nametype}}"
+								style="font-size:32px;"></i> <span class="overFlow-text" title="{{resource.name}}" >{{resource.name}}</span>
+						</a>
+						<a ng-if="resource.isfolder === '1'" class="domBrow" style="white-space: nowrap;" ng-click='viewOnline(resource)'> <i class="icon-{{resource.nametype}}" style="font-size:32px;"></i> 
+						     <span class="overFlow-text lFile" title="{{resource.name}}" >{{resource.name}}</span>
+						</a> 
+						<!--here  -->
+						<!-- <a target="_blank" ng-if="resource.isfolder === '1' && (resource.fileurl.lastIndexOf('.swf') != -1 || resource.fileurl.lastIndexOf('.txt') != -1 || resource.fileurl.lastIndexOf('.html') != -1)" class="domBrow"
+							style="white-space: nowrap;" href="{{resource.fileurl}}"> <i class="icon-{{resource.nametype}}" style="font-size:32px;"></i> <span class="overFlow-text" title="{{resource.name}}">{{resource.name}}</span>
+						</a> 
+						<a ng-if="resource.isfolder === '1' && resource.fileurl.lastIndexOf('.swf') == -1 && resource.fileurl.lastIndexOf('.txt') == -1 && resource.fileurl.lastIndexOf('.html') == -1 && resource.nametype!='Pictrue' && resource.nametype!='Documents' && resource.nametype!='Videos' && resource.nametype !=='PDF' && resource.nametype !== 'Word' && resource.nametype !== 'Excel'" class="domBrow"
+							style="white-space: nowrap;" href=""> <i class="icon-{{resource.nametype}}" style="font-size:32px;"></i> <span class="overFlow-text" title="{{resource.name}}">{{resource.name}}</span>
+						</a> 
+						<a target="_blank" ng-if="resource.isfolder === '1' && resource.fileurl.lastIndexOf('.swf') == -1 && resource.fileurl.lastIndexOf('.txt') == -1 && resource.fileurl.lastIndexOf('.html') == -1 &&(resource.nametype=='Documents' || resource.nametype=='PDF'||resource.nametype=='Word'||resource.nametype=='Excel')" class="domBrow"
+							style="white-space: nowrap;" href="../resource/readOnline?path={{resource.fileurl.replace(config.resourceIp,'')}}"> <i class="icon-{{resource.nametype}}" style="font-size:32px;"></i> <span class="overFlow-text"
+								title="{{resource.name}}">{{resource.name}}</span>
+						</a>
+						<a target="_blank" ng-if="resource.isfolder === '1' && resource.fileurl.lastIndexOf('.swf') == -1 && resource.fileurl.lastIndexOf('.txt') == -1 && resource.fileurl.lastIndexOf('.html') == -1 && resource.nametype=='Videos' " class="domBrow"
+							style="white-space: nowrap;" href="{{resource.transPath}}"> <i class="icon-{{resource.nametype}}" style="font-size:32px;"></i> <span class="overFlow-text"
+								title="{{resource.name}}">{{resource.name}}</span>
+						</a>
+						<a target="_blank" ng-if="resource.isfolder === '1' && resource.fileurl.lastIndexOf('.swf') == -1 && resource.fileurl.lastIndexOf('.txt') == -1 && resource.fileurl.lastIndexOf('.html') == -1 && resource.nametype=='Pictrue' " class="domBrow"
+							style="white-space: nowrap;" href="{{resource.fileurl}}"> <i class="icon-{{resource.nametype}}" style="font-size:32px;"></i> <span class="overFlow-text"
+								title="{{resource.name}}">{{resource.name}}</span>
+						</a> -->
+						</td>
+						<td style="vertical-align: middle;">{{resource.createdate}}</td>
+						<td style="vertical-align: middle;">{{transfer(type,resource.type)}}</td>
+						<td style="vertical-align: middle;">{{transfer(source,resource.source)}}</td>
+						<!-- <td>{{resource.createuser}}</td> -->
+						<td style="vertical-align: middle;"><a href ng-click="EditResource(resource)">设置 <a ng-if="resource.isfolder==1" href="../resource/down?path={{resource.fileurl.replace(config.resourceIp,'')}}&name={{resource.name}}">下载</a></a></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="col-xs-12 padding-left-none" ng-show="pagination.totalItems > pagination.pageSize">
+		<div class="col-xs-12 padding-left-right-none">
+			<pagination class="pagination-sm pull-right" total-items="pagination.totalItems" page="pagination.pageIndex" items-per-page="pagination.pageSize" max-size="pagination.maxSize"
+				previous-text="{{pagination.previousText}}" next-text="{{pagination.nextText}}" first-text="{{pagination.firstText}}" last-text="{{pagination.lastText}}" class="pagination-small"
+				boundary-links="true" on-select-page="onSelectPage(page)"> </pagination>
+		</div>
+	</div>
+	<div growl></div>
+</div>

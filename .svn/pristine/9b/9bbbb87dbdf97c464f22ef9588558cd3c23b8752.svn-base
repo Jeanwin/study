@@ -1,0 +1,12 @@
+(function($) {
+	$.config = {
+		appName : "/study",
+		pageSize : 12
+	}
+	$.urls = {
+		unicastList : "/mobile/unicastList",
+		latestPlay : "/mobile/latestPlay",
+		getUser : "/user/getUser",
+		playRecordList : "/mobile/playRecordList"
+	}
+})(Zepto)

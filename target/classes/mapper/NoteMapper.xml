@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.NoteMapper">
+	<!-- 根据不同条件查笔记 -->
+	<select id="selectNoteByWhere" parameterType="com.zonekey.study.entity.Note" resultType="com.zonekey.study.entity.Note">
+		select id,resourceid,worksid,userid,content,REPLACE(videotime,'.',':') videotime from study_note where 1=1
+		<if test="worksid!=null and worksid !=''">and worksid = #{worksid} </if>
+		<if test="floder!=null and floder != ''">and resourceid = #{floder} </if>
+		<if test="curriculumid!=null and curriculumid !=''">and resourceid = #{curriculumid} </if>
+		and userid = #{userid}
+		ORDER BY videotime asc
+	</select>
+	<!-- 修改笔记 -->
+	<update id="updateNote" parameterType="com.zonekey.study.entity.Note" >
+		update study_note set content=#{content} ,createdate=sysDate()
+		where 1=1 and id=#{id} 
+	</update>
+	<!-- 新增笔记 -->
+	<insert id="addNote" parameterType="com.zonekey.study.entity.Note">
+		insert into study_note (resourceid,worksid,userid,content,createdate,videotime,type) values (#{resourceid},#{worksid},#{userid},#{content},sysDate(),#{videotime},#{type})
+	</insert>
+	<!-- 删除笔记 -->
+	<delete id="deleteNote" parameterType="string">
+		delete from study_note where id=#{id}
+	</delete>
+</mapper>

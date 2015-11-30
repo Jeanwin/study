@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.MessageMapper">
+	<!-- 消息主体和消息记录 -->
+	<resultMap id="msgWithStatus" type="com.zonekey.study.entity.Message">
+		<id property="id" column="id" />
+		<!-- one to many -->
+		<collection property="msgStatus" ofType="com.zonekey.study.entity.MsgStatus" column="id" select="getMsgStatus">
+			<id property="id" column="id" />
+		</collection>
+	</resultMap>
+	<!-- 消息发送记录和消息的接收者 -->
+	<resultMap id="msgStatusWithReciever" type="com.zonekey.study.entity.MsgStatus">
+		<id property="id" column="id" />
+		<association property="reciever" column="recieverid" javaType="com.zonekey.study.entity.SysUser" select="getReciever">
+			<id property="id" column="id" />
+		</association>
+	</resultMap>
+	<!-- 消息接收者及其部门 -->
+	<resultMap id="recieverWithDept" type="com.zonekey.study.entity.SysUser">
+		<id property="id" column="id" />
+		<association property="dept" column="deptid" javaType="com.zonekey.study.entity.Dept" select="getDept">
+			<id property="id" column="id" />
+		</association>
+	</resultMap>
+	<!-- 查询发件箱 -->
+	<select id="findOutbox" parameterType="com.zonekey.study.entity.PageBean" resultMap="msgWithStatus">
+		select id,typeid,title,content,DATE_FORMAT(createdate,'%Y-%c-%e %H:%i') createdatestring,  
+		(select count(*) from study_msg_status b where b.msgid = a.id) recieverNum,
+		(select group_concat(u.name) from study_msg_status c left join sys_user u on c.recieverid = u.loginname where c.msgid = a.id) AS 
+		reciewerNames,
+		(select group_concat(distinct(de.name)) from study_msg_status sc left join sys_user su on sc.recieverid = su.loginname 
+		left join zonekey_dept de on su.deptid = de.id where sc.msgid = a.id) AS deptNames
+		from study_message a where createuser = #{keywords.loginname} and deleteflag = '0'
+		order by createdate desc
+		<if test="page != null and page.offset != null and page.limit != null">
+			limit #{page.offset} ,#{page.limit}
+		</if>
+	</select>
+	<!-- 查询发件箱记录数 -->
+	<select id="countOutbox" parameterType="String" resultType="int">
+		select count(*) from (select id from study_message where createuser = #{senderid} and deleteflag = '0'
+		order by createdate desc) a
+	</select>
+	<!-- 根据消息id查找消息发送，接收状态 -->
+	<select id="getMsgStatus" parameterType="int" resultMap="msgStatusWithReciever">
+		select id,recieverid,readstatus,sendstatus,replyid,readtime,sendtime,createdate,createuser
+		 from study_msg_status where msgid = #{id}
+	</select>
+	<!-- 根据消息记录中的recieverid查询接收者 -->
+	<select id="getReciever" parameterType="String" resultMap="recieverWithDept">
+		select name,loginname from sys_user where loginname = #{recieverid}
+	</select>
+	<!-- 根据部门id查找用户部门 -->
+	<select id="getDept" parameterType="String" resultType="com.zonekey.study.entity.Dept">
+		select name from zonekey_dept where id = #{deptid}
+	</select>
+	<!-- 根据id查找 -->
+	<select id="findOne" parameterType="java.lang.Integer" resultType="com.zonekey.study.entity.Message">
+		select * from study_message where id = #{id}
+	</select>
+	<!-- 插入消息表 -->
+	<insert id="insert" parameterType="com.zonekey.study.entity.Message" useGeneratedKeys="true" keyProperty="id">
+		insert into
+		study_message(uuid,typeid,title,content,createdate,createuser,modifydate,modifyuser,deleteflag)
+		values(#{uuid},#{typeid},#{title},#{content},sysDate(),#{createuser},sysDate(),#{modifyuser},'0')
+	</insert>
+	<!-- 更新消息表 记录 -->
+	<update id="update" parameterType="com.zonekey.study.entity.Message">
+		update study_message
+		<set>
+			<if test="typeid != null">
+				typeid = #{typeid},
+			</if>
+			<if test="title != null">
+				title = #{title},
+			</if>
+			<if test="content != null">
+				content = #{content},
+			</if>
+			<if test="createuser != null">
+				createuser = #{createuser},
+			</if>
+			<if test="modifyuser != null">
+				modifyuser = #{modifyuser},
+			</if>
+			<if test="deleteflag != null">
+				deleteflag = #{deleteflag},
+			</if>
+			modifydate = sysDate()
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除表中的记录 -->
+	<delete id="deleteMessage" parameterType="com.zonekey.study.entity.Message">
+		delete from study_message where id = #{id}
+	</delete>
+	<!-- 逻辑删除 -->
+	<update id="deleteVirtual">
+		update study_message set deleteflag = "1",modifyuser=#{modifyuser},modifydate=sysDate()
+		where id in
+		<foreach collection="list" open="(" close=")" separator="," item="map">
+			#{map.id}
+		</foreach>
+	</update>
+	<!-- 逻辑删除 2 -->
+	<update id="removeMessage" parameterType="com.zonekey.study.entity.Message">
+		update study_message set deleteflag = "1",modifyuser=#{modifyuser},modifydate=sysDate()
+		where id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zonekey.study.dao.MyClassRoomMapper">
+    <!-- sql绑定用户名 -->
+	<sql id="bindLoginname">
+		<bind name="_loginname" value="@com.zonekey.study.service.auth.ShiroDbRealm@getCurrentLoginName()" />
+	</sql> 
+	<sql id="resourceIp">
+		<bind name="_ip" value="@com.zonekey.study.common.ReadProperties@getIp()" />
+	</sql>
+	<!-- 学生查找周课表 -->
+	<select id="stufindMyWeekCurriculumList" parameterType="com.zonekey.study.entity.CurriculumParamForWeek" resultType="com.zonekey.study.entity.CurriculumParamForWeek">
+		select a1.*,(CASE WHEN left(NOW(),10)=a1.today THEN '今天' ELSE right(a1.today,5) end) as subtoday,
+		ctime >CONCAT(today,' ',a1.classstarttime) showstatus ,c.*,(select `name` from zonekey_area where
+		id=c.areaid) as areaname,(select innerid from zonekey_area where id=c.areaid) as areano
+		from (
+		select areaid as classareaid,LEFT(starttime,5) as classstarttime,left(endtime,5) as classendtime,rqid as
+		weekdate,rq,i_class as classnum,now() ctime,b.today from zonekey_curriculumbase a ,(
+		select 1 rqid, '星期一' rq,#{monDate} today from dual
+		union
+		select 2 rqid, '星期二'rq, #{tuesDate} today from dual
+		union
+		select 3 rqid, '星期三'rq, #{wednesDate} today from dual
+		union
+		select 4 rqid, '星期四'rq ,#{thursDate} today from dual
+		union
+		select 5 rqid, '星期五'rq ,#{friDate} today from dual
+		union
+		select 6 rqid, '星期六' rq,
+		#{saturDate} today from dual
+		union
+		select 7 rqid, '星期日'rq ,#{sunDate} today from dual
+
+		) b where 1=1
+		<if test="classbatch!=null and classbatch!=''"> AND classbatch=#{classbatch}</if>
+		AND ISNULL(areaid)
+
+		) a1
+		left JOIN
+		(select abc.* ,u.name as username,ifnull((select name from zonekey_dept where id=abc.deptid),'')as deptname ,abc.course_desc as coursedesc,
+		CASE WHEN abc.id in(
+		SELECT
+		DISTINCT(ar.id) FROM
+		zonekey_curriculum ar , zonekey_resource r where r.curriculumid=ar.id )
+		THEN '1' ELSE '0' END as isresource
+
+		from zonekey_curriculum abc ,sys_user u where 1=1 AND abc.userid=u.id
+		<if test="deptid!=null and deptid!=''"> AND abc.deptid=#{deptid}</if>
+		<if test="weeks!=null and weeks!=''"> AND abc.weeks=#{weeks}</if>
+		and abc.deleteflag=0 and u.id=abc.userid) c
+		on a1.today=c.date and a1.classnum=c.classnum
+		<if test="live!=null and live!=''"> and c.live = #{live}</if>
+		<if test="record!=null and record!=''"> and c.record = #{record}</if>
+		<if test="isresource!=null and isresource!=''"> and c.isresource = #{isresource}</if>
+		order by today,a1.classnum
+	</select>
+	<!-- 老师查找周课表 -->
+	<select id="findMyWeekCurriculumList" parameterType="com.zonekey.study.entity.CurriculumParamForWeek" resultType="com.zonekey.study.entity.CurriculumParamForWeek">
+		select a1.*,(CASE WHEN left(NOW(),10)=a1.today THEN '今天' ELSE right(a1.today,5) end) as subtoday,
+		ctime >CONCAT(today,' ',a1.classstarttime) showstatus ,c.*,(select `name` from zonekey_area where
+		id=c.areaid) as areaname,(select innerid from zonekey_area where id=c.areaid) as areano
+		from (
+		select areaid as classareaid,LEFT(starttime,5) as classstarttime,left(endtime,5) as classendtime,rqid as
+		weekdate,rq,i_class as classnum,now() ctime,b.today from zonekey_curriculumbase a ,(
+		select 1 rqid, '星期一' rq,#{monDate} today from dual
+		union
+		select 2 rqid, '星期二'rq, #{tuesDate} today from dual
+		union
+		select 3 rqid, '星期三'rq, #{wednesDate} today from dual
+		union
+		select 4 rqid, '星期四'rq ,#{thursDate} today from dual
+		union
+		select 5 rqid, '星期五'rq ,#{friDate} today from dual
+		union
+		select 6 rqid, '星期六' rq,
+		#{saturDate} today from dual
+		union
+		select 7 rqid, '星期日'rq ,#{sunDate} today from dual
+
+		) b where 1=1
+		<if test="classbatch!=null and classbatch!=''"> AND classbatch=#{classbatch}</if>
+		AND ISNULL(areaid)
+
+		) a1
+		left JOIN
+		(select abc.* ,u.name as username,ifnull((select name from zonekey_dept where id=abc.deptid),'')as deptname ,abc.course_desc as coursedesc,
+		CASE WHEN abc.id in(
+		SELECT
+		DISTINCT(ar.id) FROM
+		zonekey_curriculum ar , zonekey_resource r where r.curriculumid=ar.id )
+		THEN '1' ELSE '0' END as isresource
+
+		from zonekey_curriculum abc ,sys_user u where 1=1 AND abc.userid=u.id
+		<if test="userno!=null and userno!=''"> AND u.loginname=#{userno}</if>
+		<if test="weeks!=null and weeks!=''"> AND abc.weeks=#{weeks}</if>
+		and abc.deleteflag=0 and u.id=abc.userid) c
+		on a1.today=c.date and a1.classnum=c.classnum
+		<if test="live!=null and live!=''"> and c.live = #{live}</if>
+		<if test="record!=null and record!=''"> and c.record = #{record}</if>
+		<if test="isresource!=null and isresource!=''"> and c.isresource = #{isresource}</if>
+		order by today,a1.classnum
+	</select>
+	<!-- 查询当前学期全部周（不翻页） -->
+	<select id="findAllWeeksForShearch" resultType="com.zonekey.study.entity.Term">
+		SELECT
+		id,termname,startday,weeks
+		FROM zonekey_term where is_current ='1' order by id desc
+	</select>
+	<!-- 查找课堂内容 -->
+	<select id="findCurriculumDetailList" parameterType="com.zonekey.study.entity.CurriculumMaterials" resultType="com.zonekey.study.entity.CurriculumMaterials">
+		select * from study_curriculum_materials where curriculumid=#{curriculumid}
+	</select>
+
+	<!-- 查找课前准备资料 -->
+	<select id="showResourceBeforeClass" parameterType="com.zonekey.study.entity.CurriculumMaterials" resultType="com.zonekey.study.entity.CurriculumMaterials">
+	<include refid="resourceIp" />
+		SELECT c.id, c.curriculumid, r.size AS readyresourcesize, concat(#{_ip},r.fileurl) AS
+		readyresourcefileurl, r.nametype,r. NAME AS readyresourcename, c.resource_uuid AS readyresourcuuid, r.id AS readyresourcid, c.visable AS resourcevisable, r.id, r.createuser, ifnull(( SELECT
+		count(rc.id) FROM
+		study_resource rc WHERE rc.storeid = r.id AND rc.createuser = #{createuser} ), '' ) AS resourcecollection , concat(#{_ip},r.transPath) transPath FROM study_curriculum_ready_resource c, study_resource r WHERE
+		c.resource_uuid =
+		r.resource_uuid AND c.curriculumid = #{curriculumid} 
+		<!-- AND ISNULL(r.storeid) -->
+	</select>
+
+	<!-- 查找课前准备资料（外部接口） -->
+	<select id="selectResourceBeforeClass" parameterType="com.zonekey.study.entity.CurriculumMaterials" resultType="com.zonekey.study.entity.CurriculumMaterials">
+		select c.id,c.curriculumid,r.size as readyresourcesize,r.fileurl as
+		readyresourcefileurl,r.name as readyresourcename ,c.resource_uuid as readyresourcuuid ,r.id as readyresourcid,c.visable as resourcevisable ,ifnull((select count(rc.id) from study_resource_collection
+		rc where rc.relation=c.resource_uuid),'')as resourcecollection from study_curriculum_ready_resource c,study_resource r where c.resource_uuid=r.resource_uuid and
+		c.curriculumid = (select id from
+		zonekey_curriculum where userid=#{userid} and date=#{date} and classnum=#{classnum} and deleteflag='0')
+	</select>
+	<!-- 新增课前准备表 -->
+	<insert id="addResourceBeforeClass" parameterType="map">
+		insert into study_curriculum_ready_resource(uuid,curriculumid,resource_uuid,createdate,createuser) value
+		<foreach collection="list" item="item" separator=",">
+			(#{uuid},#{curriculumid},#{item.resource_uuid},sysdate(),#{createuser})
+		</foreach>
+	</insert>
+	<!-- 展开全部课前准备资料 -->
+	<select id="showAllResourceBeforeClass" parameterType="com.zonekey.study.entity.CurriculumMaterials" resultType="com.zonekey.study.entity.CurriculumMaterials">
+		select c.id,c.curriculumid,r.size as readyresourcesize,r.name as
+		readyresourcename ,c.resource_uuid as readyresourcuuid ,c.visable as resourcevisable ,ifnull((select count(rc.id) from study_resource_collection rc where rc.relation=c.resource_uuid),'')as
+		resourcecollection from study_curriculum_ready_resource c,study_resource r where c.resource_uuid=r.resource_uuid and c.curriculumid=#{curriculumid}
+	</select>
+	<!-- 编辑课堂内容（主题、学科、阶段、简介） -->
+	<update id="updateCurriculum" parameterType="com.zonekey.study.entity.CurriculumMaterials">
+		update study_curriculum_materials set
+		<if test="subjectname != null and subjectname!=''">
+			subjectname=#{subjectname},
+		</if>
+		<if test="scopename != null and scopename!=''">
+			scopename=#{scopename},
+		</if>
+		<if test="gradename != null and gradename!=''">
+			gradename=#{gradename},
+		</if>
+		<if test="introduce != null and introduce!=''">
+			introduce=#{introduce},
+		</if>
+		<if test="imageurl != null and imageurl!=''">
+			imageurl=#{imageurl},
+		</if>
+		createdate=sysDate()
+		where
+		curriculumid=#{curriculumid}
+	</update>
+	<!-- -->
+	<select id="selectCurriculumMaterials" parameterType="string" resultType="com.zonekey.study.entity.CurriculumMaterials">
+		select * from study_curriculum_materials where curriculumid=#{curriculumid}
+	</select>
+	<insert id="insertCurriculumMaterials" parameterType="com.zonekey.study.entity.CurriculumMaterials">
+		insert into study_curriculum_materials (uuid,curriculumid,subjectname,scopename,gradename,introduce,imageurl) values
+		(#{uuid},#{curriculumid},#{subjectname},#{scopename},#{gradename},#{introduce},#{imageurl})
+	</insert>
+	<!-- 设置课前准备资料的学生可见性 -->
+	<update id="setupVisibilityClassReady" parameterType="com.zonekey.study.entity.CurriculumMaterials">
+		update study_curriculum_ready_resource set
+		<if test="resourcevisable != null">
+			visable=#{resourcevisable}
+		</if>
+		where
+		curriculumid=#{curriculumid} and resource_uuid=#{readyresourcuuid}
+	</update>
+	<!-- 教师移除课前准备资料 -->
+	<delete id="moveClassReady" parameterType="com.zonekey.study.entity.CurriculumMaterials">
+		delete from study_curriculum_ready_resource where curriculumid=#{curriculumid} and resource_uuid=#{readyresourcuuid}
+	</delete>
+	<!-- 学生收藏课前准备资料 -->
+	<insert id="collectPrepareDate" parameterType="com.zonekey.study.entity.CurriculumMaterials">
+		insert into study_resource_collection (uuid,userid,relation,collectiondate,source) values (#{uuid},#{userid},#{relation},sysdate(),#{source})
+	</insert>
+	<!-- 查找课前准备资料 -->
+	<select id="selectCollectPrepareDate" parameterType="com.zonekey.study.entity.CurriculumMaterials" resultType="com.zonekey.study.entity.CurriculumMaterials">
+		select * from study_resource_collection where userid=#{userid} and
+		relation=#{relation}
+	</select>
+	<!-- 从资源表查找课前准备资料是否被收藏 -->
+	<select id="selectCollectResource" parameterType="com.zonekey.study.vo.ResourceView" resultType="com.zonekey.study.vo.ResourceView">
+		select * from study_resource where createuser=#{createuser} and storeid=#{storeid} and
+		storetype=#{storetype}
+	</select>
+	<!-- 从资源表查找课前准备资料是否被收藏 -->
+	<select id="selectCollectCountResource" parameterType="com.zonekey.study.vo.ResourceView" resultType="int">
+		select count(*) from study_resource where storeid in (select id from zonekey_resource where floder=#{storeid} and name like '%.mp4') and createuser = #{createuser} and storetype=#{storetype} and source='collect'
+	</select>
+	<!-- 学生取消收藏课前准备资料 -->
+	<delete id="deletecollectPrepareDate">
+		delete from study_resource_collection where userid=#{userid} and relation=#{relation}
+	</delete>
+	<!-- 收藏课堂生成资料 -->
+	<!-- <insert id="collectGenerateClass" parameterType="com.zonekey.study.entity.CurriculumMaterials"> insert into study_resource_collection (uuid,userid,relation,collectiondate,source) values (#{uuid},#{userid},#{relation},sysdate(),#{source}) 
+		</insert> -->
+
+	<!-- 老师设置课堂生成性资料的可见性 -->
+	<!-- <update id="setupVisibilityAfterClass" parameterType="com.zonekey.study.entity.CurriculumMaterials">
+		update study_curriculum_resource set
+		<if test="resourcevisable != null">
+			visable=#{resourcevisable}
+		</if>
+		where
+		curriculumid=#{curriculumid} and floder=#{floder}
+	</update> -->
+	<!--查询课后资源表中是否有记录 -->
+	<select id="selectfromafterresource" parameterType="com.zonekey.study.entity.CurriculumMaterials" resultType="com.zonekey.study.entity.CurriculumMaterials">
+		select * from study_curriculum_resource r where r.curriculumid=#{curriculumid} and
+		r.floder=#{floder}
+	</select>
+	<delete id="deletefromafterresource" parameterType="com.zonekey.study.entity.CurriculumMaterials" >
+		delete from study_curriculum_resource where curriculumid=#{curriculumid} and floder=#{floder}
+	</delete>
+	<delete id="deletefromafterresourceById" parameterType="com.zonekey.study.entity.CurriculumMaterials" >
+		delete from study_curriculum_resource where curriculumid=#{curriculumid} and resourceid=#{readyresourcid}
+	</delete>
+	<!--新增课后资源表中是否有记录 -->
+	<insert id="insertafterresource" parameterType="com.zonekey.study.entity.CurriculumMaterials">
+		insert into study_curriculum_resource (uuid,curriculumid,resourceid,floder,visable) values (#{uuid},#{curriculumid},#{readyresourcid},#{floder},#{resourcevisable})
+	</insert>
+	<insert id="insertAll" parameterType="List">
+		<include refid="bindLoginname" />
+		insert into study_curriculum_resource (uuid,curriculumid,resourceid,floder,visable) values
+		<foreach collection="storelist" item="item" separator=",">
+			(#{item.uuid},#{item.curriculumid},#{item.readyresourcid},#{item.floder},#{item.resourcevisable})
+		</foreach>
+	</insert>
+	<!-- 查询课后生成资料 -->
+	<select id="showVideoAfterClass" parameterType="com.zonekey.study.entity.CurriculumMaterials" resultType="com.zonekey.study.entity.CurriculumMaterials">
+	<include refid="bindLoginname" />
+		select r.id as readyresourcuuid,r.name as readyresourcename
+		,r.curriculumid,
+		case (select count(*) from study_resource s where s.storeid in (select rc.id from zonekey_resource rc where rc.floder=r.floder and rc.name like '%.mp4') and s.createuser = #{_loginname}) when '0' then '0' else '1' end as resourcecollection
+		,ifnull((select c1.visable from
+		study_curriculum_resource c1 where c1.resourceid=r.id and c1.curriculumid=r.curriculumid),'')as resourcevisable ,r.floder as floder,r.status as status
+		from zonekey_resource r where
+		r.deleteflag ='0'
+		and r.name like '%.mp4' and r.curriculumid=#{curriculumid}  GROUP BY r.floder
+	</select>
+	<!-- 查找当前学期 -->
+	<select id="findNowTerm" resultType="com.zonekey.study.entity.Term">
+		SELECT a.id,a.termname ,a.startday,a.weeks , a.is_current as iscurrent FROM zonekey_term a
+		where is_current ='1'
+	</select>
+	<!-- 查看一段时间内的所有方案(为我的课表使用) -->
+	<select id="findMyTypesByweek" resultType="com.zonekey.study.entity.Curriculumbase" parameterType="com.zonekey.study.entity.Curriculumbase">
+		select
+		a.id,a.class_type as classtype, a.classbatch,a.areaid, a.date_begin as datebegin, a.date_end as
+		dateend, a. name,
+		a.i_class as iclass, a.starttime, a.endtime
+		,a. smaxclass,a.maxclass
+		from
+		zonekey_curriculumbase a
+		where ISNULL(a.areaid)
+		<if test="datebegin != null">and a.date_end >=#{dateend}</if>
+		<if test="dateend != null">and #{datebegin} >= a.date_begin </if>
+		GROUP BY a.classbatch
+		ORDER BY a.maxclass desc limit 1
+	</select>
+	<!-- 点播数据 -->
+	<select id="getMp4" resultType="map">
+		select floder group_id,fileurl base_dir,concat(id,'') uid,concat(floder,'/',name) file_name from zonekey_resource where floder=#{map.floder} and name like
+		'%.mp4' group by name
+	</select>
+	<select id="getUploadCount" resultType="int">
+		select count(*) from
+		(
+		select count(*) from zonekey_resource where status=#{status} and deleteflag='0' group by floder
+		) a
+	</select>
+	<update id="updateStatus" parameterType="list">
+		update zonekey_resource set
+		<foreach collection="list" item="map">
+			status=#{map.status} where id=#{map.uid}
+		</foreach>
+	</update>
+	<update id="updateStatusByFloder">
+		update zonekey_resource set status = #{status} where floder=#{map.floder} and name like '%.mp4'
+	</update>
+	<!-- 根据mac date查询课前准备资料 -->
+	<select id="findResourceBeforeClassByMac" parameterType="map" resultType="com.zonekey.study.entity.CurriculumMaterials">
+		select c.id,c.curriculumid,(select classnum from zonekey_curriculum where id=c.curriculumid)classnum,r.parentid as
+		parentid,r.size as readyresourcesize,r.fileurl as readyresourcefileurl,r.name
+		as readyresourcename ,c.resource_uuid as readyresourcuuid ,r.id as
+		readyresourcid,c.visable as resourcevisable
+		,ifnull((select count(rc.id) from study_resource_collection rc where
+		rc.relation=c.resource_uuid),'')as resourcecollection from
+		study_curriculum_ready_resource c,study_resource r where
+		c.resource_uuid=r.resource_uuid and
+		c.curriculumid in (select id from
+		zonekey_curriculum where areaid= (select areaid from zonekey_device where deleteflag = '0' and mac=#{map.mac}) and
+		date=#{map.date} and deleteflag='0')
+	</select>
+	<select id="selectCurriculumIdByMac" parameterType="com.zonekey.study.entity.Wisclassroom" resultType="map">
+		select id ,areaid ,userid from zonekey_curriculum where areaid=(select areaid from
+		zonekey_device where mac=#{mac}) and date=#{date} and classnum=#{classnum} and deleteflag='0'
+	</select>
+	<!-- 根据mac date查询对应教室今天的所有课程 -->
+	<select id="findClssInfoByMac" parameterType="map" resultType="com.zonekey.study.entity.ClassInfo">
+		select classnum ,SUBSTR(starttime,1,5) as starttime ,SUBSTR(endtime,1,5) as endtime from zonekey_curriculum where areaid= (select
+		areaid from zonekey_device where deleteflag = '0' and mac=#{map.mac}) and date=#{map.date} and deleteflag='0' ORDER BY classnum
+	</select>
+	<!-- 根据floder 去录播机资源表查记录 -->
+	<select id="findResourceByFloder" parameterType="string" resultType="com.zonekey.study.vo.ResourceView">
+	<include refid="bindLoginname" />
+		<!-- select * from zonekey_resource where floder=#{floder} and name like '%.mp4' and deleteflag='0'  -->
+		select r.* ,(select count(id) from study_resource where storeid=r.id and curriculumid=r.curriculumid and storetype='2' and storeuser=#{_loginname}) resourcecollection ,
+		(select visable from study_curriculum_resource where resourceid=r.id) as resourcevisable
+		from zonekey_resource r where r.floder=#{floder} and r.name like '%.mp4' and r.deleteflag='0' 
+	</select>
+	<!-- 查找当前时间的直播课程 -->
+	<select id="selectLiveCurriculum" parameterType="string" resultType="com.zonekey.study.entity.Curriculum">
+		select * from zonekey_curriculum where date=#{date} and CONCAT(date,' ',endtime) > SYSDATE() and deleteflag='0'
+	</select>
+	<!-- 根据教室id，查教室下录播机ip -->
+	<select id="selectIpByArea" parameterType="string" resultType="map">
+		SELECT ip from zonekey_device where areaid=#{areaid} and deleteflag='0'
+	</select>
+	<!-- 根据课表id，查录播机mac，ip等信息 -->
+	<!-- 2015-07-24 把 typeid ='1' 条件去掉-->
+	<select id="selectIpByCurriculumid" parameterType="string" resultType="map">
+		<!-- select c.areaid,c.livemodel, c.date,substr(c.endtime, 1, 5) endtime,(select mac from zonekey_device where areaid=c.areaid  and typeid ='1' and deleteflag='0') mac ,
+		(select ip from zonekey_device where areaid=c.areaid  and typeid ='1' and deleteflag='0') ip
+		from zonekey_curriculum c where c.id=#{curriculumid} and  c.deleteflag='0' -->
+		select c.areaid,c.livemodel, c.date,substr(c.endtime, 1, 5) endtime, d.mac,d.ip,d.typeid from zonekey_curriculum c  
+		LEFT JOIN zonekey_device d 
+		on d.areaid=c.areaid  
+		where 
+		c.id=#{curriculumid}
+		and c.deleteflag='0' and d.deleteflag='0'
+		limit 1
+	</select>
+
+	<!-- 按条件查询直播课表 -->
+	<select id="findLiveCurriculum" resultType="map">
+		SELECT a.date,date_format(a.starttime,'%H:%i') starttime,a.endtime,a.id,a.watchwatchnum,
+		(select count(*) from study_comment where resourceid=a.id) num,
+		a.subject,u.name as username,a.classnum ,concat('/data/',b.imageurl) imageurl,
+		case
+		when (concat(a.date ,' ',a.starttime)>sysdate() ) then '1'
+		else '0' end as status
+		FROM
+		zonekey_curriculum a left join study_curriculum_materials b on a.id=b.curriculumid,sys_user u
+		where u.id=a.userid AND a.live='1' and a.deleteflag = '0' 
+		and concat(a.date ,' ',a.endtime)>sysdate()
+		<if test="type != null and type!=''">
+			and b.scopename=#{type}
+		</if>
+		<if test="page.keywords != null and page.keywords.name != null">
+			and a.subject like concat('%',#{page.keywords.name},'%')
+		</if>
+		order by status ,a.date,a.starttime
+		limit #{page.offset} ,#{page.pageSize}
+	</select>
+
+	<select id="findLiveCount" resultType="long">
+		SELECT count(*)
+		FROM
+		zonekey_curriculum a left join study_curriculum_materials b on a.id=b.curriculumid
+		where a.live='1' and a.deleteflag = '0'
+		and concat(a.date ,' ',a.endtime)>sysdate()
+		<if test="type != null and type!=''">
+			and b.scopename=#{type}
+		</if>
+		<if test="page.keywords != null and page.keywords.name != null">
+			and a.subject like concat('%',#{page.keywords.name},'%')
+		</if>
+	</select>
+	<!-- 查询精品课堂视频列表 -->
+	<select id="findPublish" resultType="map">
+		select a.resourcename,a.transPath,a.subject,a.createuser,b.name ,concat('/data',a.uploadPic) uploadPic,a.floder,a.watchwatchnum,
+		(select count(*) from study_comment where resourceid=a.floder) num
+		from zonekey_resource a,sys_user b,zonekey_curriculum c
+		where a.publishstate=1 and a.floder=c.resourcefloder and b.id=c.userid and a.deleteflag='0' and a.transflag='0'
+		<if test="type != null and type!=''">
+			and a.subject=#{type}
+		</if>
+		<if test="page.keywords != null  and page.keywords.name != null">
+			and a.resourcename like concat('%',#{page.keywords.name},'%')
+		</if>
+		group by a.floder order by publishdate desc
+		limit #{page.offset},#{page.pageSize}
+	</select>
+	<select id="findHotList" resultType="map">
+		select a.resourcename,a.transPath,a.subject,a.createuser,b.name ,concat('/data',a.uploadPic) uploadPic,a.floder,a.watchwatchnum
+		from zonekey_resource a,sys_user b,zonekey_curriculum c
+		where a.publishstate=1 and a.floder=c.resourcefloder and b.id=c.userid and a.deleteflag='0' 
+		group by a.floder
+		order by a.watchwatchnum desc limit 9
+	</select>
+	<select id="findPublishCount" resultType="long">
+			select count(*) from 
+		(select count(*) from zonekey_resource a where a.publishstate=1 and a.deleteflag='0'
+		and a.transflag='0'
+		<if test="type != null and type!=''">
+			and a.subject=#{type}
+		</if>
+		<if test="page.keywords != null  and page.keywords.name != null">
+			and a.resourcename like concat('%',#{page.keywords.name},'%')
+		</if>
+			group by floder)   b
+	</select>
+	
+	<!-- 按条件查询直播课表 -->
+	<select id="findMyLiveCurriculum" parameterType="com.zonekey.study.entity.PageBean" resultType="map">
+	    <include refid="bindLoginname" />
+	    <include refid="resourceIp" />
+		SELECT a.endtime,a.date,a.id,a.watchwatchnum,a.weeks,a.weekdate,a.sameclass,a.subjectattribute,a.course_desc,
+		(select count(*) from study_comment where resourceid=a.id) num,
+		a.subject,u.name as username,a.classnum ,concat(#{_ip},a.imageurl) imageurl,a.starttime,
+        <!--  -->
+		case
+		when (sysdate()> concat(a.date ,' ',a.endtime) ) then '0'
+		when (concat(a.date ,' ',a.starttime)>sysdate() ) then '1'
+		else '2' end as status
+		FROM
+		zonekey_curriculum a,sys_user u
+		where u.id=a.userid AND a.live='1' and a.deleteflag = '0' AND a.userid=(select id from sys_user su where su.loginname=#{_loginname})
+		<if test="keywords != null">
+		   <if test="keywords.subject != null and keywords.subject != ''">
+			   and (a.subjectattribute like concat("%",#{keywords.subject},"%") or a.subject like concat("%",#{keywords.subject},"%"))
+	 	   </if>
+	 	    <if test="keywords.weeks != null and keywords.weeks != ''">
+			   and a.weeks=#{keywords.weeks}
+	 	   </if>
+	 	    <if test="keywords.weekdate != null and keywords.weekdate != ''">
+			   and a.weekdate=#{keywords.weekdate}
+	 	   </if>
+		</if>
+		order by status desc ,a.date desc,a.starttime
+		<if test="page != null and page.offset != null and page.limit != null">
+			limit #{page.offset} ,#{page.limit}
+		</if>
+	</select>
+
+	<select id="findMyLiveCount" parameterType="com.zonekey.study.entity.PageBean" resultType="long">
+	    <include refid="bindLoginname" />
+		SELECT count(*)
+		FROM
+		zonekey_curriculum a
+		where a.live='1' and a.deleteflag = '0' AND a.userid=(select id from sys_user su where su.loginname=#{_loginname})
+		<if test="keywords != null">
+		   <if test="keywords.subject != null and keywords.subject != ''">
+			   and (a.subjectattribute like concat("%",#{keywords.subject},"%") or a.subject like concat("%",#{keywords.subject},"%"))
+	 	   </if>
+	 	    <if test="keywords.weeks != null and keywords.weeks != ''">
+			   and a.weeks=#{keywords.weeks}
+	 	   </if>
+	 	    <if test="keywords.weekdate != null and keywords.weekdate != ''">
+			   and a.weekdate=#{keywords.weekdate}
+	 	   </if>
+		</if>
+	</select>
+</mapper>

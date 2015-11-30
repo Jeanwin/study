@@ -1,0 +1,53 @@
+package com.zonekey.study.common;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+
+/**
+ * TODO Comment of JProperties
+ * 
+ * @author jeawin
+ * @version v1.0
+ */
+public class ReadProperties {
+	/**
+	 * 读取配置文件
+	 * @return
+	 */
+	public static Properties loadProperties(String fileName){
+		InputStream inStream = ReadProperties.class.getClassLoader().getResourceAsStream(fileName);
+		Properties prop = new Properties();  
+		try {
+			prop.load(inStream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return prop;
+	}
+	/**
+	 * 获取资源ip
+	 * @return
+	 */
+    public static String getIp(){
+    	return loadProperties("application.properties").getProperty("resource.ip");
+    }
+    /**
+     * 
+     * @param name
+     * @return
+     */
+    public static String getByName(String name){
+    	return loadProperties("application.properties").getProperty(name);
+    }
+	/**
+	 * test
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		Properties prop = loadProperties("application.properties");
+		System.out.println(prop.getProperty("resource.ip"));
+	}
+}

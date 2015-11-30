@@ -1,0 +1,308 @@
+$(function(){
+    /*** expertPerson edit ***/
+    $(".expertPerson a").hover(function () {
+        $(this).append("<i class='icon-close btn_del_expert'></i>");
+    },function () {
+        $(this).find("i").remove();
+    }).find("i").live("click", function () {
+        $(this).parent().remove();
+        return false;
+    });
+    /***btn-edit-expert******/
+    $("#btn-edit-expert").click(function(){
+        $("#editExpertBox").show();
+        center($("#editExpertBox"));
+        return false;
+    });
+    document.onkeypress=function(e){
+        var ev=e||window.event;
+        if(ev.keyCode == 13) {
+            if ( ev.preventDefault ){
+                ev.preventDefault();
+            }
+            else{
+                ev.returnValue = false;
+            }
+            return false;//禁用回车事件
+        }
+    };
+    $(".cancel-box").click(function(){
+        $(".box").hide();
+    });
+    $("#editExpertBox .icon-my-library-del").live("click",function(){
+        $(this).parent().parent().remove();
+    });
+    $("#btn-search-expert").click(function(){
+        $(".expertTab1").hide();
+        $(".expertTab2").show();
+    });
+    $("#to-expertTab1").click(function(){
+        $(".expertTab1").show();
+        $(".expertTab2").hide();
+    });
+    /*******tabChange********/
+    $('.courseViewNav li').click(function(){
+        $(this).addClass("current").siblings().removeClass();
+        $(".courseViewContent").hide().eq($('.courseViewNav li').index(this)).show();
+    });
+
+    $('.activeRelativeInfo ul li').click(function(){
+        $(this).addClass("cur").siblings().removeClass();
+        $(".activeRelativeContent").hide().eq($('.activeRelativeInfo ul li').index(this)).show();
+    });
+    /*******course-resource-back*******/
+    $(".course-resource-back-click").click(function(){
+        $(".course-resource-edit").show();
+        selectMaterialOnlineRead();
+        $(".course-resource-add").hide();
+    });
+    $(".course-resource-edit-click").click(function(){
+        $(".course-resource-edit").hide();
+        $(".course-resource-add").show();
+    });
+    /******resourceBox***/
+    $("#add-resource").click(function(){
+        $(".file-box").show();
+        $("#file").val('');
+        center($(".file-box"));
+    });
+    $("#cancelFileBox").click(function(){
+        $(".file-box").hide();
+    });
+    $("#cancelFileBox2").click(function(){
+        $(".file-box").hide();
+    });
+
+    /***expert-distribution***/
+    $("#expert-distribution").click(function(){
+        $("#selExpertBox").show();
+        center($("#selExpertBox"));
+        return false;
+    });
+
+    /*******broadcastYesNo********/
+    $("#broadcastYesNo input").click(function(){
+        var index=$("#broadcastYesNo input").index(this);
+        if(index==1){
+            $("#selcourse").html('<i class="icon-my-library-add" style="font-size:20px;color:#999;"></i> 选择录像课程');
+        }else{
+            $("#selcourse").html('<i class="icon-my-library-add" style="font-size:20px;color:#999;"></i> 选择直播课程');
+        }
+    });
+        /***selcourse*****/
+        $("#selcourse").click(function(){
+            if($("#selcourse:contains('选择直播课程')").length==1){
+                $("#selbroadcastBox").show();
+                center($("#selbroadcastBox"));
+            }else if($("#selcourse:contains('选择录像课程')").length==1){
+                $(".file-box").show();
+                center($(".file-box"));
+                if($(".icon-done")){
+                    var a=$(".icon-done").parent().offset().top-$(".selectVideoFileContent>ul").offset().top;
+                    console.log(a);
+                    $(".selectVideoFileContent>ul").scrollTop(a);
+                }
+            }
+        });
+
+        /*$("#VideoFile a").click(function(){
+            $(this).addClass("cur").siblings('a').removeClass();
+            var eqNum=$(this).index()-1;
+            $(".selectVideoFileContent").eq(eqNum).show().siblings(".selectVideoFileContent").hide();
+            if($(".icon-done")){
+                var a=$(".icon-done").parent().offset().top-$(".selectVideoFileContent>ul").offset().top;
+                console.log(a);
+                $(".selectVideoFileContent>ul").scrollTop(a);
+            }
+        });*/
+    /****reviewInfoPart*****/
+    $(".goReviewInfoPage").click(function(){
+        $("#activeDetailTab").hide();
+        $("#reviewInfoMore").show();
+    });
+    $("#goWritingManage").click(function(){
+        $("#activeDetailTab").hide();
+        $("#writingManage").show();
+    });
+
+    /****btn-write-note******/
+    $("#btn-write-note").click(function(){
+    	$("#content").val("");
+        $(".my-note-box").show();
+        $(".my-note-box .comment-detail article").each(function(){
+            if($(this).height()>40&&!$(this).next().hasClass("collapseAll")){
+                $(this).after('<span class="collapseAll">展开全部<i class="icon-arrow-drop-down"></i></span>');
+            }
+        });
+    });
+    $(".my-note-box-close").click(function(){
+        $(".my-note-box").hide();
+    });
+    var dragging=false;
+    var iX,iY;
+    $(".my-note-box").mousedown(function(e){
+        if(!$(".inputIns").focus()){
+            var e = e || window.event;
+            dragging=true;
+            iX= e.clientX-this.offsetLeft;
+            iY= e.clientY-this.offsetTop;
+            if (!window.captureEvents) {
+                this.setCapture();
+            }else {
+                window.captureEvents(Event.MOUSEMOVE|Event.MOUSEUP);
+            };
+            $(".note-input-add").focus();
+            return false;
+        }
+    });
+    document.onmousemove=function(e){
+        if(dragging){
+            var e = e || window.event;
+            var oX= e.clientX-iX;
+            var oY= e.clientY-iY;
+            $(".my-note-box").css({"position":"absolute","left":oX,"top":oY});
+            return false;
+        }
+    };
+    document.onmouseup=function(e){
+        var e = e || window.event;
+        dragging=false;
+        if (!window.captureEvents) {
+            e.releaseCapture();
+        }else {
+            window.releaseEvents(Event.MOUSEMOVE|Event.MOUSEUP);
+        };
+        if(e.cancelBubble){
+            e.cancelBubble=true;
+        }else{
+            e.stopPropagation();
+        }
+        return false;
+    };
+    $(".clear-add-note").click(function(){
+        $(".note-input-add").val("");
+    });
+    $(".collapseAll").live("click",function(){
+        $(this).parent().find("article").css("max-height","none");
+        $(this).removeClass();
+        $(this).addClass("spreadAll");
+        $(this).html('缩起<i class="icon-arrow-drop-up"></i>');
+    });
+    $(".spreadAll").live("click",function(){
+        $(this).parent().find("article").css("max-height","42px");
+        $(this).removeClass();
+        $(this).addClass("collapseAll");
+        $(this).html('展开全部<i class="icon-arrow-drop-down"></i>');
+    });
+    $(".comment-detail").hover(function(){
+        if($(this).find("i").hasClass("icon-arrow-drop-up")||$(this).find("i").hasClass("icon-arrow-drop-down")){
+            $(this).find("i").not(":eq(0)").not(":last").remove();
+            $(this).find("span:eq(0)").after('<i class="icon-delete blue-color pull-right"></i><i class="icon-create blue-color pull-right"></i>');
+        }else{
+            $(this).find("i").not(":eq(0)").remove();
+            $(this).find("span:eq(0)").after('<i class="icon-delete blue-color pull-right"></i><i class="icon-create blue-color pull-right"></i>');
+        }
+    },function(){
+        if($(this).find("i").hasClass("icon-arrow-drop-up")||$(this).find("i").hasClass("icon-arrow-drop-down")){
+            $(this).find("i").not(":eq(0)").not(":last").remove();
+        }else{
+            $(this).find("i").not(":eq(0)").remove();
+        }
+    });
+    $(".comment-detail .icon-delete").live("click",function(){
+        $(this).parent().remove();
+        //niu
+        var id=$(this).parent().find("span:eq(1)").html();
+        deleteNote(id);
+    });
+    $(".comment-detail .icon-create").live("click",function(){
+        var articleVal=$(this).parent().find("article").html();
+        $(this).parent().find("article").replaceWith('<textarea class="inputIns" style="width:100%;">'+articleVal+'</textarea>');
+        $(".inputIns").focus();
+        $(".inputIns").val(articleVal);
+        $(".inputIns").blur(function(){
+        	//niu
+        	var id=$(this).parent().find("span:eq(1)").html();
+        	var inputVal=$(".inputIns").val();
+            $(this).parent().find("textarea").replaceWith('<article>'+inputVal+'</article>');
+            updateNote(id,inputVal);
+            $(".my-note-box .comment-detail article").each(function(){
+                if($(this).height()>40&&!$(this).next().hasClass("collapseAll")){
+                    $(this).after('<span class="collapseAll">展开全部<i class="icon-arrow-drop-down"></i></span>');
+                }else if($(this).height()<=40&&$(this).next().hasClass("collapseAll")){
+                    $(this).next().remove();
+                }
+            });
+        });
+    });
+    /***tree****/
+    $(".file-box-mid li").each(function(){
+        if($(this).children("ul").length>0){
+            $(this).addClass("parent");
+        }
+    });
+    $(".file-box-mid li.parent").click(function(){
+        $( this).children("i:eq(0)").toggleClass("icon-arrow-drop-down icon-play-arrow");
+        $(this).children("ul").slideToggle("fast");
+    });
+    /******center*****/
+    function center(obj) {
+        var screenWidth = $(window).width(), screenHeight = $(window).height(); //当前浏览器窗口的宽高
+        var scrolltop = $(document).scrollTop();//获取当前窗口距离页面顶部高度
+        var objLeft = (screenWidth - obj.width())/2 ;
+        var objTop = (screenHeight - obj.height())/2 + scrolltop;
+        obj.css({left: objLeft + 'px', top: objTop + 'px'});
+        //浏览器窗口大小改变时的操作
+        if(obj.is(":visible")) {
+            $(window).resize(function () {
+                screenWidth = $(window).width();
+                screenHeight = $(window).height();
+                scrolltop = $(document).scrollTop();
+                objLeft = (screenWidth - obj.width()) / 2;
+                objTop = (screenHeight - obj.height()) / 2 + scrolltop;
+                obj.css({left: objLeft + 'px', top: objTop + 'px'});
+            });
+            //浏览器有滚动条时的操作
+            $(window).scroll(function () {
+                screenWidth = $(window).width();
+                screenHeight = $(window).height();
+                scrolltop = $(document).scrollTop();
+                objLeft = (screenWidth - obj.width()) / 2;
+                objTop = (screenHeight - obj.height()) / 2 + scrolltop;
+                obj.css({left: objLeft + 'px', top: objTop + 'px'});
+            });
+        }
+    }
+    /***videoBroadcastBox****/
+    $(".childWindow div .videoPos").hover(function(){
+            $(this).append('<div class="tBox"><i class="icon-swap-horiz"></i><div>切换至主屏播放</div></div>');
+        },function(){
+            $(".tBox").remove();
+    });
+    /*$(".childWindow div .videoPos").click(function(){
+        var $childVal=$(this).find(":eq(0)").attr("src");
+        var $mainVal=$(".mainWindow").find(":eq(0)").attr("src");
+        $(this).find(":eq(0)").attr("src",$mainVal);
+        $(".mainWindow").find(":eq(0)").attr("src",$childVal);
+    });*/
+    /**tree***/
+    $( '.tree li' ).each( function() {
+        if( $( this ).children( 'ul' ).length > 0 ) {
+            $( this ).addClass('parent');
+        }
+    });
+    $( '.tree li.parent >span' ).click( function( ) {
+        $( this ).parent().toggleClass( 'active' );
+        $( this ).parent().children( 'ul' ).slideToggle( 'fast' );
+    });
+    $("#select_dept").click(function(){
+        $( '.tree').fadeToggle("fast","linear");
+    });
+
+    $( '.tree li' ).click( function(){
+        if( $( this ).children( 'ul' ).length == 0 ) {
+            var $thisVal=$(this).text();
+            $("#select_dept").val($thisVal);
+        }
+    });
+});

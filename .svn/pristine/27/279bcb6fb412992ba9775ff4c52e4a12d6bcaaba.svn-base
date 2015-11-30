@@ -1,0 +1,401 @@
+package com.zonekey.study.common;
+
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.NoRouteToHostException;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.net.PrintCommandListener;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.zonekey.study.vo.FileBean;
+  public class ContinueFTP {
+	  protected int connectTimeout = 1000;
+      private FTPClient ftpClient = new FTPClient();    
+       public ContinueFTP(){    
+          this.ftpClient.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out))); 
+          
+      }    
+           
+       /**
+        * java编程中用于连接到FTP服务器
+        * @param hostname 主机名
+        * @param port 端口
+        * @param username 用户名
+        * @param password 密码
+        * @return 是否连接成功
+        * @throws IOException
+        */   
+      public boolean connect(String hostname,int port,String username,String password) throws SocketTimeoutException, IOException,NoRouteToHostException{ 
+    	  ftpClient.setConnectTimeout(2000); // 一秒钟，如果超过就判定超时了
+          ftpClient.connect(hostname, port);    
+          if(FTPReply.isPositiveCompletion(ftpClient.getReplyCode())){    
+              if(ftpClient.login(username, password)){    
+                	
+                 	return true;
+              }    
+          }    
+          disconnect();    
+          return false;    
+      }    
+           
+      /**
+       * 从FTP服务器上下载文件
+       * @param remote 远程文件路径
+       * @param local 本地文件路径
+       * @return 是否成功
+       * @throws IOException
+       */   
+      public boolean download(String remote,String local) throws IOException{    
+          ftpClient.enterLocalPassiveMode();    
+          ftpClient.setFileType(FTP.BINARY_FILE_TYPE);    
+          
+          boolean result;    
+          File f = new File(local);    
+          FTPFile[] files = ftpClient.listFiles(remote);    
+          if(files.length != 1){    
+              return false;    
+          }    
+          long lRemoteSize = files[0].getSize();    
+          if(f.exists()){    
+              OutputStream out = new FileOutputStream(f,true);    
+              System.out.println("本地文件大小为:"+f.length());      
+              if(f.length() >= lRemoteSize){    
+            	  System.out.println("本地文件大小大于远程文件大小，下载中止");
+                  return false;    
+              }    
+              ftpClient.setRestartOffset(f.length());    
+              result = ftpClient.retrieveFile(remote, out);    
+              out.close();    
+          }else {    
+              OutputStream out = new FileOutputStream(f);    
+              result = ftpClient.retrieveFile(remote, out);    
+              out.close();    
+          }    
+          return result;    
+      }    
+           
+      /**
+       * 上传文件到FTP服务器，支持断点续传
+       * @param local 本地文件名称，绝对路径
+       * @param remote 远程文件路径，使用/home/directory1/subdirectory/file.ext 按照Linux上的路径指定方式，支持多级目录嵌套，支持递归创建不存在的目录结构
+       * @return 上传结果
+       * @throws IOException
+       */   
+      public String upload(MultipartFile imgFile,String remote) throws IOException{    
+    	//设置PassiveMode传输
+          ftpClient.enterLocalPassiveMode();    
+        //设置以二进制流的方式传输 
+          ftpClient.setFileType(FTP.BINARY_FILE_TYPE);    
+          String  result;    
+        //对远程目录的处理   
+          String remoteFileName = remote;    
+          if(remote.contains(String.valueOf(File.separatorChar))){    
+              remoteFileName = remote.substring(remote.lastIndexOf(File.separatorChar)+1);    
+              String directory = remote.substring(0,remote.lastIndexOf(File.separatorChar)+1);    
+              if(!directory.equalsIgnoreCase(String.valueOf(File.separatorChar))&&!ftpClient.changeWorkingDirectory(directory)){    
+            	//如果远程目录不存在，则递归创建远程服务器目录
+                  int start=0;    
+                  int end = 0;    
+                  if(directory.startsWith(String.valueOf((File.separatorChar)))){    
+                      start = 1;    
+                  }else{    
+                      start = 0;    
+                  }    
+                  end = directory.indexOf(File.separatorChar,start);    
+                  while(true){    
+                      String subDirectory = remote.substring(start,end);    
+                      if(!ftpClient.changeWorkingDirectory(subDirectory)){    
+                          if(ftpClient.makeDirectory(subDirectory)){    
+                              ftpClient.changeWorkingDirectory(subDirectory);    
+                          }else {    
+                              System.out.println("创建目录失败");    
+                              return "false";    
+                          }    
+                      }    
+                           
+                      start = end + 1;    
+                      end = directory.indexOf(File.separatorChar,start);    
+                           
+                    //检查所有目录是否创建完毕
+                      if(end <= start){    
+                          break;    
+                      }    
+                  }    
+              }    
+          }    
+               
+        //检查远程是否存在文件   
+          FTPFile[] files = ftpClient.listFiles(remoteFileName);    
+          if(files.length == 1){    
+              long remoteSize = files[0].getSize();    
+//              File f = new File(local);    
+              long localSize = imgFile.getSize();
+              if(remoteSize==localSize){
+            	  System.out.println("文件已经存在");
+                  return "true";    
+              }else if(remoteSize > localSize){
+            	  System.out.println("远程文件大于本地文件");
+            	  return "true";      
+              }    
+                   
+            //尝试移动文件内读取指针,实现断点续传
+              InputStream is = imgFile.getInputStream();   
+              if(is.skip(remoteSize)==remoteSize){    
+                  ftpClient.setRestartOffset(remoteSize);    
+                  if(ftpClient.storeFile(remote, is)){    
+                      return "true";    
+                  }    
+              }    
+                   
+              //如果断点续传没有成功，则删除服务器上文件，重新上传   
+              if(!ftpClient.deleteFile(remoteFileName)){
+            	  System.out.println("删除远程文件失败");
+            	  return "false";    
+              }    
+//              is = new FileInputStream(f);    
+              if(ftpClient.storeFile(remote, is)){        
+            	  return "true";     
+              }else{    
+                  result = "false";    
+              }    
+              is.close();    
+          }else {    
+              InputStream is = imgFile.getInputStream();  
+              if(ftpClient.storeFile(remoteFileName, is)){    
+            	  return "true"; 
+              }else{    
+                  result = "false";    
+              }    
+              is.close();    
+          }    
+          return result;    
+      }    
+      /**   
+       * �Ͽ���Զ�̷�����������   
+       * @throws IOException   
+       */   
+      public void disconnect() throws IOException{    
+          if(ftpClient.isConnected()){    
+              ftpClient.disconnect();
+          }    
+      }    
+  
+      /**   
+       * ��ʾ�����ڵ��ļ��б�   
+       * @throws IOException   
+       */   
+      public  java.util.List  getfileList(String path) throws IOException{    
+    	  java.util.List list=new java.util.ArrayList();
+          if(ftpClient.isConnected()){    
+        	 
+        	FTPFile[] file= ftpClient.listFiles(path);
+           	if(file.length>0){
+//           		list=new java.util.ArrayList();
+           	
+	           	for(int i=0;i<file.length;i++){
+	           		java.util.Map map=new java.util.HashMap();
+	           		map.put("name", file[i].getName());
+	           		map.put("size", file[i].getSize());
+	           		map.put("timestamp", file[i].getTimestamp());
+	           		
+//	           		System.out.println("文件名称"+file[i].getName());
+//	           		System.out.println("文件大小"+file[i].getSize());
+	           		file[i].getTimestamp().setTime(new Date());
+	           		SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// 定义日期格式
+	        		String sysTime=format2.format(file[i].getTimestamp().getTime());
+//	           		System.out.println("文件时间"+sysTime);
+	           		map.put("time", sysTime);
+	           		
+	           		list.add(map);
+	           	}
+           	}
+          }   
+          return list;
+      }    
+
+      public  java.util.List  getFolederList(String path) throws IOException{    
+    	  java.util.List list=new java.util.ArrayList();
+          if(ftpClient.isConnected()){    
+        	
+        	FTPFile[] file= ftpClient.listFiles(path);
+           	if(file.length>0){
+//           		list=new java.util.ArrayList();
+           	
+	           	for(int i=0;i<file.length;i++){
+	           		java.util.Map map=new java.util.HashMap();
+	           		map.put("name", file[i].getName());
+	           		map.put("size", file[i].getSize());
+	           		SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// 定义日期格式
+	        		String sysTime=format2.format(file[i].getTimestamp().getTime());
+	           		map.put("time", sysTime);
+	           		//判断是不是文件夹，是返回true，不是返回false ，因为数据少暂时注掉，以后要打开
+	           		if(file[i].isDirectory() ){
+	           			list.add(map);
+	           		}
+	           		
+//	           		System.out.println(file[i].getName());
+	           		
+	           		
+	           	}
+           	}
+          }  
+          return list;
+      }   
+      /**
+       * 设置超时时间
+     * @param connectTimeout
+     */
+    public void setConnectTimeout(int connectTimeout) {
+          this.connectTimeout = connectTimeout;
+      }
+	/******************************************************************上传start*********************************/
+	/**
+	 * 上传
+	 * @param resourcePath 上传相对路径
+	 * @param req
+	 * @return返回结果为以逻辑名为key,真实文件名为value的map的集合
+	 */
+	 public  List<FileBean> upload(String resourcePath,MultipartHttpServletRequest req){
+		/* if(StringUtils.isEmpty(resourcePath)){
+			 resourcePath = AppConstants.upload_PATH;
+		 }*/
+		 
+		 List<FileBean> list = new ArrayList<FileBean>();
+		 MultiValueMap<String,MultipartFile> mfiles =  req.getMultiFileMap();
+        for (List<MultipartFile> f : mfiles.values()) {
+        	FileBean bean = getFile(f.get(0),resourcePath);
+        	if(bean!=null){
+        		list.add(bean);
+        	}
+		}
+         return list;
+   }
+   
+   private  FileBean getFile(MultipartFile imgFile,String path) {
+	   FileBean bean = new FileBean();
+	   String filename=imgFile.getOriginalFilename();
+//	   String fileName=DateUtils.getFormat("yyyyMMddHHmmss");
+	   String fileName=IdUtils.uuid();
+       try {
+    	   //扩展名
+    	   String ext = filename.substring(filename.lastIndexOf("."));
+    	   fileName +=ext;
+    	   //校验文件类型并进行分类存储
+    	   String rePath = "";
+    	   if(path == null){
+    		   path = AppConstants.upload_PATH;
+    		   rePath = getTypePath(ext);
+    		   path +=rePath;
+    	   }
+//    	   File file = creatFolder(path,fileName); 
+    	   //TODO
+    	   //接口
+    	   String ip=ReadProperties.loadProperties("ftp.properties").getProperty("data.ftp.host");
+    	   String host=ReadProperties.loadProperties("ftp.properties").getProperty("data.ftp.commitport");
+    	   String urlall = "http://"+ip+":"+host+"/ftp/info";
+//    	   String urlall = "http://192.168.12.220:50240/ftp/info";
+    	 //拼一个json格式参数
+			Map<String,Object> parammap=new HashMap<String,Object>();
+			parammap.put("filename", filename);
+			parammap.put("nowname", fileName);
+			parammap.put("filesize", imgFile.getSize());
+			parammap.put("uploadtime", DateUtils.getFormat("yyyyMMdd"));
+			String resultall = HttpSend.post(urlall,parammap);
+			System.out.println(resultall);
+			if(resultall == null){
+				 return null;
+			}
+			//如果失败了，不上传了
+//    	   upload(imgFile,path+File.separator+fileName);
+    	   String flag=upload(imgFile,fileName);
+    	   System.out.println("上传返回flag："+flag);
+    	   if(flag == null || flag.equals("false")){
+    		   return null;
+    	   }
+    	   //filename为逻辑名称,file.getName为物理名
+    	    bean.setName(filename);
+    	    bean.setNametype(CommonUtil.getnametype(filename));
+    	    bean.setFileurl(rePath+fileName);
+    	    bean.setSize(imgFile.getSize());
+    	    bean.setResource_uuid(IdUtils.uuid2());
+    	    return bean;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}                
+       return null;
+   }
+   /**
+    * 分类存储路径
+    */
+   private static String getTypePath(String ext){
+	   String path = DateUtils.getFormat("yyyy")+File.separator+DateUtils.getFormat("yyyyMMdd")+File.separator;
+	   if(AppConstants.IMG_EXT_LIST.contains(ext)){
+		   return AppConstants.TYPE_PATH_LIST.get(0)+path;
+	   }else if(AppConstants.VIDEO_EXT_LIST.contains(ext)){
+		   return AppConstants.TYPE_PATH_LIST.get(1)+path;
+	   }else if(AppConstants.DOC_EXT_LIST.contains(ext)){
+		   return AppConstants.TYPE_PATH_LIST.get(2)+path;
+	   }else{
+		   return AppConstants.TYPE_PATH_LIST.get(3)+path;
+	   }
+   }
+      public static void main(String[] args) {    
+          ContinueFTP myFtp = new ContinueFTP();    
+          try {    
+              
+        	  myFtp.connect("192.168.12.219",21,"ftpde", "123456");
+//        	  myFtp.upload("e://aa//shell重启项目.txt",File.separatorChar + "home" + File.separatorChar + "mfsdate" + File.separatorChar+"1234.txt");
+              myFtp.disconnect();    
+          } catch (IOException e) {    
+              System.out.println("����FTP���?"+e.getMessage());    
+          }    
+      }
+      //
+      public boolean upload(MultipartFile []files){
+	      InputStream is = null;
+	      boolean flag=true;
+	      try{
+	    	  ftpClient.enterLocalPassiveMode();    
+	    	  ftpClient.setFileType(FTP.BINARY_FILE_TYPE);    
+	    	  ftpClient.changeWorkingDirectory("update");
+	    	  for (MultipartFile file : files) {
+	    		  is = file.getInputStream();
+		    	  String fileName = file.getOriginalFilename();
+		    	  flag = ftpClient.storeFile(fileName, is);
+		    	  if(!flag){
+		    		  return false;
+		    	  }
+			}
+	          return true;
+	      }catch(Exception e){
+	    	  e.printStackTrace();
+	      }finally{
+	    	  try {
+				is.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	      }
+		return false;
+      }
+  } 

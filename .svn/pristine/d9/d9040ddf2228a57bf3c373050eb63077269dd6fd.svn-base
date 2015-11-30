@@ -1,0 +1,40 @@
+var currentUser;
+var getUserInfo = function() {
+	$.ajax({
+		url : "/study/gateway/getUser",
+		type : "POST",
+		async : false,
+		dataType : "json",
+		success : function(data) {
+			console.log("获取用户信息", data);
+			//有用户登录
+			if(data != null && data != undefined){
+				currentUser = data;
+				$("#login_title").html('<span style="color:#fff">欢迎:'+data.name+'</span>');
+				var options = '<option value="/study/gateway/index">门户首页</option>';
+				//options += '<option value="./getAllActives">教研中心</option>';
+				options += '<option value="/study/portal/index.html#/PersonalInformation/resource">我的空间</option>';
+				options += '<option value="/study/logout">退出</option>';
+				$(".LoginSelect").html(options);
+			}
+			//没有用户登录
+			else{
+				var ops = '<option value="/">门户首页</option>';
+				$("#login_title").html('<a style="color: #ffffff;font-size: 13px" href="/study/login">登录</a>');
+				$(".LoginSelect").html(ops);
+			}
+		},
+		error : function(xhr, status) {
+			//addMessage("error", "不好意思，请求出错了，错误码" + xhr.status);
+		}
+	});
+};
+$(function() {
+     getUserInfo();
+     $(".LoginSelect").bind("change",function(){
+    	 window.location=$(".LoginSelect").val(); 
+    	 return false;
+     });
+});
+
+/*********************************************************/

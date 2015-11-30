@@ -1,0 +1,47 @@
+package com.zonekey.study.web;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springside.modules.web.MediaTypes;
+
+import com.zonekey.study.common.JsonMsg;
+import com.zonekey.study.common.JsonUtil;
+import com.zonekey.study.entity.Comment;
+import com.zonekey.study.service.CommentService;
+
+
+@RestController
+@RequestMapping(value = "/comment")
+public class CommentController {
+	@Resource
+	private CommentService commentService;
+
+	@RequestMapping(value = "/cancelShare", method = RequestMethod.POST, produces = MediaTypes.JSON_UTF_8)
+	public @ResponseBody
+	JsonMsg cancelShare(HttpServletRequest req) {
+		@SuppressWarnings("unchecked")
+		List<Integer> shareListDel = (List<Integer>)JsonUtil.jsonToObject(req, List.class);
+		//System.out.println("delteid"+shareListDel.get(0));
+		JsonMsg msg = new JsonMsg();
+		msg.setOperation("取消分享");
+	  //int result = commentService.cancelShare(shareListDel);
+		int result = 1;
+		if (result == shareListDel.size()) {  
+			msg.setId("1");
+			msg.setContent("您取消了" + result + "条分享");
+		} else {
+			msg.setId("2");
+			msg.setContent("取消失败啦，请重试");
+		}
+		return msg;
+	}
+	
+}

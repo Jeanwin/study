@@ -1,0 +1,720 @@
+/**
+ * Created by Administrator on 14-3-20.
+ */
+define(['angular', 'config'], function (angular, config) {
+    angular.module('lemon.service.schedule', [])
+        .constant('ScheduleServiceConfig', {
+            urls:{
+            	searchMyEvent: config.backend.ip + config.backend.base + 'rest/myClassRoom/findMyWeekCurriculumList',
+            	searchMyWeektime: config.backend.ip + config.backend.base + 'rest/myClassRoom/findMyWeekCurriculumList',
+            	selectSchedulebyweek: config.backend.ip + config.backend.base + 'rest/myClassRoom/findAllWeeksForShearch',
+            	selectNowTerm: config.backend.ip + config.backend.base + 'rest/myClassRoom/findTermtips',
+            	updateCurriculum: config.backend.ip + config.backend.base + 'rest/myClassRoom/updateCurriculum',
+            	selectCurriculumMaterials: config.backend.ip + config.backend.base + 'rest/myClassRoom/selectCurriculumMaterials',
+            	showResourceBeforeClass: config.backend.ip + config.backend.base + 'rest/myClassRoom/showResourceBeforeClass',
+            	setupVisibilityClassReady: config.backend.ip + config.backend.base + 'rest/myClassRoom/setupVisibilityClassReady',
+            	moveClassReady: config.backend.ip + config.backend.base + 'rest/myClassRoom/moveClassReady',
+            	updateResourcename:config.backend.ip + config.backend.base + 'rest/myClassRoom/updateResourcename',
+            	collectPrepareDate:config.backend.ip + config.backend.base + 'rest/myClassRoom/collectPrepareDate',
+            	setcollectAfterResource:config.backend.ip + config.backend.base + 'rest/myClassRoom/setcollectAfterResource',
+            	showVideoAfterClass:config.backend.ip + config.backend.base + 'rest/myClassRoom/showVideoAfterClass',
+            	showWisclassroomResource:config.backend.ip + config.backend.base + 'rest/myClassRoom/showWisclassroomResource',
+            	afterclassvisibility:config.backend.ip + config.backend.base + 'rest/myClassRoom/setupVisibilityAfterClass',
+            	setafterclassvisibility:config.backend.ip + config.backend.base + 'rest/myClassRoom/setafterclassvisibility',
+            	dirTrees:config.backend.ip + config.backend.base + 'rest/myClassRoom/trees',
+            	importDateForCurriculum:config.backend.ip + config.backend.base + 'rest/myClassRoom/importDateForCurriculum',
+            	demand: config.backend.ip + config.backend.base + 'rest/myClassRoom/onDemand',
+            	code: config.backend.ip + config.backend.base + 'rest/myClassRoom/code',
+            	showWisclassroomFiles: config.backend.ip + config.backend.base + 'rest/myClassRoom/showWisclassroomFiles',
+            	oneafterclassvisibility:config.backend.ip + config.backend.base + 'rest/myClassRoom/oneafterclassvisibility',
+            	collectOneVideo:config.backend.ip + config.backend.base + 'rest/myClassRoom/collectOneVideo',
+            	onesetafterclassvisibility:config.backend.ip + config.backend.base + 'rest/myClassRoom/onesetafterclassvisibility',
+            	setOnecollectAfterResource:config.backend.ip + config.backend.base + 'rest/myClassRoom/setOnecollectAfterResource',
+            	
+            }
+        })
+        .factory('ScheduleService',['$http', '$q', 'ScheduleServiceConfig', function ($http, $q, ScheduleServiceConfig) {
+            return {
+            	//智慧教室文件展示
+            	showWisclassroomFiles : function(curriculumid,id){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.showWisclassroomFiles;
+                    $http({
+                        method: config.data.method==='files'? 'GET':'POST',
+                        dataType: "jso",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	curriculumid:curriculumid,
+                            parentid:id
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	 //录播方案初始化
+                code : function(keywords){
+                    console.log(keywords);
+                    var deffered = $q.defer();
+                    var _url = config.data.method==='files'?ScheduleServiceConfig.files.code: ScheduleServiceConfig.urls.code;
+                    $http({
+                        method: config.data.method==='files'? 'GET':'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                            value:keywords
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	 //视频资源，发布
+                demand: function(floder,status){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.demand;
+                    $http({
+                        method: config.data.method==='files'? 'GET':'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	floder:floder,
+                        	status:status
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	//导入
+            	importDateForCurriculum : function(readyresourcuuidlist,curriculumid){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.importDateForCurriculum;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	readyresourcuuidlist:readyresourcuuidlist,
+                        	curriculumid:curriculumid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	 dirTrees : function(){
+                     var deffered = $q.defer();
+                     var _url =  ScheduleServiceConfig.urls.dirTrees;
+                     $http({
+                         method: 'POST',
+                         dataType: "json",
+                         contentType:'application/json; charset=UTF-8',
+                         url: _url,
+                         headers: {
+                         },
+                         timeout:  config.backend.timeout
+                     })
+                         .success(function(data){
+                             deffered.resolve(data);
+                         })
+                         .error(function(e, code){
+                             deffered.reject(code);
+                         });
+                     return deffered.promise;
+                 },
+                 
+               //收藏智慧教室（单一）
+                 setOnecollectAfterResource : function(keywords){
+                      var deffered = $q.defer();
+                      var _url = ScheduleServiceConfig.urls.setOnecollectAfterResource;
+                      $http({
+                          method: 'POST',
+                          dataType: "json",
+                          contentType:'application/json; charset=UTF-8',
+                          url: _url,
+                          headers: {
+                          },
+                          data:{
+                        	storetype:keywords.storetype,
+                        	storeid:keywords.storeid,
+                          	curriculumid:keywords.curriculumid,
+                          	resourcecollection:keywords.resourcecollection,
+                          	name:keywords.name,
+                          	fileurl:keywords.fileurl,
+                          	size:keywords.size,
+                          	id:keywords.id,
+                          	transPath:keywords.transPath,
+                          	transFlag:keywords.transFlag,
+                          },
+                          timeout:  config.backend.timeout
+                      })
+                          .success(function(data){
+                              deffered.resolve(data);
+                          })
+                          .error(function(e, code){
+                              deffered.reject(code);
+                          });
+                      return deffered.promise;
+                  },
+                 //收藏录播机（单一）
+                 collectOneVideo : function(keywords){
+                      var deffered = $q.defer();
+                      var _url = ScheduleServiceConfig.urls.collectOneVideo;
+                      $http({
+                          method: 'POST',
+                          dataType: "json",
+                          contentType:'application/json; charset=UTF-8',
+                          url: _url,
+                          headers: {
+                          },
+                          data:{
+                        	storetype:keywords.storetype,
+                        	storeid:keywords.storeid,
+                          	curriculumid:keywords.curriculumid,
+                          	floder:keywords.floder,
+                          	resourcecollection:keywords.resourcecollection,
+                          	name:keywords.name,
+                          	subject:keywords.subject,
+                          	grade:keywords.grade,
+                          	id:keywords.id,
+                          	transPath:keywords.transPath,
+                          	transFlag:keywords.transFlag,
+                          },
+                          timeout:  config.backend.timeout
+                      })
+                          .success(function(data){
+                              deffered.resolve(data);
+                          })
+                          .error(function(e, code){
+                              deffered.reject(code);
+                          });
+                      return deffered.promise;
+                  },
+                  
+                //智慧教室设置可见性(单一)
+                  onesetafterclassvisibility : function(keywords){
+                       var deffered = $q.defer();
+                       var _url = ScheduleServiceConfig.urls.onesetafterclassvisibility;
+                       $http({
+                           method: 'POST',
+                           dataType: "json",
+                           contentType:'application/json; charset=UTF-8',
+                           url: _url,
+                           headers: {
+                           },
+                           data:{
+                           	resourcevisable:keywords.resourcevisable,
+                           	id:keywords.id
+                           },
+                           timeout:  config.backend.timeout
+                       })
+                           .success(function(data){
+                               deffered.resolve(data);
+                           })
+                           .error(function(e, code){
+                               deffered.reject(code);
+                           });
+                       return deffered.promise;
+                   },
+               //录播机设置可见性(单一)
+             	oneafterclassvisibility : function(keywords){
+                     var deffered = $q.defer();
+                     var _url = ScheduleServiceConfig.urls.oneafterclassvisibility;
+                     $http({
+                         method: 'POST',
+                         dataType: "json",
+                         contentType:'application/json; charset=UTF-8',
+                         url: _url,
+                         headers: {
+                         },
+                         data:{
+                         	resourcevisable:keywords.resourcevisable,
+                         	readyresourcid:keywords.readyresourcid,
+                         	curriculumid:keywords.curriculumid,
+                         	floder:keywords.floder
+                         },
+                         timeout:  config.backend.timeout
+                     })
+                         .success(function(data){
+                             deffered.resolve(data);
+                         })
+                         .error(function(e, code){
+                             deffered.reject(code);
+                         });
+                     return deffered.promise;
+                 },
+            	//录播机设置可见性
+            	afterclassvisibility : function(keywords){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.afterclassvisibility;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	resourcevisable:keywords.resourcevisable,
+                        	floder:keywords.floder,
+                        	curriculumid:keywords.curriculumid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+              //智慧教室设置可见性
+                setafterclassvisibility : function(keywords){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.setafterclassvisibility;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	resourcevisable:keywords.resourcevisable,
+                        	id:keywords.id,
+                        	curriculumid:keywords.curriculumid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	//查询课后生成资料
+            	showVideoAfterClass : function(curriculumMaterialsid){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.showVideoAfterClass;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	curriculumid:curriculumMaterialsid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+              //查询智慧教室课后生成资料
+                showWisclassroomResource : function(curriculumMaterialsid){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.showWisclassroomResource;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	curriculumid:curriculumMaterialsid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	//收藏课前准备资料名称
+            	collectPrepareDate : function(keywords){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.collectPrepareDate;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	storetype:keywords.storetype,
+                        	storeid:keywords.storeid,
+                        	curriculumid:keywords.curriculumid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+              //收藏智慧教室
+                setcollectAfterResource : function(keywords){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.setcollectAfterResource;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	storetype:keywords.storetype,
+                        	storeid:keywords.storeid,
+                        	curriculumid:keywords.curriculumid,
+                        	resourcecollection:keywords.resourcecollection
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	//修改课前准备资料名称
+            	updateResourcename : function(keywords){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.updateResourcename;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	readyresourcid:keywords.readyresourcid,
+                        	readyresourcename:keywords.readyresourcename
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	//移除课前准备资料
+            	moveClassReady : function(keywords){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.moveClassReady;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	readyresourcuuid:keywords.readyresourcuuid,
+                        	curriculumid:keywords.curriculumid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	//设置课前准备资料的学生可见性
+            	setupVisibilityClassReady : function(keywords){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.setupVisibilityClassReady;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	resourcevisable:keywords.resourcevisable,
+                        	readyresourcuuid:keywords.readyresourcuuid,
+                        	curriculumid:keywords.curriculumid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	//课前准备资料查询
+            	showResourceBeforeClass : function(curriculumMaterialsid){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.showResourceBeforeClass;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	curriculumid:curriculumMaterialsid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	/*//我的课表信息查询
+            	selectCurriculumMaterials : function(keyword){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.selectCurriculumMaterials;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	keyword:keyword
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },*/
+            	//我的课表查询
+            	selectCurriculumMaterials : function(curriculumMaterialsid){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.selectCurriculumMaterials;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        	curriculumid:curriculumMaterialsid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+            	//我的课表查询
+                searchMyEvent : function(live,video,isresource,keywords,treeid, pagination, user){
+                    console.log(live,video,isresource,treeid,keywords, pagination, user);
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.searchMyEvent;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                            live:live,
+                            video:video,
+                            isresource:isresource,
+                            weeks:keywords.weeks,
+                            areaid:treeid,
+                            page:pagination,
+                            user:user
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+              //我的课表更新
+                updateCurriculum : function(keyword){
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.updateCurriculum;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                        //	scheduleId:scheduleId,
+                        	subjectname:keyword.subjectname,
+                        	scopename:keyword.scopename,
+                        	gradename:keyword.gradename,
+                        	introduce:keyword.introduce,
+                        	curriculumid:keyword.curriculumid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+              //我的课表按周查询
+                searchMyWeektime : function(live,record,isresource,keywords,treeid){
+                    console.log(record,isresource,live,keywords,treeid);
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.searchMyWeektime;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                            live:live,
+                            record:record,
+                            isresource:isresource,
+                            weeks:keywords.weeks,
+                            areaid:treeid
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+              //获取课表周次接口
+                selectSchedulebyweek : function(keywords){
+                    console.log(keywords);
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.selectSchedulebyweek;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:{
+                            keywords:keywords
+                        },
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                },
+                //显示当前学期
+                selectNowTerm : function(keywords){
+                    console.log(keywords);
+                    var deffered = $q.defer();
+                    var _url = ScheduleServiceConfig.urls.selectNowTerm;
+                    $http({
+                        method: 'POST',
+                        dataType: "json",
+                        contentType:'application/json; charset=UTF-8',
+                        url: _url,
+                        headers: {
+                        },
+                        data:keywords,
+                        timeout:  config.backend.timeout
+                    })
+                        .success(function(data){
+                            deffered.resolve(data);
+                        })
+                        .error(function(e, code){
+                            deffered.reject(code);
+                        });
+                    return deffered.promise;
+                }
+            };
+        }]);
+
+});
